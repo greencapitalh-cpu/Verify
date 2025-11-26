@@ -1,26 +1,19 @@
 // ======================================================
-// 📘 Mongoose Schema — VerifyEvidence (Estado Vivo Actual)
+// 📘 Mongoose Schema — VerifyEvidence (Estado Vivo Actual v4.5)
 // ======================================================
 import mongoose from "mongoose";
 
 const verifyEvidenceSchema = new mongoose.Schema(
   {
-    // 🔗 Referencia al origen (Validate)
     txHash: { type: String, required: true, unique: true },
     storageId: { type: String, default: null },
     originalPdfUrl: { type: String, default: null },
-
-    // 🧩 Datos dinámicos actualizados
     currentPdfUrl: { type: String, default: null },
     updatedBy: { type: String, default: null },
     updatedAt: { type: Date, default: null },
-
-    // 🛡️ Control de QR y acceso
     qrId: { type: String, default: null },
     qrActive: { type: Boolean, default: true },
     privateAccess: { type: Boolean, default: false },
-
-    // 🧠 Información general
     evidenceTitle: { type: String, default: null },
     type: {
       type: String,
@@ -34,22 +27,23 @@ const verifyEvidenceSchema = new mongoose.Schema(
     },
     version: { type: Number, default: 1 },
 
-    // 🧾 Historial de modificaciones
+    // 🧾 Historial
     history: [
       {
-        action: String, // "update_pdf", "block_qr", etc.
+        action: String,
         userEmail: String,
         date: { type: Date, default: Date.now },
         notes: String,
       },
     ],
 
+    // 🧠 Auditoría
+    origin: { type: String, enum: ["validate", "verify"], default: "verify" },
     createdAt: { type: Date, default: Date.now },
   },
   { collection: "verify_evidences" }
 );
 
-// 📘 Usa la conexión de Verify (udochain_verify)
 export default global.mongoConnections?.verifyConn
   ? global.mongoConnections.verifyConn.model("VerifyEvidence", verifyEvidenceSchema)
   : mongoose.model("VerifyEvidence", verifyEvidenceSchema);
