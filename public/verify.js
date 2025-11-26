@@ -6,20 +6,21 @@ function openQRMenu() {
   const menu = document.createElement("div");
   menu.className = "qr-menu";
   menu.innerHTML = `
-    <button class="camera">📷 Scan with camera</button>
-    <button class="gallery">🖼 Import from gallery</button>
-    <button onclick="this.parentElement.remove()">Cancel</button>
+    <button class="confirm" id="cameraScan">Scan with camera</button>
+    <button id="uploadScan">Upload image with QR</button>
+    <button id="cancelScan">Cancel</button>
   `;
   document.body.appendChild(menu);
 
-  menu.querySelector(".camera").onclick = () => {
+  document.getElementById("cameraScan").onclick = () => {
     menu.remove();
     startCameraScan();
   };
-  menu.querySelector(".gallery").onclick = () => {
+  document.getElementById("uploadScan").onclick = () => {
     menu.remove();
-    pickFromGallery();
+    uploadImageForQR();
   };
+  document.getElementById("cancelScan").onclick = () => menu.remove();
 }
 
 async function startCameraScan() {
@@ -28,39 +29,18 @@ async function startCameraScan() {
   overlay.innerHTML = `
     <div class="qr-box">
       <video id="video" playsinline></video>
-      <button id="flashToggle" class="flash-toggle">💡</button>
+      <div class="scan-line"></div>
     </div>
     <p style="color:white;margin-top:1rem;">Scanning QR...</p>
   `;
   document.body.appendChild(overlay);
 
   const video = overlay.querySelector("#video");
-  const flashToggle = overlay.querySelector("#flashToggle");
-
-  let track, imageCapture;
-  let flashOn = false;
 
   try {
     const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
     video.srcObject = stream;
     await video.play();
-
-    track = stream.getVideoTracks()[0];
-    if ("ImageCapture" in window) {
-      imageCapture = new ImageCapture(track);
-    }
-
-    flashToggle.addEventListener("click", async () => {
-      try {
-        flashOn = !flashOn;
-        await track.applyConstraints({
-          advanced: [{ torch: flashOn }],
-        });
-        flashToggle.textContent = flashOn ? "🔦" : "💡";
-      } catch {
-        alert("Flash not supported on this device.");
-      }
-    });
 
     const canvas = document.createElement("canvas");
     const ctx = canvas.getContext("2d");
@@ -93,7 +73,7 @@ function stopCamera(stream, overlay) {
   overlay.remove();
 }
 
-function pickFromGallery() {
+function uploadImageForQR() {
   const input = document.createElement("input");
   input.type = "file";
   input.accept = "image/*";
@@ -113,7 +93,7 @@ function pickFromGallery() {
         const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
         const code = jsQR.default(imageData.data, canvas.width, canvas.height);
         if (code) handleQR(code.data);
-        else alert("No QR detected.");
+        else alert("No QR detected in the image.");
       };
       img.src = event.target.result;
     };
@@ -124,19 +104,23 @@ function pickFromGallery() {
 
 async function handleQR(decodedText) {
   console.log("QR scanned:", decodedText);
-  statusDiv.textContent = "✅ QR detected: " + decodedText;
+  statusDiv.textContent = "QR detected: " + decodedText;
 
-  const url = new URL(decodedText);
-  const tx = url.searchParams.get("tx");
-  const storage = url.searchParams.get("storage");
+  try {
+    const url = new URL(decodedText);
+    const tx = url.searchParams.get("tx");
+    const storage = url.searchParams.get("storage");
 
-  if (storage) {
-    statusDiv.innerHTML = "🔐 Redirecting to private verification...";
-    window.location.href = `/api/verify/private/${storage}`;
-  } else if (tx) {
-    document.getElementById("hashInput").value = tx;
-    document.getElementById("verifyBtn").click();
-  } else {
-    alert("Invalid QR content.");
+    if (storage) {
+      statusDiv.innerHTML = "Redirecting to private verification...";
+      window.location.href = `/api/verify/private/${storage}`;
+    } else if (tx) {
+      document.getElementById("hashInput").value = tx;
+      document.getElementById("verifyBtn").click();
+    } else {
+      alert("Invalid QR content.");
+    }
+  } catch {
+    alert("Invalid QR format.");
   }
 }
