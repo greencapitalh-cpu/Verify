@@ -1,11 +1,12 @@
 // ======================================================
-// 🧾 UDoChain Verify Controller v3.5
-//  Mongo + Aereware + QR Control + Records
+// 🧾 UDoChain Verify Controller v3.6
+// Mongo + Aereware + QR Control + Records + Verify Logs
 // ======================================================
-import Validation from "../models/Validation.js";
-import { getFromAereware, recoverEvidence } from "../utils/aerewareUtils.js";
-import Arweave from "arweave";
 import { v4 as uuidv4 } from "uuid";
+import Arweave from "arweave";
+import Validation from "../models/Validation.js";
+import VerifyLog from "../models/VerifyLog.js";
+import { getFromAereware, recoverEvidence } from "../utils/aerewareUtils.js";
 
 // 🔹 Cache temporal (QR → login flow)
 const qrCache = new Map();
@@ -15,14 +16,24 @@ const qrCache = new Map();
 // ======================================================
 export const verifyHash = async (req, res) => {
   try {
-    const { hash } = req.body;
-    if (!hash) return res.status(400).json({ ok: false, message: "Missing hash" });
+    const { hash, email, source } = req.body;
+    if (!hash)
+      return res.status(400).json({ ok: false, message: "Missing hash" });
 
     let result = await Validation.findOne({ "files.hash": hash }).lean();
 
+    // 🔄 Si no está en Mongo, intentar recuperar desde Aereware
     if (!result) {
       const recovered = await recoverEvidence(`ar://${hash}`);
-      if (recovered)
+      if (recovered) {
+        // Registrar intento de verificación desde Aereware
+        await VerifyLog.create({
+          userEmail: email || "anonymous",
+          evidenceHash: hash,
+          type: "public",
+          source: source || "recovered",
+        });
+
         return res.json({
           ok: true,
           recovered: true,
@@ -31,18 +42,30 @@ export const verifyHash = async (req, res) => {
           storageId: recovered.storageId,
           recoveredAt: recovered.recoveredAt,
         });
+      }
+
       return res.json({
         ok: false,
         message: "⚠️ Evidence not found on UDoChain or Aereware network.",
       });
     }
 
-    if (!result.qrActive)
+    // 🚫 Si el QR fue desactivado por el dueño
+    if (result.qrActive === false)
       return res.json({
         ok: false,
         message: "QR disabled — verification blocked by owner.",
       });
 
+    // 🧾 Registrar acción de verificación
+    await VerifyLog.create({
+      userEmail: email || "anonymous",
+      evidenceHash: hash,
+      type: result.type || "public",
+      source: source || "manual",
+    });
+
+    // ✅ Respuesta con la evidencia encontrada
     res.json({
       ok: true,
       evidenceTitle: result.evidenceTitle,
@@ -65,7 +88,8 @@ export const verifyHash = async (req, res) => {
 export const getValidationsByUser = async (req, res) => {
   try {
     const { token } = req.params;
-    if (!token) return res.status(400).json({ ok: false, message: "Missing token" });
+    if (!token)
+      return res.status(400).json({ ok: false, message: "Missing token" });
 
     const validations = await Validation.find({ userToken: token })
       .sort({ createdAt: -1 })
@@ -98,17 +122,35 @@ export const getValidationsByUser = async (req, res) => {
 // ======================================================
 export const getPrivateValidation = async (req, res) => {
   try {
-    const { storageId } = req.params;
+    const { storageId, email, source } = req.params;
     if (!storageId)
       return res.status(400).json({ ok: false, message: "Missing storageId" });
 
     const data = await getFromAereware(storageId);
+
     if (!data) {
       const recovered = await recoverEvidence(storageId);
-      if (recovered)
+      if (recovered) {
+        await VerifyLog.create({
+          userEmail: email || "anonymous",
+          evidenceHash: storageId,
+          type: "private",
+          source: source || "recovered",
+        });
+
         return res.json({ ok: true, recovered: true, data: recovered });
+      }
+
       return res.json({ ok: false, message: "Not found on Aereware" });
     }
+
+    // Registrar verificación privada
+    await VerifyLog.create({
+      userEmail: email || "anonymous",
+      evidenceHash: storageId,
+      type: "private",
+      source: source || "private",
+    });
 
     res.json({ ok: true, data });
   } catch (err) {
@@ -150,7 +192,8 @@ export const getBinaryFromAereware = async (req, res) => {
 export const blockQR = async (req, res) => {
   try {
     const { txHash } = req.params;
-    if (!txHash) return res.status(400).json({ ok: false, message: "Missing txHash" });
+    if (!txHash)
+      return res.status(400).json({ ok: false, message: "Missing txHash" });
 
     await Validation.findOneAndUpdate({ txHash }, { qrActive: false });
     res.json({ ok: true, message: "QR blocked successfully." });
@@ -166,7 +209,8 @@ export const blockQR = async (req, res) => {
 export const regenerateQR = async (req, res) => {
   try {
     const { txHash } = req.params;
-    if (!txHash) return res.status(400).json({ ok: false, message: "Missing txHash" });
+    if (!txHash)
+      return res.status(400).json({ ok: false, message: "Missing txHash" });
 
     const newQR = uuidv4();
     await Validation.findOneAndUpdate(
