@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Private Records | UDoChain Verify</title>
+    <link rel="stylesheet" href="records.css" />
+  </head>
+
+  <body>
+    <header class="header">
+      <div class="header-left">
+        <img src="logo-udochain.png" class="logo" alt="UDoChain Logo" />
+        <h1>Private Records</h1>
+      </div>
+      <a href="https://wapp.udochain.com" class="nav-link">Back</a>
+    </header>
+
+    <main class="container">
+      <h2>Your Private Evidences</h2>
+      <p class="subtitle">Access your private verifications and download backups.</p>
+
+      <!-- Filters -->
+      <section class="filters">
+        <select id="filterType">
+          <option value="all">All Types</option>
+          <option value="Validate">Validate</option>
+          <option value="Sign">Sign</option>
+          <option value="Trace">Trace</option>
+          <option value="Vote">Vote</option>
+        </select>
+      </section>
+
+      <!-- List -->
+      <div id="recordsList" class="records-list">Loading...</div>
+    </main>
+
+    <footer class="footer">
+      <p>UDoChain Records — Private Access Only</p>
+    </footer>
+
+    <script type="module" src="records-private.js"></script>
+    <script src="script-translate.js"></script>
+  </body>
+</html>
