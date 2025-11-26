@@ -5,38 +5,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>UDoChain Verify</title>
   <link rel="stylesheet" href="styles.css" />
-  <link rel="icon" href="logo-udochain.png" />
-  <script src="https://unpkg.com/html5-qrcode"></script>
 </head>
 <body>
-  <header class="header">
+  <header>
     <img src="logo-udochain.png" alt="UDoChain" class="logo" />
     <h1>UDoChain Verify</h1>
   </header>
 
   <main class="container">
-    <h2>Verify Blockchain Certificates</h2>
-    <p class="subtitle">Scan a QR, upload it, or paste a transaction hash.</p>
-
-    <div class="qr-controls">
-      <button id="btnScanCamera" class="qr-btn">📷 Scan QR</button>
-      <button id="btnScanFile" class="qr-btn">🖼️ Upload QR Image</button>
-    </div>
-
-    <div id="qr-reader" style="display:none;"></div>
-
-    <section id="manualVerify">
-      <input type="file" id="fileInput" />
-      <input type="text" id="hashInput" placeholder="Or paste transaction hash" />
-      <button id="verifyBtn">Verify</button>
-    </section>
-
+    <h2>Verify Evidence</h2>
+    <input type="file" id="fileInput" />
+    <input type="text" id="hashInput" placeholder="Enter hash or TX" />
+    <button id="verifyBtn">Verify</button>
     <div id="status" class="status"></div>
   </main>
 
-  <footer class="footer">
-    <p class="notranslate">You do. We validate.</p>
-    <p>© 2025 UDoChain — All rights reserved.</p>
+  <footer>
+    <p>You do. We validate.</p>
   </footer>
 
   <script src="verify.js"></script>
