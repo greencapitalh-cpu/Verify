@@ -1,37 +1,40 @@
 // ======================================================
-// 🧾 UDoChain Verify Controller v3.6
-// Mongo + Aereware + QR Control + Records + Verify Logs
+// 🧾 UDoChain Verify Controller v4.2
+//  Mongo Dual + Aereware + QR Control + Records + Live State
 // ======================================================
-import { v4 as uuidv4 } from "uuid";
-import Arweave from "arweave";
-import Validation from "../models/Validation.js";
-import VerifyLog from "../models/VerifyLog.js";
-import { getFromAereware, recoverEvidence } from "../utils/aerewareUtils.js";
 
-// 🔹 Cache temporal (QR → login flow)
+import Validation from "../models/Validation.js";
+import VerifyEvidence from "../models/VerifyEvidence.js";
+import VerifyRecord from "../models/VerifyRecord.js";
+import { getFromAereware, recoverEvidence } from "../utils/aerewareUtils.js";
+import Arweave from "arweave";
+import { v4 as uuidv4 } from "uuid";
+
+// 🧠 Cache temporal (QR → login flow)
 const qrCache = new Map();
 
 // ======================================================
-// 🔍 Verify Hash — Busca evidencia pública o privada
+// 🔍 verifyHash — Verifica hash en Mongo o Aereware
 // ======================================================
 export const verifyHash = async (req, res) => {
   try {
-    const { hash, email, source } = req.body;
+    const { hash, userEmail, sessionId } = req.body;
     if (!hash)
       return res.status(400).json({ ok: false, message: "Missing hash" });
 
+    // 1️⃣ Buscar evidencia original (Validate)
     let result = await Validation.findOne({ "files.hash": hash }).lean();
 
-    // 🔄 Si no está en Mongo, intentar recuperar desde Aereware
+    // 2️⃣ Si no existe, intentar recuperación desde Aereware
     if (!result) {
       const recovered = await recoverEvidence(`ar://${hash}`);
       if (recovered) {
-        // Registrar intento de verificación desde Aereware
-        await VerifyLog.create({
-          userEmail: email || "anonymous",
-          evidenceHash: hash,
-          type: "public",
-          source: source || "recovered",
+        await VerifyRecord.create({
+          userEmail,
+          sessionId,
+          txHash: hash,
+          action: "recovered_from_aereware",
+          result: "success",
         });
 
         return res.json({
@@ -43,38 +46,65 @@ export const verifyHash = async (req, res) => {
           recoveredAt: recovered.recoveredAt,
         });
       }
-
       return res.json({
         ok: false,
         message: "⚠️ Evidence not found on UDoChain or Aereware network.",
       });
     }
 
-    // 🚫 Si el QR fue desactivado por el dueño
-    if (result.qrActive === false)
+    // 3️⃣ Buscar estado vivo (VerifyEvidence)
+    let live = await VerifyEvidence.findOne({ txHash: result.txHash });
+
+    // Crear registro si no existe aún
+    if (!live) {
+      live = await VerifyEvidence.create({
+        txHash: result.txHash,
+        storageId: result.storageId,
+        originalPdfUrl: result.pdfUrl,
+        evidenceTitle: result.evidenceTitle,
+        type: result.type || "Validate",
+        qrActive: true,
+        status: "active",
+        version: 1,
+      });
+    }
+
+    // Verificar si el QR está activo
+    if (!live.qrActive) {
+      await VerifyRecord.create({
+        userEmail,
+        sessionId,
+        txHash: result.txHash,
+        action: "verify_attempt_blocked",
+        result: "blocked",
+      });
       return res.json({
         ok: false,
         message: "QR disabled — verification blocked by owner.",
       });
+    }
 
-    // 🧾 Registrar acción de verificación
-    await VerifyLog.create({
-      userEmail: email || "anonymous",
-      evidenceHash: hash,
-      type: result.type || "public",
-      source: source || "manual",
+    // 4️⃣ Registrar verificación exitosa
+    await VerifyRecord.create({
+      userEmail,
+      sessionId,
+      txHash: result.txHash,
+      action: "verify_hash",
+      result: "success",
     });
 
-    // ✅ Respuesta con la evidencia encontrada
     res.json({
       ok: true,
       evidenceTitle: result.evidenceTitle,
       validatedAt: result.createdAt,
       txHash: result.txHash,
       storageId: result.storageId,
-      pdfUrl: result.pdfUrl,
+      pdfUrl: live.currentPdfUrl || result.pdfUrl,
       hasBinaryBackup: result.hasBinaryBackup,
       w3Note: result.w3Note,
+      qrActive: live.qrActive,
+      version: live.version,
+      status: live.status,
     });
   } catch (err) {
     console.error("❌ verifyHash error:", err);
@@ -83,7 +113,7 @@ export const verifyHash = async (req, res) => {
 };
 
 // ======================================================
-// 📋 Get Validations by User — Records personales
+// 📋 getValidationsByUser — Lista evidencias verificadas
 // ======================================================
 export const getValidationsByUser = async (req, res) => {
   try {
@@ -98,19 +128,28 @@ export const getValidationsByUser = async (req, res) => {
     if (!validations.length)
       return res.json({ ok: false, message: "No validations found." });
 
-    res.json({
-      ok: true,
-      validations: validations.map((v) => ({
+    // Buscar estados vivos desde VerifyEvidence
+    const liveData = await VerifyEvidence.find({
+      txHash: { $in: validations.map((v) => v.txHash) },
+    }).lean();
+
+    const merged = validations.map((v) => {
+      const live = liveData.find((x) => x.txHash === v.txHash);
+      return {
         evidenceTitle: v.evidenceTitle,
         txHash: v.txHash,
         storageId: v.storageId,
-        pdfUrl: v.pdfUrl,
+        pdfUrl: live?.currentPdfUrl || v.pdfUrl,
         createdAt: v.createdAt,
         hasBinaryBackup: v.hasBinaryBackup,
-        qrActive: v.qrActive,
+        qrActive: live?.qrActive ?? true,
         type: v.type,
-      })),
+        status: live?.status || "active",
+        version: live?.version || 1,
+      };
     });
+
+    res.json({ ok: true, validations: merged });
   } catch (err) {
     console.error("❌ getValidationsByUser error:", err);
     res.status(500).json({ ok: false, error: err.message });
@@ -118,40 +157,21 @@ export const getValidationsByUser = async (req, res) => {
 };
 
 // ======================================================
-// 🔒 getPrivateValidation — Desde Aereware o recovery
+// 🔒 getPrivateValidation — Recupera JSON desde Aereware
 // ======================================================
 export const getPrivateValidation = async (req, res) => {
   try {
-    const { storageId, email, source } = req.params;
+    const { storageId } = req.params;
     if (!storageId)
       return res.status(400).json({ ok: false, message: "Missing storageId" });
 
     const data = await getFromAereware(storageId);
-
     if (!data) {
       const recovered = await recoverEvidence(storageId);
-      if (recovered) {
-        await VerifyLog.create({
-          userEmail: email || "anonymous",
-          evidenceHash: storageId,
-          type: "private",
-          source: source || "recovered",
-        });
-
+      if (recovered)
         return res.json({ ok: true, recovered: true, data: recovered });
-      }
-
       return res.json({ ok: false, message: "Not found on Aereware" });
     }
-
-    // Registrar verificación privada
-    await VerifyLog.create({
-      userEmail: email || "anonymous",
-      evidenceHash: storageId,
-      type: "private",
-      source: source || "private",
-    });
-
     res.json({ ok: true, data });
   } catch (err) {
     console.error("❌ getPrivateValidation error:", err);
@@ -178,7 +198,10 @@ export const getBinaryFromAereware = async (req, res) => {
     const data = await arweave.transactions.getData(id, { decode: true });
     const buffer = Buffer.from(data);
     res.setHeader("Content-Type", "application/zip");
-    res.setHeader("Content-Disposition", `attachment; filename="${id}.zip"`);
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename="${id}.zip"`
+    );
     res.end(buffer);
   } catch (err) {
     console.error("❌ getBinaryFromAereware error:", err);
@@ -191,11 +214,28 @@ export const getBinaryFromAereware = async (req, res) => {
 // ======================================================
 export const blockQR = async (req, res) => {
   try {
-    const { txHash } = req.params;
+    const { txHash, userEmail } = req.params;
     if (!txHash)
       return res.status(400).json({ ok: false, message: "Missing txHash" });
 
-    await Validation.findOneAndUpdate({ txHash }, { qrActive: false });
+    await VerifyEvidence.findOneAndUpdate(
+      { txHash },
+      {
+        qrActive: false,
+        status: "blocked",
+        $push: {
+          history: { action: "block_qr", userEmail },
+        },
+      }
+    );
+
+    await VerifyRecord.create({
+      userEmail,
+      txHash,
+      action: "block_qr",
+      result: "success",
+    });
+
     res.json({ ok: true, message: "QR blocked successfully." });
   } catch (err) {
     console.error("❌ blockQR error:", err);
@@ -204,19 +244,34 @@ export const blockQR = async (req, res) => {
 };
 
 // ======================================================
-// ♻️ regenerateQR — Genera nuevo QR ID (misma evidencia)
+// ♻️ regenerateQR — Genera nuevo QR ID
 // ======================================================
 export const regenerateQR = async (req, res) => {
   try {
-    const { txHash } = req.params;
+    const { txHash, userEmail } = req.params;
     if (!txHash)
       return res.status(400).json({ ok: false, message: "Missing txHash" });
 
     const newQR = uuidv4();
-    await Validation.findOneAndUpdate(
+
+    await VerifyEvidence.findOneAndUpdate(
       { txHash },
-      { qrId: newQR, qrActive: true }
+      {
+        qrId: newQR,
+        qrActive: true,
+        status: "active",
+        $push: {
+          history: { action: "regenerate_qr", userEmail },
+        },
+      }
     );
+
+    await VerifyRecord.create({
+      userEmail,
+      txHash,
+      action: "regenerate_qr",
+      result: "success",
+    });
 
     res.json({ ok: true, message: "QR regenerated.", newQR });
   } catch (err) {
