@@ -4,26 +4,52 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>UDoChain Verify</title>
+  <link rel="icon" href="logo-udochain.png" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <header>
-    <img src="logo-udochain.png" alt="UDoChain" class="logo" />
-    <h1>UDoChain Verify</h1>
+  <header class="header">
+    <div class="header-left">
+      <img src="logo-udochain.png" alt="UDoChain Logo" class="logo" />
+      <h1 class="notranslate" translate="no">UDoChain Verify</h1>
+    </div>
+    <a href="https://wapp.udochain.com" class="nav-link">Dashboard</a>
   </header>
 
   <main class="container">
-    <h2>Verify Evidence</h2>
-    <input type="file" id="fileInput" />
-    <input type="text" id="hashInput" placeholder="Enter hash or TX" />
-    <button id="verifyBtn">Verify</button>
+    <h2>Verify Blockchain Evidence</h2>
+    <p class="subtitle">Scan a QR, upload a file, or enter a transaction hash.</p>
+
+    <!-- QR Section -->
+    <section class="qr-section">
+      <button id="startQrBtn" class="btn-primary">📷 Scan QR</button>
+      <input type="file" id="qrFileInput" accept="image/*" style="display:none" />
+      <video id="qrVideo" playsinline></video>
+    </section>
+
+    <!-- Manual Verify -->
+    <section class="manual-section">
+      <input type="file" id="fileInput" />
+      <input type="text" id="hashInput" placeholder="Or paste a file hash here" />
+      <button id="verifyBtn" class="btn-primary">Verify Evidence</button>
+    </section>
+
+    <!-- Result -->
     <div id="status" class="status"></div>
+
+    <!-- My Validations -->
+    <section id="myValidations" style="display:none;">
+      <h3>My Verified Evidences</h3>
+      <div id="validationList" class="validation-list"></div>
+    </section>
   </main>
 
-  <footer>
-    <p>You do. We validate.</p>
+  <footer class="footer">
+    <p class="notranslate" translate="no">You do. We validate.</p>
+    <p>© 2025 UDoChain — All rights reserved.</p>
   </footer>
 
+  <script src="https://unpkg.com/html5-qrcode"></script>
   <script src="verify.js"></script>
   <script src="script-translate.js"></script>
 </body>
