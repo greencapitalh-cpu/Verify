@@ -1,23 +1,46 @@
 // ======================================================
-// 🔒 Aereware Utilities v3 — Full Read, Binary & Recovery
+// 🔒 Aereware Utilities v4 — Full Read, Binary & Recovery
 // ======================================================
 import Arweave from "arweave";
+import fs from "fs";
+import path from "path";
 import fetch from "node-fetch";
 
-// 🔹 Inicialización segura de cliente Arweave
+// ======================================================
+// ⚙️ Inicialización segura de cliente Arweave/Aereware
+// ======================================================
 function initClient() {
+  const keyPath = path.join(process.cwd(), "aereware-keyfile.json");
+  let keyfile = null;
+
+  try {
+    if (fs.existsSync(keyPath)) {
+      keyfile = JSON.parse(fs.readFileSync(keyPath, "utf8"));
+      console.log("🔐 Using local Aereware keyfile");
+    } else {
+      console.warn("⚠️ No local keyfile found, using public gateway (read-only)");
+    }
+  } catch (err) {
+    console.error("❌ Error loading keyfile:", err.message);
+  }
+
   return Arweave.init({
     host: process.env.AEREWARE_GATEWAY_HOST || "arweave.net",
     port: parseInt(process.env.AEREWARE_GATEWAY_PORT || "443"),
     protocol: process.env.AEREWARE_GATEWAY_PROTOCOL || "https",
+    timeout: 30000, // ⏱️ 30 segundos
+    logging: false,
   });
 }
 
-// 🔹 Lectura directa JSON (fallback)
+// ======================================================
+// 🔹 readMetadata — Lectura directa JSON (fallback HTTP)
+// ======================================================
 export async function readMetadata(txId) {
   try {
-    const res = await fetch(`https://arweave.net/${txId}`);
-    if (!res.ok) throw new Error("Metadata not found");
+    const url = `https://arweave.net/${txId}`;
+    const res = await fetch(url, { timeout: 20000 });
+    if (!res.ok) throw new Error(`Metadata not found at ${url}`);
     return await res.json();
   } catch (err) {
     console.error("❌ readMetadata:", err.message);
@@ -25,7 +48,9 @@ export async function readMetadata(txId) {
   }
 }
 
-// 🔹 Lectura binaria directa (ZIP, PDF, etc.)
+// ======================================================
+// 🔹 readBinary — Descarga binaria directa (ZIP, PDF, etc.)
+// ======================================================
 export async function readBinary(txId) {
   try {
     const res = await fetch(`https://arweave.net/${txId}`);
@@ -37,7 +62,9 @@ export async function readBinary(txId) {
   }
 }
 
-// 🔹 Lectura vía SDK (JSON metadata)
+// ======================================================
+// 🔹 getFromAereware — Lectura JSON vía SDK (Aereware API)
+// ======================================================
 export async function getFromAereware(storageId) {
   try {
     const id = storageId.replace("ar://", "");
@@ -46,29 +73,36 @@ export async function getFromAereware(storageId) {
       decode: true,
       string: true,
     });
-    return JSON.parse(txData.toString());
+    const parsed = JSON.parse(txData.toString());
+    return parsed;
   } catch (err) {
-    console.error("❌ getFromAereware error:", err.message);
-    return null;
+    console.warn("⚠️ getFromAereware fallback to HTTP:", err.message);
+    return await readMetadata(storageId.replace("ar://", ""));
   }
 }
 
-// 🔹 Recuperación completa (JSON + Binario)
+// ======================================================
+// 🔹 recoverEvidence — Recuperación completa JSON + Binario
+// ======================================================
 export async function recoverEvidence(storageId) {
   try {
     const txId = storageId.replace("ar://", "");
+    console.log(`🧩 Recovering evidence for ${txId}...`);
 
-    // 1️⃣ Intentar leer metadata JSON con SDK
+    // 1️⃣ Intentar leer metadata con SDK (preferido)
     let meta = await getFromAereware(storageId);
 
-    // 2️⃣ Si falla, usar fetch directo
+    // 2️⃣ Si falla, intentar con HTTP directo
     if (!meta) meta = await readMetadata(txId);
 
-    // 3️⃣ Intentar recuperar binario
+    // 3️⃣ Intentar recuperar binario ZIP/PDF
     const bin = await readBinary(txId);
 
-    // 4️⃣ Si nada se pudo recuperar, abortar
-    if (!meta && !bin) return null;
+    // 4️⃣ Validar resultado
+    if (!meta && !bin) {
+      console.warn(`⚠️ No data found for ${txId}`);
+      return null;
+    }
 
     return {
       storageId,
