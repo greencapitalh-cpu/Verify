@@ -12,19 +12,3 @@ services:
         value: 8080
       - key: MONGO_URI
         sync: false
-      - key: AEREWARE_GATEWAY_HOST
-        value: arweave.net
-      - key: AEREWARE_GATEWAY_PORT
-        value: 443
-      - key: AEREWARE_GATEWAY_PROTOCOL
-        value: https
-      - key: AEREWARE_KEYFILE_JSON
-        sync: false
-      - key: POLYGON_RPC_URL
-        sync: false
-      - key: POLYGON_PRIVATE_KEY
-        sync: false
-      - key: AUTH_API_URL
-        value: https://api.udochain.com/api/auth/me
-      - key: CORS_ORIGINS
-        value: https://verify.udochain.com,https://app.udochain.com,https://wapp.udochain.com
