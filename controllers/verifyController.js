@@ -1,6 +1,6 @@
 // ======================================================
-// 🧾 UDoChain Verify Controller v4.2
-//  Mongo Dual + Aereware + QR Control + Records + Live State
+// 🧾 UDoChain Verify Controller v4.5
+// Mongo Dual + Aereware + QR Control + Records + Live State
 // ======================================================
 
 import Validation from "../models/Validation.js";
@@ -14,7 +14,7 @@ import { v4 as uuidv4 } from "uuid";
 const qrCache = new Map();
 
 // ======================================================
-// 🔍 verifyHash — Verifica hash en Mongo o Aereware
+// 🔍 verifyHash — Verifica hash en Mongo o Aereware (v4.5)
 // ======================================================
 export const verifyHash = async (req, res) => {
   try {
@@ -22,10 +22,10 @@ export const verifyHash = async (req, res) => {
     if (!hash)
       return res.status(400).json({ ok: false, message: "Missing hash" });
 
-    // 1️⃣ Buscar evidencia original (Validate)
+    // 1️⃣ Buscar evidencia original
     let result = await Validation.findOne({ "files.hash": hash }).lean();
 
-    // 2️⃣ Si no existe, intentar recuperación desde Aereware
+    // 2️⃣ Intentar recuperación si no está en Mongo
     if (!result) {
       const recovered = await recoverEvidence(`ar://${hash}`);
       if (recovered) {
@@ -35,27 +35,21 @@ export const verifyHash = async (req, res) => {
           txHash: hash,
           action: "recovered_from_aereware",
           result: "success",
+          origin: "verify",
         });
-
         return res.json({
           ok: true,
           recovered: true,
-          source: "Aereware",
           evidenceTitle: recovered.evidenceTitle,
           storageId: recovered.storageId,
           recoveredAt: recovered.recoveredAt,
         });
       }
-      return res.json({
-        ok: false,
-        message: "⚠️ Evidence not found on UDoChain or Aereware network.",
-      });
+      return res.json({ ok: false, message: "⚠️ Evidence not found." });
     }
 
-    // 3️⃣ Buscar estado vivo (VerifyEvidence)
+    // 3️⃣ Crear o actualizar estado vivo (VerifyEvidence)
     let live = await VerifyEvidence.findOne({ txHash: result.txHash });
-
-    // Crear registro si no existe aún
     if (!live) {
       live = await VerifyEvidence.create({
         txHash: result.txHash,
@@ -66,33 +60,34 @@ export const verifyHash = async (req, res) => {
         qrActive: true,
         status: "active",
         version: 1,
+        origin: "validate",
       });
     }
 
-    // Verificar si el QR está activo
-    if (!live.qrActive) {
-      await VerifyRecord.create({
-        userEmail,
-        sessionId,
-        txHash: result.txHash,
-        action: "verify_attempt_blocked",
-        result: "blocked",
-      });
-      return res.json({
-        ok: false,
-        message: "QR disabled — verification blocked by owner.",
-      });
-    }
+    // 4️⃣ Verificar si el QR está activo
+    if (!live.qrActive)
+      return res.json({ ok: false, message: "QR disabled by owner." });
 
-    // 4️⃣ Registrar verificación exitosa
+    // 5️⃣ Guardar registro de verificación
     await VerifyRecord.create({
       userEmail,
       sessionId,
       txHash: result.txHash,
       action: "verify_hash",
       result: "success",
+      origin: "verify",
     });
 
+    // 6️⃣ Actualizar métricas internas en la validación original
+    await Validation.updateOne(
+      { txHash: result.txHash },
+      {
+        $inc: { verifiedCount: 1 },
+        $set: { lastVerifiedAt: new Date() },
+      }
+    );
+
+    // ✅ Respuesta final
     res.json({
       ok: true,
       evidenceTitle: result.evidenceTitle,
