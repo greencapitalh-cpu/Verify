@@ -1,5 +1,5 @@
 // ======================================================
-// 🚀 UDoChain Verify v3 — Mongo + Aereware + QR + Auto-Login
+// 🚀 UDoChain Verify v4 — Dual Mongo + Aereware + QR + Logs
 // ======================================================
 import express from "express";
 import cors from "cors";
@@ -35,6 +35,7 @@ app.use(
       "https://app.udochain.com",
       "https://bioid.udochain.com",
       "http://localhost:8080",
+      "http://localhost:5173",
     ],
     credentials: true,
   })
@@ -43,16 +44,43 @@ app.use(
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 
-// 🗄️ MongoDB
-mongoose
-  .connect(process.env.MONGO_URI, { dbName: "udochain_validate" })
-  .then(() => console.log("✅ MongoDB conectado correctamente"))
-  .catch((err) => console.error("❌ Error MongoDB:", err));
+// ======================================================
+// 🗄️ MongoDB — Conexión doble (Validate + Verify)
+// ======================================================
+(async () => {
+  try {
+    // 🟦 Base principal (solo lectura de evidencias)
+    const validateConn = await mongoose.createConnection(
+      process.env.MONGO_URI_VALIDATE,
+      { dbName: "udochain_validate" }
+    );
+    console.log("✅ Conectado a MongoDB (udochain_validate)");
 
-// 🧩 Rutas
+    // 🟨 Base secundaria (para logs de verificación)
+    const verifyConn = await mongoose.createConnection(
+      process.env.MONGO_URI_VERIFY,
+      { dbName: "udochain_verify" }
+    );
+    console.log("✅ Conectado a MongoDB (udochain_verify)");
+
+    // Guardar conexiones globales
+    global.mongoConnections = {
+      validateConn,
+      verifyConn,
+    };
+  } catch (err) {
+    console.error("❌ Error conectando a MongoDB:", err.message);
+  }
+})();
+
+// ======================================================
+// 🧩 Rutas API
+// ======================================================
 app.use("/api/verify", verifyRoutes);
 
+// ======================================================
 // 🌍 Archivos estáticos
+// ======================================================
 app.use(express.static(path.join(__dirname, "public")));
 
 // ❤️ Healthcheck
@@ -66,5 +94,5 @@ app.get("*", (_, res) =>
 // 🚀 Servidor
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () =>
-  console.log(`✅ UDoChain Verify v3 corriendo en puerto ${PORT}`)
+  console.log(`✅ UDoChain Verify v4 corriendo en puerto ${PORT}`)
 );
