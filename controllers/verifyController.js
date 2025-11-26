@@ -1,27 +1,25 @@
 // ======================================================
-// 🧾 UDoChain Verify Controller v3 — Full Mongo + Aereware + QR + Polygon
+// 🧾 UDoChain Verify Controller v3.5
+//  Mongo + Aereware + QR Control + Records
 // ======================================================
 import Validation from "../models/Validation.js";
 import { getFromAereware, recoverEvidence } from "../utils/aerewareUtils.js";
 import Arweave from "arweave";
 import { v4 as uuidv4 } from "uuid";
 
-// 🧠 Cache temporal (QR → login flow)
+// 🔹 Cache temporal (QR → login flow)
 const qrCache = new Map();
 
 // ======================================================
-// 🔹 verifyHash — Busca en Mongo y sincroniza si falta
+// 🔍 Verify Hash — Busca evidencia pública o privada
 // ======================================================
 export const verifyHash = async (req, res) => {
   try {
     const { hash } = req.body;
-    if (!hash)
-      return res.status(400).json({ ok: false, message: "Missing hash" });
+    if (!hash) return res.status(400).json({ ok: false, message: "Missing hash" });
 
-    // Buscar validación en Mongo
     let result = await Validation.findOne({ "files.hash": hash }).lean();
 
-    // Si no existe, intentar recuperación desde Arweave
     if (!result) {
       const recovered = await recoverEvidence(`ar://${hash}`);
       if (recovered)
@@ -33,15 +31,19 @@ export const verifyHash = async (req, res) => {
           storageId: recovered.storageId,
           recoveredAt: recovered.recoveredAt,
         });
-
       return res.json({
         ok: false,
         message: "⚠️ Evidence not found on UDoChain or Aereware network.",
       });
     }
 
-    // Si se encontró en Mongo
-    return res.json({
+    if (!result.qrActive)
+      return res.json({
+        ok: false,
+        message: "QR disabled — verification blocked by owner.",
+      });
+
+    res.json({
       ok: true,
       evidenceTitle: result.evidenceTitle,
       validatedAt: result.createdAt,
@@ -58,13 +60,12 @@ export const verifyHash = async (req, res) => {
 };
 
 // ======================================================
-// 🔹 getValidationsByUser — Lista validaciones de usuario
+// 📋 Get Validations by User — Records personales
 // ======================================================
 export const getValidationsByUser = async (req, res) => {
   try {
     const { token } = req.params;
-    if (!token)
-      return res.status(400).json({ ok: false, message: "Missing token" });
+    if (!token) return res.status(400).json({ ok: false, message: "Missing token" });
 
     const validations = await Validation.find({ userToken: token })
       .sort({ createdAt: -1 })
@@ -75,7 +76,6 @@ export const getValidationsByUser = async (req, res) => {
 
     res.json({
       ok: true,
-      count: validations.length,
       validations: validations.map((v) => ({
         evidenceTitle: v.evidenceTitle,
         txHash: v.txHash,
@@ -83,6 +83,8 @@ export const getValidationsByUser = async (req, res) => {
         pdfUrl: v.pdfUrl,
         createdAt: v.createdAt,
         hasBinaryBackup: v.hasBinaryBackup,
+        qrActive: v.qrActive,
+        type: v.type,
       })),
     });
   } catch (err) {
@@ -92,7 +94,7 @@ export const getValidationsByUser = async (req, res) => {
 };
 
 // ======================================================
-// 🔹 getPrivateValidation — Recupera JSON desde Arweave
+// 🔒 getPrivateValidation — Desde Aereware o recovery
 // ======================================================
 export const getPrivateValidation = async (req, res) => {
   try {
@@ -116,7 +118,7 @@ export const getPrivateValidation = async (req, res) => {
 };
 
 // ======================================================
-// 🔹 getBinaryFromAereware — Descarga ZIP desde Arweave
+// 💾 getBinaryFromAereware — Descarga ZIP privado
 // ======================================================
 export const getBinaryFromAereware = async (req, res) => {
   try {
@@ -134,10 +136,7 @@ export const getBinaryFromAereware = async (req, res) => {
     const data = await arweave.transactions.getData(id, { decode: true });
     const buffer = Buffer.from(data);
     res.setHeader("Content-Type", "application/zip");
-    res.setHeader(
-      "Content-Disposition",
-      `attachment; filename="${id}.zip"`
-    );
+    res.setHeader("Content-Disposition", `attachment; filename="${id}.zip"`);
     res.end(buffer);
   } catch (err) {
     console.error("❌ getBinaryFromAereware error:", err);
@@ -146,37 +145,65 @@ export const getBinaryFromAereware = async (req, res) => {
 };
 
 // ======================================================
-// 🔹 cacheQRData — Guarda temporalmente el QR escaneado
+// 🚫 blockQR — Desactiva QR público/privado
+// ======================================================
+export const blockQR = async (req, res) => {
+  try {
+    const { txHash } = req.params;
+    if (!txHash) return res.status(400).json({ ok: false, message: "Missing txHash" });
+
+    await Validation.findOneAndUpdate({ txHash }, { qrActive: false });
+    res.json({ ok: true, message: "QR blocked successfully." });
+  } catch (err) {
+    console.error("❌ blockQR error:", err);
+    res.status(500).json({ ok: false, error: err.message });
+  }
+};
+
+// ======================================================
+// ♻️ regenerateQR — Genera nuevo QR ID (misma evidencia)
+// ======================================================
+export const regenerateQR = async (req, res) => {
+  try {
+    const { txHash } = req.params;
+    if (!txHash) return res.status(400).json({ ok: false, message: "Missing txHash" });
+
+    const newQR = uuidv4();
+    await Validation.findOneAndUpdate(
+      { txHash },
+      { qrId: newQR, qrActive: true }
+    );
+
+    res.json({ ok: true, message: "QR regenerated.", newQR });
+  } catch (err) {
+    console.error("❌ regenerateQR error:", err);
+    res.status(500).json({ ok: false, error: err.message });
+  }
+};
+
+// ======================================================
+// 🧩 Cache temporal para QR login flow
 // ======================================================
 export const cacheQRData = async (req, res) => {
   try {
     const { qrData } = req.body;
     if (!qrData)
       return res.status(400).json({ ok: false, message: "Missing QR data" });
-
     const id = uuidv4();
     qrCache.set(id, { qrData, createdAt: Date.now() });
-    setTimeout(() => qrCache.delete(id), 5 * 60 * 1000); // 5 min TTL
-
+    setTimeout(() => qrCache.delete(id), 5 * 60 * 1000);
     res.json({ ok: true, cacheId: id });
   } catch (err) {
     res.status(500).json({ ok: false, error: err.message });
   }
 };
 
-// ======================================================
-// 🔹 retrieveCachedQR — Recupera datos QR tras login
-// ======================================================
 export const retrieveCachedQR = async (req, res) => {
   try {
     const { id } = req.params;
-    if (!id)
-      return res.status(400).json({ ok: false, message: "Missing cache id" });
-
     const data = qrCache.get(id);
     if (!data)
       return res.json({ ok: false, message: "Cache expired or not found" });
-
     res.json({ ok: true, data });
   } catch (err) {
     res.status(500).json({ ok: false, error: err.message });
