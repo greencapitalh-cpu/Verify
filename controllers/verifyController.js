@@ -1,37 +1,52 @@
 // ======================================================
-// 🧾 UDoChain Verify Controller v2 — Full Aereware & Mongo Sync
+// 🧾 UDoChain Verify Controller v2.1 — Mongo + Aereware Full Recovery
 // ======================================================
-
 import Validation from "../models/Validation.js";
 import Arweave from "arweave";
 import { v4 as uuidv4 } from "uuid";
-import fs from "fs";
-import path from "path";
-import { getFromAereware } from "../utils/aerewareUtils.js";
+import { getFromAereware, recoverEvidence } from "../utils/aerewareUtils.js";
 
 // 🧠 Cache temporal (QR → login flow)
 const qrCache = new Map();
 
 // ======================================================
-// 🔹 verifyHash — Busca en Mongo y sincroniza si falta
+// 🔹 verifyHash — Busca en Mongo, y si no está, intenta recuperar desde Aereware
 // ======================================================
 export const verifyHash = async (req, res) => {
   try {
     const { hash } = req.body;
     if (!hash) return res.status(400).json({ ok: false, message: "Missing hash" });
 
-    // Buscar validación por hash de archivo
-    const result = await Validation.findOne({ "files.hash": hash }).lean();
+    // Buscar en Mongo
+    let result = await Validation.findOne({ "files.hash": hash }).lean();
 
+    // Si no existe, intentar recuperar desde Aereware
     if (!result) {
+      console.log("⚠️ Evidence not found in Mongo. Trying Aereware...");
+      const recovered = await recoverEvidence(hash);
+      if (recovered) {
+        console.log("✅ Evidence recovered from Aereware:", recovered.storageId);
+        return res.json({
+          ok: true,
+          recovered: true,
+          source: "Aereware",
+          evidenceTitle: recovered.evidenceTitle,
+          storageId: recovered.storageId,
+          recoveredAt: recovered.recoveredAt,
+          pdfUrl: recovered.meta?.pdfUrl || null,
+          meta: recovered.meta,
+        });
+      }
       return res.json({
         ok: false,
-        message: "⚠️ Evidence not found on UDoChain database. It may have been removed or never validated.",
+        message: "Evidence not found in Mongo or Aereware.",
       });
     }
 
-    return res.json({
+    // Retornar resultado Mongo
+    res.json({
       ok: true,
+      source: "MongoDB",
       evidenceTitle: result.evidenceTitle,
       validatedAt: result.createdAt,
       txHash: result.txHash,
@@ -47,7 +62,7 @@ export const verifyHash = async (req, res) => {
 };
 
 // ======================================================
-// 🔹 getValidationsByUser — Listado de validaciones por token
+// 🔹 getValidationsByUser — Lista validaciones del usuario autenticado
 // ======================================================
 export const getValidationsByUser = async (req, res) => {
   try {
@@ -80,7 +95,7 @@ export const getValidationsByUser = async (req, res) => {
 };
 
 // ======================================================
-// 🔹 getPrivateValidation — Recupera JSON de Aereware
+// 🔹 getPrivateValidation — Recupera JSON desde Aereware (metadatos privados)
 // ======================================================
 export const getPrivateValidation = async (req, res) => {
   try {
@@ -89,7 +104,6 @@ export const getPrivateValidation = async (req, res) => {
       return res.status(400).json({ ok: false, message: "Missing storageId" });
 
     const data = await getFromAereware(storageId);
-
     if (!data) return res.json({ ok: false, message: "Not found on Aereware" });
 
     res.json({ ok: true, storageId, data });
@@ -100,7 +114,7 @@ export const getPrivateValidation = async (req, res) => {
 };
 
 // ======================================================
-// 🔹 getBinaryFromAereware — Descargar ZIP binario custodiado
+// 🔹 getBinaryFromAereware — Descarga binario custodiado (ZIP) desde Arweave
 // ======================================================
 export const getBinaryFromAereware = async (req, res) => {
   try {
@@ -117,7 +131,6 @@ export const getBinaryFromAereware = async (req, res) => {
 
     const data = await arweave.transactions.getData(id, { decode: true });
     const buffer = Buffer.from(data);
-
     res.setHeader("Content-Type", "application/zip");
     res.setHeader("Content-Disposition", `attachment; filename="${id}.zip"`);
     res.end(buffer);
@@ -139,7 +152,6 @@ export const cacheQRData = async (req, res) => {
     const id = uuidv4();
     qrCache.set(id, { qrData, createdAt: Date.now() });
     setTimeout(() => qrCache.delete(id), 5 * 60 * 1000); // 5 min TTL
-
     res.json({ ok: true, cacheId: id });
   } catch (err) {
     res.status(500).json({ ok: false, error: err.message });
@@ -152,11 +164,11 @@ export const cacheQRData = async (req, res) => {
 export const retrieveCachedQR = async (req, res) => {
   try {
     const { id } = req.params;
-    if (!id) return res.status(400).json({ ok: false, message: "Missing cache id" });
+    if (!id)
+      return res.status(400).json({ ok: false, message: "Missing cache id" });
 
     const data = qrCache.get(id);
     if (!data) return res.json({ ok: false, message: "Cache expired or not found" });
-
     res.json({ ok: true, data });
   } catch (err) {
     res.status(500).json({ ok: false, error: err.message });
