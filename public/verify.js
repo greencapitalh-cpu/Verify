@@ -1,126 +1,84 @@
-const scanBtn = document.getElementById("scanBtn");
-const statusDiv = document.getElementById("status");
-scanBtn.addEventListener("click", openQRMenu);
+<script type="module">
+import jsQR from "https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.esm.js";
 
-function openQRMenu() {
-  const menu = document.createElement("div");
-  menu.className = "qr-menu";
-  menu.innerHTML = `
-    <button class="confirm" id="cameraScan">Scan with camera</button>
-    <button id="uploadScan">Upload image with QR</button>
-    <button id="cancelScan">Cancel</button>
-  `;
-  document.body.appendChild(menu);
+const scanBtn = document.getElementById("scanQR");
+const uploadInput = document.getElementById("qrUpload");
+const hashInput = document.getElementById("hashInput");
+const verifyBtn = document.getElementById("verifyBtn");
+const canvas = document.createElement("canvas");
+const ctx = canvas.getContext("2d");
 
-  document.getElementById("cameraScan").onclick = () => {
-    menu.remove();
-    startCameraScan();
-  };
-  document.getElementById("uploadScan").onclick = () => {
-    menu.remove();
-    uploadImageForQR();
-  };
-  document.getElementById("cancelScan").onclick = () => menu.remove();
-}
-
-async function startCameraScan() {
-  const overlay = document.createElement("div");
-  overlay.className = "qr-overlay";
-  overlay.innerHTML = `
-    <div class="qr-box">
-      <video id="video" playsinline></video>
-      <div class="scan-line"></div>
-    </div>
-    <p style="color:white;margin-top:1rem;">Scanning QR...</p>
-  `;
-  document.body.appendChild(overlay);
-
-  const video = overlay.querySelector("#video");
-
+// ===============
+// 📸 Escanear con cámara
+// ===============
+scanBtn.addEventListener("click", async () => {
   try {
     const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+    const video = document.createElement("video");
     video.srcObject = stream;
-    await video.play();
+    video.setAttribute("playsinline", true);
+    video.play();
 
-    const canvas = document.createElement("canvas");
-    const ctx = canvas.getContext("2d");
-    const jsQR = await import("https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.mjs");
-
-    const scan = () => {
+    const scanLoop = () => {
       if (video.readyState === video.HAVE_ENOUGH_DATA) {
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
         const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        const code = jsQR.default(imageData.data, canvas.width, canvas.height);
+        const code = jsQR(imageData.data, imageData.width, imageData.height);
         if (code) {
-          stopCamera(stream, overlay);
-          handleQR(code.data);
+          stream.getTracks().forEach(t => t.stop());
+          handleDecodedQR(code.data);
           return;
         }
       }
-      requestAnimationFrame(scan);
+      requestAnimationFrame(scanLoop);
     };
-    scan();
+    scanLoop();
   } catch (err) {
-    alert("Camera access denied or unavailable.");
-    overlay.remove();
+    alert("No se pudo acceder a la cámara: " + err.message);
   }
-}
+});
 
-function stopCamera(stream, overlay) {
-  stream.getTracks().forEach((t) => t.stop());
-  overlay.remove();
-}
-
-function uploadImageForQR() {
-  const input = document.createElement("input");
-  input.type = "file";
-  input.accept = "image/*";
-  input.onchange = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = async (event) => {
-      const img = new Image();
-      img.onload = async () => {
-        const canvas = document.createElement("canvas");
-        const ctx = canvas.getContext("2d");
-        canvas.width = img.width;
-        canvas.height = img.height;
-        ctx.drawImage(img, 0, 0);
-        const jsQR = await import("https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.mjs");
-        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        const code = jsQR.default(imageData.data, canvas.width, canvas.height);
-        if (code) handleQR(code.data);
-        else alert("No QR detected in the image.");
-      };
-      img.src = event.target.result;
-    };
-    reader.readAsDataURL(file);
+// ===============
+// 📤 Subir imagen desde galería
+// ===============
+uploadInput.addEventListener("change", async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const img = new Image();
+  img.src = URL.createObjectURL(file);
+  img.onload = () => {
+    canvas.width = img.width;
+    canvas.height = img.height;
+    ctx.drawImage(img, 0, 0, img.width, img.height);
+    const imageData = ctx.getImageData(0, 0, img.width, img.height);
+    const code = jsQR(imageData.data, imageData.width, imageData.height);
+    if (code) handleDecodedQR(code.data);
+    else alert("No se detectó ningún QR válido en la imagen.");
   };
-  input.click();
-}
+});
 
-async function handleQR(decodedText) {
-  console.log("QR scanned:", decodedText);
-  statusDiv.textContent = "QR detected: " + decodedText;
-
-  try {
-    const url = new URL(decodedText);
-    const tx = url.searchParams.get("tx");
-    const storage = url.searchParams.get("storage");
-
-    if (storage) {
-      statusDiv.innerHTML = "Redirecting to private verification...";
-      window.location.href = `/api/verify/private/${storage}`;
-    } else if (tx) {
-      document.getElementById("hashInput").value = tx;
-      document.getElementById("verifyBtn").click();
-    } else {
-      alert("Invalid QR content.");
-    }
-  } catch {
-    alert("Invalid QR format.");
+// ===============
+// 🧠 Procesa el QR decodificado
+// ===============
+function handleDecodedQR(data) {
+  if (data.includes("udochain.com")) {
+    window.location.href = data; // Redirige al enlace del QR (verify)
+  } else if (data.startsWith("0x")) {
+    hashInput.value = data;
+    alert("Código QR leído correctamente. Puedes verificarlo ahora.");
+  } else {
+    alert("QR leído: " + data);
   }
 }
+
+// ===============
+// 🔍 Botón de verificación manual
+// ===============
+verifyBtn.addEventListener("click", () => {
+  const tx = hashInput.value.trim();
+  if (!tx) return alert("Ingrese o escanee un hash de transacción válido.");
+  window.location.href = `https://verify.udochain.com/?tx=${tx}`;
+});
+</script>
