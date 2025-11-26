@@ -1,5 +1,5 @@
 // ======================================================
-// 📘 Mongoose Schema — Validation (Shared with Validate)
+// 📘 Mongoose Schema — Validation (Extended v3.5)
 // ======================================================
 import mongoose from "mongoose";
 
@@ -19,6 +19,13 @@ const validationSchema = new mongoose.Schema(
     w3Note: String,
     hasBinaryBackup: Boolean,
     files: [fileSchema],
+    type: {
+      type: String,
+      enum: ["Validate", "Sign", "Trace", "Vote", "Other"],
+      default: "Validate",
+    },
+    qrId: { type: String, default: null },
+    qrActive: { type: Boolean, default: true },
     createdAt: { type: Date, default: Date.now },
   },
   { collection: "validations" }
