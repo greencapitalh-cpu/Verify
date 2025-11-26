@@ -4,12 +4,13 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Private Verification | UDoChain</title>
-    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="verify-private.css" />
   </head>
+
   <body>
     <header class="header">
       <div class="header-left">
-        <img src="logo-udochain.png" class="logo" />
+        <img src="logo-udochain.png" class="logo" alt="UDoChain Logo" />
         <h1>Private Evidence</h1>
       </div>
       <a href="https://wapp.udochain.com" class="nav-link">Dashboard</a>
@@ -17,8 +18,13 @@
 
     <main class="container">
       <h2>Private Record</h2>
+      <p class="subtitle">This information is private and requires authentication.</p>
+
       <div id="privateData" class="data-box">Loading private record...</div>
-      <button id="downloadZip" class="btn-primary">⬇️ Download ZIP</button>
+
+      <button id="downloadZip" class="btn-primary" disabled>
+        ⬇️ Download ZIP
+      </button>
     </main>
 
     <footer class="footer">
