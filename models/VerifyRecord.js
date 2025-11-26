@@ -1,45 +1,48 @@
 // ======================================================
-// 🧾 Mongoose Schema — VerifyRecord (Logs de Verificaciones)
+// 📘 Mongoose Schema — VerifyRecord (User / System Actions)
 // ======================================================
 import mongoose from "mongoose";
 
-// 📦 Cada registro documenta una acción dentro de verify.udochain.com
 const verifyRecordSchema = new mongoose.Schema(
   {
-    userEmail: { type: String, default: "anonymous" }, // si no hay login
-    userToken: { type: String, default: null }, // si viene desde app/wapp
-    txHash: { type: String, required: true }, // hash verificado
-    storageId: { type: String, default: null }, // solo si aplica (privado)
-    evidenceTitle: { type: String, default: null },
-    type: {
-      type: String,
-      enum: ["Validate", "Sign", "Trace", "Vote", "Other"],
-      default: "Validate",
-    },
+    // 🧑 Usuario que realizó la acción
+    userEmail: { type: String, default: null },
+    sessionId: { type: String, default: null },
+
+    // 🔗 Identificador de la evidencia
+    txHash: { type: String, required: true },
+    storageId: { type: String, default: null },
+
+    // ⚙️ Acción y resultado
     action: {
       type: String,
       enum: [
-        "verify_public",
-        "verify_private",
-        "download_private_zip",
+        "verify_hash",
+        "verify_attempt_blocked",
         "block_qr",
         "regenerate_qr",
-        "pdf_updated",
+        "download_zip",
+        "recovered_from_aereware",
+        "update_pdf",
+        "login_via_qr",
       ],
       required: true,
     },
     result: {
       type: String,
-      enum: ["success", "failed", "blocked"],
+      enum: ["success", "blocked", "error"],
       default: "success",
     },
-    details: { type: Object, default: {} }, // datos extras, como IP, browser, etc.
-    verifiedAt: { type: Date, default: Date.now },
+
+    // 🕐 Metadatos de auditoría
+    ipAddress: { type: String, default: null },
+    userAgent: { type: String, default: null },
+    createdAt: { type: Date, default: Date.now },
   },
   { collection: "verify_records" }
 );
 
-// 📘 Usará la segunda conexión (udochain_verify)
+// 📘 Usa la conexión del entorno verifyConn
 export default global.mongoConnections?.verifyConn
   ? global.mongoConnections.verifyConn.model("VerifyRecord", verifyRecordSchema)
   : mongoose.model("VerifyRecord", verifyRecordSchema);
