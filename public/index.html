@@ -22,19 +22,17 @@
 
     <!-- QR Section -->
     <section class="qr-section">
-      <button id="startQrBtn" class="btn-primary">📷 Scan QR</button>
-      <input type="file" id="qrFileInput" accept="image/*" style="display:none" />
-      <video id="qrVideo" playsinline></video>
+      <button id="startQrBtn" class="btn-primary">Scan QR</button>
     </section>
 
-    <!-- Manual Verify -->
+    <!-- Manual Section -->
     <section class="manual-section">
       <input type="file" id="fileInput" />
       <input type="text" id="hashInput" placeholder="Or paste a file hash here" />
       <button id="verifyBtn" class="btn-primary">Verify Evidence</button>
     </section>
 
-    <!-- Result -->
+    <!-- Status -->
     <div id="status" class="status"></div>
 
     <!-- My Validations -->
@@ -49,7 +47,6 @@
     <p>© 2025 UDoChain — All rights reserved.</p>
   </footer>
 
-  <script src="https://unpkg.com/html5-qrcode"></script>
   <script src="verify.js"></script>
   <script src="script-translate.js"></script>
 </body>
