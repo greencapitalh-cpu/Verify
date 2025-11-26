@@ -9,29 +9,26 @@
   <body>
     <header class="header">
       <div class="header-left">
-        <img src="logo-udochain.png" alt="UDoChain Logo" class="logo" />
+        <img src="logo-udochain.png" alt="UDoChain" class="logo" />
         <h1>UDoChain Verify</h1>
       </div>
       <a href="https://wapp.udochain.com" class="nav-link">Dashboard</a>
     </header>
 
     <main class="container">
-      <h2>Verify Blockchain Evidence</h2>
-      <p class="subtitle">Scan a QR, upload an image, or enter a transaction hash.</p>
+      <h2 class="title">Verify Blockchain Evidence</h2>
+      <p class="subtitle">Scan a QR code or enter a transaction hash.</p>
 
-      <section class="qr-section">
-        <button id="scanQR" class="btn-primary">Scan QR</button>
+      <section class="scanner">
+        <button id="scanQR" class="btn-primary">📷 Scan QR</button>
         <label for="qrUpload" class="btn-secondary">Upload QR Image</label>
-        <input type="file" id="qrUpload" accept="image/*" style="display:none" />
-
-        <!-- Cámara visible -->
-        <video id="qrVideo" autoplay playsinline muted></video>
-        <canvas id="qrCanvas" style="display:none"></canvas>
+        <input type="file" id="qrUpload" accept="image/*" hidden />
+        <video id="qrVideo" autoplay playsinline></video>
       </section>
 
-      <section class="manual-section">
-        <input type="text" id="hashInput" placeholder="Or paste a file hash here" />
-        <button id="verifyBtn" class="btn-primary">Verify Evidence</button>
+      <section class="manual">
+        <input type="text" id="hashInput" placeholder="Enter transaction hash" />
+        <button id="verifyBtn" class="btn-primary">Verify</button>
       </section>
 
       <div id="status" class="status"></div>
@@ -43,5 +40,6 @@
     </footer>
 
     <script type="module" src="verify.js"></script>
+    <script src="script-translate.js"></script>
   </body>
 </html>
