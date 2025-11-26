@@ -19,6 +19,12 @@ body {
   height: 36px;
 }
 
+.nav-link {
+  color: #4f46e5;
+  text-decoration: none;
+  font-weight: 500;
+}
+
 .container {
   max-width: 700px;
   margin: 2rem auto;
@@ -33,7 +39,7 @@ body {
   margin-bottom: 1rem;
 }
 
-.btn-primary, .btn-secondary {
+.btn-primary {
   background: #184b8c;
   color: white;
   border: none;
@@ -41,13 +47,11 @@ body {
   border-radius: 8px;
   cursor: pointer;
   margin-top: 0.5rem;
+  font-size: 1rem;
+  font-weight: 500;
 }
 
-.btn-secondary {
-  background: #5b2e90;
-}
-
-.btn-primary:hover, .btn-secondary:hover {
+.btn-primary:hover {
   opacity: 0.9;
 }
 
@@ -68,14 +72,38 @@ body {
   text-align: left;
 }
 
-.qr-section {
-  margin: 1rem 0;
+.qr-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
 }
 
-#qrVideo {
-  width: 100%;
-  border-radius: 12px;
-  display: none;
+.qr-frame {
+  border: 3px solid #00ffcc;
+  border-radius: 8px;
+  width: 80%;
+  max-width: 320px;
+  aspect-ratio: 1;
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.qr-overlay p {
+  color: white;
+  margin-top: 1rem;
+}
+
+.footer {
+  margin-top: 2rem;
+  font-size: 0.85rem;
+  color: #64748b;
 }
 
 @media (max-width: 600px) {
