@@ -1,14 +1,9 @@
-// =======================================================
-// 🌍 Auto-Translate — UDoChain Global
-// =======================================================
 (function autoTranslate() {
   const lang = navigator.language.split("-")[0];
-  if (lang === "en") return; // Already in English
+  if (lang === "en") return;
 
-  // Exclude branding
   const notranslate = ["UDoChain", "You do. We validate."];
 
-  // Add Google Translate script
   if (!document.querySelector("#google-translate-script")) {
     const script = document.createElement("script");
     script.id = "google-translate-script";
@@ -33,7 +28,6 @@
     };
   }
 
-  // Apply notranslate to branding text
   notranslate.forEach((t) => {
     document.querySelectorAll("*").forEach((el) => {
       if (el.textContent?.includes(t)) {
