@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Public Verification | UDoChain</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="header">
+      <div class="header-left">
+        <img src="logo-udochain.png" class="logo" />
+        <h1>Public Verification</h1>
+      </div>
+      <a href="https://wapp.udochain.com" class="nav-link">Dashboard</a>
+    </header>
+
+    <main class="container">
+      <h2>Evidence Details</h2>
+      <div id="publicData" class="data-box">Loading...</div>
+
+      <section class="upload-check">
+        <h3>Check File Authenticity</h3>
+        <input type="file" id="fileInput" />
+        <button id="checkFileBtn" class="btn-primary">Compare Hash</button>
+        <div id="checkResult"></div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <p>UDoChain Verify — Public Record</p>
+    </footer>
+
+    <script type="module" src="verify-public.js"></script>
+    <script src="script-translate.js"></script>
+  </body>
+</html>
