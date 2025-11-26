@@ -15,18 +15,27 @@ dotenv.config();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// 🔑 Inicializar Keyfile de Aereware
+// ======================================================
+// 🔑 Inicialización de Aereware Keyfile
+// ======================================================
 ensureAerewareKeyfile();
 
-// 📂 Crear carpetas si no existen
+// ======================================================
+// 📂 Creación de carpetas necesarias
+// ======================================================
 ["public"].forEach((dir) => {
   const folder = path.join(__dirname, dir);
   if (!fs.existsSync(folder)) fs.mkdirSync(folder);
 });
 
+// ======================================================
+// ⚙️ Inicialización de Express
+// ======================================================
 const app = express();
 
-// 🌐 CORS
+// ======================================================
+// 🌐 Configuración CORS
+// ======================================================
 app.use(
   cors({
     origin: [
@@ -45,53 +54,58 @@ app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 
 // ======================================================
-// 🗄️ MongoDB — Conexión doble (Validate + Verify)
+// 🗄️ MongoDB — Conexiones dobles (Validate + Verify)
 // ======================================================
 (async () => {
   try {
-    // 🟦 Base principal (solo lectura de evidencias)
+    // 🟦 Base principal: lectura de evidencias (Validate)
     const validateConn = await mongoose.createConnection(
       process.env.MONGO_URI_VALIDATE,
       { dbName: "udochain_validate" }
     );
     console.log("✅ Conectado a MongoDB (udochain_validate)");
 
-    // 🟨 Base secundaria (para logs de verificación)
+    // 🟨 Base secundaria: registros de verificación (Verify)
     const verifyConn = await mongoose.createConnection(
       process.env.MONGO_URI_VERIFY,
       { dbName: "udochain_verify" }
     );
     console.log("✅ Conectado a MongoDB (udochain_verify)");
 
-    // Guardar conexiones globales
-    global.mongoConnections = {
-      validateConn,
-      verifyConn,
-    };
+    // Guardar conexiones globales para uso en controladores
+    global.mongoConnections = { validateConn, verifyConn };
   } catch (err) {
     console.error("❌ Error conectando a MongoDB:", err.message);
   }
 })();
 
 // ======================================================
-// 🧩 Rutas API
+// 🧩 Rutas de API
 // ======================================================
 app.use("/api/verify", verifyRoutes);
 
 // ======================================================
-// 🌍 Archivos estáticos
+// 🌍 Archivos estáticos (frontend público)
 // ======================================================
 app.use(express.static(path.join(__dirname, "public")));
 
+// ======================================================
 // ❤️ Healthcheck
-app.get("/api/healthz", (_, res) => res.json({ ok: true }));
+// ======================================================
+app.get("/api/healthz", (_, res) =>
+  res.json({ ok: true, service: "UDoChain Verify v4", timestamp: new Date() })
+);
 
+// ======================================================
 // 🏠 UI principal
+// ======================================================
 app.get("*", (_, res) =>
   res.sendFile(path.join(__dirname, "public/index.html"))
 );
 
-// 🚀 Servidor
+// ======================================================
+// 🚀 Inicio del servidor
+// ======================================================
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () =>
   console.log(`✅ UDoChain Verify v4 corriendo en puerto ${PORT}`)
