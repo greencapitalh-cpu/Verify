@@ -1,7 +1,6 @@
 // ======================================================
-// 🚀 UDoChain Verify v2 — Blockchain + Aereware + QR + Auto-Login
+// 🚀 UDoChain Verify v3 — Mongo + Aereware + QR + Auto-Login
 // ======================================================
-
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
@@ -16,27 +15,18 @@ dotenv.config();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// ------------------------------------------------------
-// 🧬 Inicializar keyfile Aereware si existe en env
-// ------------------------------------------------------
+// 🔑 Inicializar Keyfile de Aereware
 ensureAerewareKeyfile();
 
-// ------------------------------------------------------
-// 📁 Crear carpetas necesarias si no existen
-// ------------------------------------------------------
+// 📂 Crear carpetas si no existen
 ["public"].forEach((dir) => {
   const folder = path.join(__dirname, dir);
   if (!fs.existsSync(folder)) fs.mkdirSync(folder);
 });
 
-// ------------------------------------------------------
-// ⚙️ Inicializar Express
-// ------------------------------------------------------
 const app = express();
 
-// ------------------------------------------------------
-// 🔐 CORS universal
-// ------------------------------------------------------
+// 🌐 CORS
 app.use(
   cors({
     origin: [
@@ -44,7 +34,7 @@ app.use(
       "https://wapp.udochain.com",
       "https://app.udochain.com",
       "https://bioid.udochain.com",
-      "http://localhost:8080"
+      "http://localhost:8080",
     ],
     credentials: true,
   })
@@ -53,40 +43,28 @@ app.use(
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 
-// ------------------------------------------------------
-// 🗄️ Conexión a MongoDB Atlas
-// ------------------------------------------------------
+// 🗄️ MongoDB
 mongoose
   .connect(process.env.MONGO_URI, { dbName: "udochain_validate" })
   .then(() => console.log("✅ MongoDB conectado correctamente"))
   .catch((err) => console.error("❌ Error MongoDB:", err));
 
-// ------------------------------------------------------
-// 🧩 Rutas API de verificación
-// ------------------------------------------------------
+// 🧩 Rutas
 app.use("/api/verify", verifyRoutes);
 
-// ------------------------------------------------------
-// 🗂 Archivos estáticos
-// ------------------------------------------------------
+// 🌍 Archivos estáticos
 app.use(express.static(path.join(__dirname, "public")));
 
-// ------------------------------------------------------
 // ❤️ Healthcheck
-// ------------------------------------------------------
 app.get("/api/healthz", (_, res) => res.json({ ok: true }));
 
-// ------------------------------------------------------
-// 🏠 Página principal (Verify UI)
-// ------------------------------------------------------
-app.get("*", (_, res) => {
-  res.sendFile(path.join(__dirname, "public/index.html"));
-});
+// 🏠 UI principal
+app.get("*", (_, res) =>
+  res.sendFile(path.join(__dirname, "public/index.html"))
+);
 
-// ------------------------------------------------------
-// 🚀 Iniciar servidor
-// ------------------------------------------------------
+// 🚀 Servidor
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () =>
-  console.log(`✅ UDoChain Verify v2 corriendo en puerto ${PORT}`)
+  console.log(`✅ UDoChain Verify v3 corriendo en puerto ${PORT}`)
 );
