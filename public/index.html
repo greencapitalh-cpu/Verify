@@ -9,45 +9,29 @@
 </head>
 <body>
   <header class="header">
-    <div class="header-left">
-      <img src="logo-udochain.png" alt="UDoChain Logo" class="logo" />
-      <h1 class="notranslate" translate="no">UDoChain Verify</h1>
-    </div>
-    <a href="https://wapp.udochain.com" class="nav-link">Dashboard</a>
+    <img src="logo-udochain.png" alt="UDoChain Logo" class="logo" />
+    <h1 class="title notranslate" translate="no">UDoChain Verify</h1>
   </header>
 
   <main class="container">
     <h2>Verify Blockchain Evidence</h2>
     <p class="subtitle">Scan a QR, upload a file, or enter a transaction hash.</p>
 
-    <!-- QR Section -->
-    <section class="qr-section">
-      <button id="startQrBtn" class="btn-primary">Scan QR</button>
-    </section>
-
-    <!-- Manual Section -->
-    <section class="manual-section">
+    <div class="buttons">
+      <button id="scanBtn" class="btn-primary">Scan QR</button>
       <input type="file" id="fileInput" />
-      <input type="text" id="hashInput" placeholder="Or paste a file hash here" />
-      <button id="verifyBtn" class="btn-primary">Verify Evidence</button>
-    </section>
+      <input type="text" id="hashInput" placeholder="Or paste hash here" />
+      <button id="verifyBtn" class="btn-primary">Verify</button>
+    </div>
 
-    <!-- Status -->
     <div id="status" class="status"></div>
-
-    <!-- My Validations -->
-    <section id="myValidations" style="display:none;">
-      <h3>My Verified Evidences</h3>
-      <div id="validationList" class="validation-list"></div>
-    </section>
   </main>
 
   <footer class="footer">
     <p class="notranslate" translate="no">You do. We validate.</p>
-    <p>© 2025 UDoChain — All rights reserved.</p>
+    <p>© 2025 UDoChain</p>
   </footer>
 
   <script src="verify.js"></script>
-  <script src="script-translate.js"></script>
 </body>
 </html>
