@@ -1,5 +1,5 @@
 // ======================================================
-// 🧾 UDoChain Verify Controller v4.6
+// 🧾 UDoChain Verify Controller v4.7 — Dual Mongo + Aereware + QR Cache + Records
 // ======================================================
 import Validation from "../models/Validation.js";
 import VerifyEvidence from "../models/VerifyEvidence.js";
@@ -8,6 +8,7 @@ import { getFromAereware, recoverEvidence } from "../utils/aerewareUtils.js";
 import Arweave from "arweave";
 import { v4 as uuidv4 } from "uuid";
 
+// 🧠 Cache temporal para QR login flow
 const qrCache = new Map();
 
 // ======================================================
@@ -118,6 +119,13 @@ export const blockQR = async (req, res) => {
       { txHash },
       { qrActive: false, status: "blocked" }
     );
+
+    await VerifyRecord.create({
+      txHash,
+      action: "block_qr",
+      result: "success",
+    });
+
     res.json({ ok: true, message: "QR blocked successfully." });
   } catch (err) {
     console.error("❌ blockQR error:", err);
@@ -133,13 +141,56 @@ export const regenerateQR = async (req, res) => {
     const { txHash } = req.params;
     if (!txHash) return res.status(400).json({ ok: false, message: "Missing txHash" });
 
+    const newQR = uuidv4();
     await VerifyEvidence.findOneAndUpdate(
       { txHash },
-      { qrActive: true, status: "active" }
+      { qrActive: true, status: "active", qrId: newQR }
     );
-    res.json({ ok: true, message: "New QR generated successfully." });
+
+    await VerifyRecord.create({
+      txHash,
+      action: "regenerate_qr",
+      result: "success",
+    });
+
+    res.json({ ok: true, message: "New QR generated successfully.", newQR });
   } catch (err) {
     console.error("❌ regenerateQR error:", err);
+    res.status(500).json({ ok: false, error: err.message });
+  }
+};
+
+// ======================================================
+// 🧩 Cache temporal de QR login flow
+// ======================================================
+export const cacheQRData = async (req, res) => {
+  try {
+    const { qrData } = req.body;
+    if (!qrData)
+      return res.status(400).json({ ok: false, message: "Missing QR data" });
+
+    const id = uuidv4();
+    qrCache.set(id, { qrData, createdAt: Date.now() });
+
+    // Se elimina automáticamente en 5 minutos
+    setTimeout(() => qrCache.delete(id), 5 * 60 * 1000);
+
+    res.json({ ok: true, cacheId: id });
+  } catch (err) {
+    console.error("❌ cacheQRData error:", err);
+    res.status(500).json({ ok: false, error: err.message });
+  }
+};
+
+export const retrieveCachedQR = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const data = qrCache.get(id);
+    if (!data)
+      return res.json({ ok: false, message: "Cache expired or not found" });
+    res.json({ ok: true, data });
+  } catch (err) {
+    console.error("❌ retrieveCachedQR error:", err);
     res.status(500).json({ ok: false, error: err.message });
   }
 };
