@@ -1,5 +1,6 @@
 // ======================================================
-// 🧾 UDoChain Verify Controller v4.8 — Dual Mongo + Aereware + QR Cache + Records
+// 🧾 UDoChain Verify Controller v4.9
+// Dual Mongo + Aereware + Secure QR + Records + Cache Flow
 // ======================================================
 import Validation from "../models/Validation.js";
 import VerifyEvidence from "../models/VerifyEvidence.js";
@@ -12,14 +13,18 @@ import { v4 as uuidv4 } from "uuid";
 const qrCache = new Map();
 
 // ======================================================
-// 🔍 verifyHash
+// 🔍 verifyHash — Verificación de hash o recuperación remota
 // ======================================================
 export const verifyHash = async (req, res) => {
   try {
     const { hash, userEmail, sessionId } = req.body;
-    if (!hash) return res.status(400).json({ ok: false, message: "Missing hash" });
+    if (!hash)
+      return res.status(400).json({ ok: false, message: "Missing hash" });
 
+    // Buscar evidencia original
     let result = await Validation.findOne({ "files.hash": hash }).lean();
+
+    // Si no existe, intentar recuperar desde Aereware
     if (!result) {
       const recovered = await recoverEvidence(`ar://${hash}`);
       if (recovered)
@@ -27,6 +32,7 @@ export const verifyHash = async (req, res) => {
       return res.json({ ok: false, message: "⚠️ Evidence not found." });
     }
 
+    // Crear o actualizar registro vivo
     let live = await VerifyEvidence.findOne({ txHash: result.txHash });
     if (!live) {
       live = await VerifyEvidence.create({
@@ -39,9 +45,11 @@ export const verifyHash = async (req, res) => {
       });
     }
 
+    // Si el QR está bloqueado, detener
     if (!live.qrActive)
       return res.json({ ok: false, message: "QR disabled by owner." });
 
+    // Guardar registro de acción
     await VerifyRecord.create({
       userEmail,
       sessionId,
@@ -50,6 +58,7 @@ export const verifyHash = async (req, res) => {
       result: "success",
     });
 
+    // Respuesta final
     res.json({
       ok: true,
       evidenceTitle: result.evidenceTitle,
@@ -67,12 +76,13 @@ export const verifyHash = async (req, res) => {
 };
 
 // ======================================================
-// 📋 getValidationsByUser
+// 📋 getValidationsByUser — Lista de validaciones del usuario
 // ======================================================
 export const getValidationsByUser = async (req, res) => {
   try {
     const { token } = req.params;
-    if (!token) return res.status(400).json({ ok: false, message: "Missing token" });
+    if (!token)
+      return res.status(400).json({ ok: false, message: "Missing token" });
 
     const validations = await Validation.find({ userToken: token })
       .sort({ createdAt: -1 })
@@ -81,6 +91,7 @@ export const getValidationsByUser = async (req, res) => {
     if (!validations.length)
       return res.json({ ok: false, message: "No validations found." });
 
+    // Buscar estados vivos
     const liveData = await VerifyEvidence.find({
       txHash: { $in: validations.map((v) => v.txHash) },
     }).lean();
@@ -108,54 +119,25 @@ export const getValidationsByUser = async (req, res) => {
 };
 
 // ======================================================
-// 🚫 blockQR
+// 🔒 getPrivateValidation — Recupera JSON privado desde Aereware
 // ======================================================
-export const blockQR = async (req, res) => {
+export const getPrivateValidation = async (req, res) => {
   try {
-    const { txHash } = req.params;
-    if (!txHash) return res.status(400).json({ ok: false, message: "Missing txHash" });
+    const { storageId } = req.params;
+    if (!storageId)
+      return res.status(400).json({ ok: false, message: "Missing storageId" });
 
-    await VerifyEvidence.findOneAndUpdate(
-      { txHash },
-      { qrActive: false, status: "blocked" }
-    );
+    const data = await getFromAereware(storageId);
+    if (!data) {
+      const recovered = await recoverEvidence(storageId);
+      if (recovered)
+        return res.json({ ok: true, recovered: true, data: recovered });
+      return res.json({ ok: false, message: "Not found on Aereware" });
+    }
 
-    await VerifyRecord.create({
-      txHash,
-      action: "block_qr",
-      result: "success",
-    });
-
-    res.json({ ok: true, message: "QR blocked successfully." });
+    res.json({ ok: true, data });
   } catch (err) {
-    console.error("❌ blockQR error:", err);
-    res.status(500).json({ ok: false, error: err.message });
-  }
-};
-
-// ======================================================
-// ♻️ regenerateQR
-// ======================================================
-export const regenerateQR = async (req, res) => {
-  try {
-    const { txHash } = req.params;
-    if (!txHash) return res.status(400).json({ ok: false, message: "Missing txHash" });
-
-    const newQR = uuidv4();
-    await VerifyEvidence.findOneAndUpdate(
-      { txHash },
-      { qrActive: true, status: "active", qrId: newQR }
-    );
-
-    await VerifyRecord.create({
-      txHash,
-      action: "regenerate_qr",
-      result: "success",
-    });
-
-    res.json({ ok: true, message: "New QR generated successfully.", newQR });
-  } catch (err) {
-    console.error("❌ regenerateQR error:", err);
+    console.error("❌ getPrivateValidation error:", err);
     res.status(500).json({ ok: false, error: err.message });
   }
 };
@@ -190,7 +172,62 @@ export const getBinaryFromAereware = async (req, res) => {
 };
 
 // ======================================================
-// 🧩 Cache temporal de QR login flow
+// 🚫 blockQR — Desactiva QR público/privado
+// ======================================================
+export const blockQR = async (req, res) => {
+  try {
+    const { txHash } = req.params;
+    if (!txHash)
+      return res.status(400).json({ ok: false, message: "Missing txHash" });
+
+    await VerifyEvidence.findOneAndUpdate(
+      { txHash },
+      { qrActive: false, status: "blocked" }
+    );
+
+    await VerifyRecord.create({
+      txHash,
+      action: "block_qr",
+      result: "success",
+    });
+
+    res.json({ ok: true, message: "QR blocked successfully." });
+  } catch (err) {
+    console.error("❌ blockQR error:", err);
+    res.status(500).json({ ok: false, error: err.message });
+  }
+};
+
+// ======================================================
+// ♻️ regenerateQR — Reactiva QR deshabilitado
+// ======================================================
+export const regenerateQR = async (req, res) => {
+  try {
+    const { txHash } = req.params;
+    if (!txHash)
+      return res.status(400).json({ ok: false, message: "Missing txHash" });
+
+    const newQR = uuidv4();
+    await VerifyEvidence.findOneAndUpdate(
+      { txHash },
+      { qrActive: true, status: "active", qrId: newQR }
+    );
+
+    await VerifyRecord.create({
+      txHash,
+      action: "regenerate_qr",
+      result: "success",
+    });
+
+    res.json({ ok: true, message: "New QR generated successfully.", newQR });
+  } catch (err) {
+    console.error("❌ regenerateQR error:", err);
+    res.status(500).json({ ok: false, error: err.message });
+  }
+};
+
+// ======================================================
+// 🧩 cacheQRData / retrieveCachedQR — Flujo de QR previo al login
 // ======================================================
 export const cacheQRData = async (req, res) => {
   try {
@@ -201,7 +238,7 @@ export const cacheQRData = async (req, res) => {
     const id = uuidv4();
     qrCache.set(id, { qrData, createdAt: Date.now() });
 
-    // Se elimina automáticamente en 5 minutos
+    // Se limpia en 5 minutos
     setTimeout(() => qrCache.delete(id), 5 * 60 * 1000);
 
     res.json({ ok: true, cacheId: id });
