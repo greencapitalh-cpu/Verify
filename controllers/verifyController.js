@@ -1,5 +1,5 @@
 // ======================================================
-// 🧾 UDoChain Verify Controller v4.7 — Dual Mongo + Aereware + QR Cache + Records
+// 🧾 UDoChain Verify Controller v4.8 — Dual Mongo + Aereware + QR Cache + Records
 // ======================================================
 import Validation from "../models/Validation.js";
 import VerifyEvidence from "../models/VerifyEvidence.js";
@@ -156,6 +156,35 @@ export const regenerateQR = async (req, res) => {
     res.json({ ok: true, message: "New QR generated successfully.", newQR });
   } catch (err) {
     console.error("❌ regenerateQR error:", err);
+    res.status(500).json({ ok: false, error: err.message });
+  }
+};
+
+// ======================================================
+// 💾 getBinaryFromAereware — Descarga ZIP custodiado en Aereware
+// ======================================================
+export const getBinaryFromAereware = async (req, res) => {
+  try {
+    const { storageId } = req.params;
+    if (!storageId)
+      return res.status(400).json({ ok: false, message: "Missing storageId" });
+
+    const id = storageId.replace("ar://", "");
+
+    const arweave = Arweave.init({
+      host: process.env.AEREWARE_GATEWAY_HOST || "arweave.net",
+      port: parseInt(process.env.AEREWARE_GATEWAY_PORT || "443"),
+      protocol: process.env.AEREWARE_GATEWAY_PROTOCOL || "https",
+    });
+
+    const data = await arweave.transactions.getData(id, { decode: true });
+    const buffer = Buffer.from(data);
+
+    res.setHeader("Content-Type", "application/zip");
+    res.setHeader("Content-Disposition", `attachment; filename=\"${id}.zip\"`);
+    res.end(buffer);
+  } catch (err) {
+    console.error("❌ getBinaryFromAereware error:", err);
     res.status(500).json({ ok: false, error: err.message });
   }
 };
