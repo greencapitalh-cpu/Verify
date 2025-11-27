@@ -1,61 +1,79 @@
 // ======================================================
-// 📷 verify.js — QR Scan / Entry v4.5
+// 🧩 UDoChain Verify.js v5.1
+// Secure Verify Client — Token Linked + Aereware + Mongo
 // ======================================================
-import { BrowserQRCodeReader } from "https://cdn.jsdelivr.net/npm/@zxing/browser@latest/+esm";
+const API_URL = "https://verify.udochain.com/api/verify";
+const userToken = localStorage.getItem("udo_token");
 
-const scanBtn = document.getElementById("scanQR");
-const uploadInput = document.getElementById("qrUpload");
-const video = document.getElementById("qrVideo");
+if (!userToken) {
+  window.location.href = "https://app.udochain.com/login";
+}
+
+const fileInput = document.getElementById("fileInput");
 const hashInput = document.getElementById("hashInput");
 const verifyBtn = document.getElementById("verifyBtn");
-const statusDiv = document.getElementById("status");
+const resultBox = document.getElementById("result");
 
-let codeReader;
+// ======================================================
+// 🔐 Obtener hash SHA-256 del archivo
+// ======================================================
+async function computeHash(file) {
+  const buffer = await file.arrayBuffer();
+  const hashBuffer = await crypto.subtle.digest("SHA-256", buffer);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+}
 
-scanBtn.addEventListener("click", async () => {
+// ======================================================
+// 🔍 Enviar verificación
+// ======================================================
+async function verifyEvidence(hash) {
   try {
-    statusDiv.textContent = "📷 Activating camera...";
-    video.style.display = "block";
-    codeReader = new BrowserQRCodeReader();
-    const result = await codeReader.decodeOnceFromVideoDevice(undefined, "qrVideo");
-    if (result?.text) handleDecodedQR(result.text);
+    resultBox.textContent = "⏳ Verifying...";
+
+    const res = await fetch(`${API_URL}/hash`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-udo-token": userToken,
+      },
+      body: JSON.stringify({ hash, userEmail: "", sessionId: "" }),
+    });
+
+    const data = await res.json();
+
+    if (!data.ok) {
+      resultBox.innerHTML = `<p>❌ ${data.message || "Not found"}</p>`;
+      return;
+    }
+
+    resultBox.innerHTML = `
+      <h3>✅ Validated Evidence</h3>
+      <p><strong>Title:</strong> ${data.evidenceTitle}</p>
+      <p><strong>Tx Hash:</strong> ${data.txHash}</p>
+      <p><strong>Status:</strong> ${data.status || "Active"}</p>
+      <p><strong>Version:</strong> ${data.version || 1}</p>
+      <a href="${data.pdfUrl}" target="_blank" class="btn">Open Certificate PDF</a>
+    `;
   } catch (err) {
-    alert("Unable to access camera: " + err.message);
-  }
-});
-
-uploadInput.addEventListener("change", async (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
-  const imgUrl = URL.createObjectURL(file);
-  const result = await BrowserQRCodeReader.decodeFromImageUrl(imgUrl);
-  if (result?.text) handleDecodedQR(result.text);
-  else statusDiv.textContent = "❌ No valid QR found.";
-});
-
-function handleDecodedQR(data) {
-  statusDiv.textContent = "✅ QR detected...";
-  // 🔹 Solo un escaneo: si ya apunta a verify.udochain.com, entra directo
-  if (data.includes("verify.udochain.com")) {
-    window.location.href = data;
-    return;
-  }
-  // 🔹 Si apunta a otra app UDoChain (validate, etc.) redirige
-  if (data.includes("udochain.com")) {
-    window.location.href = data;
-    return;
-  }
-  // 🔹 Si contiene hash directo
-  if (data.startsWith("0x")) {
-    hashInput.value = data;
-    statusDiv.textContent = "QR read successfully. Ready to verify.";
-  } else {
-    statusDiv.textContent = data;
+    console.error("❌ Verify error:", err);
+    resultBox.innerHTML = `<p>Error verifying evidence.</p>`;
   }
 }
 
-verifyBtn.addEventListener("click", () => {
-  const tx = hashInput.value.trim();
-  if (!tx) return alert("Enter or scan a valid transaction hash.");
-  window.location.href = `https://verify.udochain.com/verify-public.html?tx=${tx}`;
+// ======================================================
+// ⚙️ Manejo de evento principal
+// ======================================================
+verifyBtn.addEventListener("click", async () => {
+  const file = fileInput.files[0];
+  const hashValue = hashInput.value.trim();
+
+  if (file) {
+    const hash = await computeHash(file);
+    verifyEvidence(hash);
+  } else if (hashValue) {
+    verifyEvidence(hashValue);
+  } else {
+    alert("Please upload a file or enter a hash.");
+  }
 });
