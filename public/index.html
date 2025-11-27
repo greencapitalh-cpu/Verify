@@ -4,40 +4,58 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>UDoChain Verify</title>
-    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="verify.css" />
   </head>
   <body>
     <header class="header">
       <div class="header-left">
-        <img src="logo-udochain.png" alt="UDoChain" class="logo" />
-        <h1>UDoChain Verify</h1>
+        <img src="logo-udochain.png" class="logo" alt="UDoChain Logo" />
+        <h1>Verify Evidence</h1>
       </div>
-      <a href="https://wapp.udochain.com" class="nav-link">Dashboard</a>
+      <a href="https://wapp.udochain.com" class="nav-link">Back</a>
     </header>
 
     <main class="container">
-      <h2 class="title">Verify Blockchain Evidence</h2>
-      <p class="subtitle">Scan a QR code or enter a transaction hash.</p>
+      <h2>Verify a File or Hash</h2>
+      <p class="subtitle">
+        Upload a file or paste its SHA-256 hash to check if it’s validated on
+        UDoChain.
+      </p>
 
-      <section class="scanner">
-        <button id="scanQR" class="btn-primary">📷 Scan QR</button>
-        <label for="qrUpload" class="btn-secondary">Upload QR Image</label>
-        <input type="file" id="qrUpload" accept="image/*" hidden />
-        <video id="qrVideo" autoplay playsinline></video>
+      <section class="verify-section">
+        <input type="file" id="fileInput" />
+        <input type="text" id="hashInput" placeholder="Or paste SHA-256 hash" />
+        <button id="verifyBtn">Verify</button>
       </section>
 
-      <section class="manual">
-        <input type="text" id="hashInput" placeholder="Enter transaction hash" />
-        <button id="verifyBtn" class="btn-primary">Verify</button>
-      </section>
-
-      <div id="status" class="status"></div>
+      <div id="result" class="result-box">Awaiting input...</div>
     </main>
 
     <footer class="footer">
-      <p class="notranslate">You do. We validate.</p>
-      <p>© 2025 UDoChain — All rights reserved.</p>
+      <p>UDoChain Verify — Blockchain Integrity Validation</p>
     </footer>
+
+    <!-- ======================================================
+         🧩 Seguridad: Autologin y token forwarding (igual que records)
+         ====================================================== -->
+    <script>
+      (function ensureLogin() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const tokenFromUrl = urlParams.get("token");
+        const storedToken = localStorage.getItem("udo_token");
+
+        // 🔹 Guardar token si viene desde Wapp
+        if (tokenFromUrl) {
+          localStorage.setItem("udo_token", tokenFromUrl);
+        }
+
+        // 🔒 Si no hay token → redirigir
+        const token = tokenFromUrl || storedToken;
+        if (!token) {
+          window.location.href = "https://app.udochain.com/login";
+        }
+      })();
+    </script>
 
     <script type="module" src="verify.js"></script>
     <script src="script-translate.js"></script>
