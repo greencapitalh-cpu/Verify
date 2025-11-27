@@ -1,5 +1,5 @@
 // ======================================================
-// 🚀 UDoChain Verify v5.0 — Secure Access + Dual Mongo + Aereware + QR + Logs
+// 🚀 UDoChain Verify v5.1 — Secure Access + Dual Mongo + Aereware + QR + Logs
 // ======================================================
 import express from "express";
 import cors from "cors";
@@ -44,8 +44,8 @@ app.use(
       "https://bioid.udochain.com",
       "https://wapp.udochain.com",
       "https://app.udochain.com",
-      "http://localhost:8080", // Dev
-      "http://localhost:5173", // Vite Dev
+      "http://localhost:8080",
+      "http://localhost:5173",
     ],
     credentials: true,
   })
@@ -83,22 +83,25 @@ app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 app.use("/api/verify", verifyRoutes);
 
 // ======================================================
-// 🔒 Middleware de seguridad de acceso (igual que Validate)
+// 🔒 Middleware de seguridad (idéntico a Validate)
 // ======================================================
 app.use((req, res, next) => {
   const origin = req.get("origin") || "";
   const token = req.query.token || req.headers["x-udo-token"];
 
-  // 🔓 Excepciones públicas (QR verification)
-  const publicPaths = ["/verify-public", "/verify-private", "/api/healthz"];
-  const isPublic =
-    publicPaths.some((p) => req.path.startsWith(p)) ||
-    req.path.startsWith("/api/verify/hash") ||
-    req.path.startsWith("/api/verify/private/");
+  // Excepciones públicas
+  const publicPaths = [
+    "/verify-public",
+    "/verify-private",
+    "/api/healthz",
+    "/api/verify/hash",
+    "/api/verify/private/",
+  ];
+  const isPublic = publicPaths.some((p) => req.path.startsWith(p));
 
   if (isPublic) return next();
 
-  // 🔒 Bloquea todo lo demás si no hay token ni viene de wapp/app
+  // Permitir acceso si viene de WAPP o APP autenticado
   const allowedOrigin =
     origin.includes("wapp.udochain.com") || origin.includes("app.udochain.com");
 
@@ -111,7 +114,7 @@ app.use((req, res, next) => {
 });
 
 // ======================================================
-// 🌍 Archivos estáticos (frontend público)
+// 🌍 Archivos estáticos
 // ======================================================
 app.use(express.static(path.join(__dirname, "public")));
 
@@ -119,11 +122,11 @@ app.use(express.static(path.join(__dirname, "public")));
 // ❤️ Healthcheck
 // ======================================================
 app.get("/api/healthz", (_, res) =>
-  res.json({ ok: true, service: "UDoChain Verify v5.0", timestamp: new Date() })
+  res.json({ ok: true, service: "UDoChain Verify v5.1", timestamp: new Date() })
 );
 
 // ======================================================
-// 🏠 Rutas principales (bloqueadas excepto QR público)
+// 🏠 Rutas principales protegidas
 // ======================================================
 app.get("/", (req, res) => {
   const token = req.query.token;
@@ -138,7 +141,7 @@ app.get("/records", (req, res) => {
 });
 
 // ======================================================
-// 🔁 Fallback universal
+// 🔁 Fallback universal (para QR público y seguridad extra)
 // ======================================================
 app.get("*", (req, res) => {
   if (
@@ -147,6 +150,8 @@ app.get("*", (req, res) => {
   ) {
     return res.sendFile(path.join(__dirname, "public/verify.html"));
   }
+
+  // Cualquier otro acceso no válido → redirige a login
   res.redirect("https://app.udochain.com/login");
 });
 
@@ -155,5 +160,5 @@ app.get("*", (req, res) => {
 // ======================================================
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () =>
-  console.log(`✅ UDoChain Verify v5.0 corriendo en puerto ${PORT}`)
+  console.log(`✅ UDoChain Verify v5.1 corriendo en puerto ${PORT}`)
 );
