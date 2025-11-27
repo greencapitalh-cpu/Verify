@@ -45,6 +45,28 @@
       <p>UDoChain Records — Private Management</p>
     </footer>
 
+    <!-- ======================================================
+         🧩 Seguridad: Autologin y token forwarding
+         ====================================================== -->
+    <script>
+      (function ensureLogin() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const tokenFromUrl = urlParams.get("token");
+        const storedToken = localStorage.getItem("udo_token");
+
+        // 🔹 Si viene desde Wapp (con token) → guardarlo
+        if (tokenFromUrl) {
+          localStorage.setItem("udo_token", tokenFromUrl);
+        }
+
+        // 🔒 Si no hay token ni guardado ni por URL → redirigir al login
+        const token = tokenFromUrl || storedToken;
+        if (!token) {
+          window.location.href = "https://app.udochain.com/login";
+        }
+      })();
+    </script>
+
     <script type="module" src="records.js"></script>
     <script src="script-translate.js"></script>
   </body>
