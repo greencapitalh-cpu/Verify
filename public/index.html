@@ -7,7 +7,7 @@
     <link rel="icon" href="logo-udochain.png" />
     <link rel="stylesheet" href="styles.css" />
     <style>
-      /* 🌐 Base layout */
+      /* ======== BASE LAYOUT ======== */
       body {
         font-family: "Inter", system-ui, sans-serif;
         background: #f9fafb;
@@ -18,7 +18,7 @@
         min-height: 100vh;
       }
 
-      /* ===== Header ===== */
+      /* ======== HEADER ======== */
       .header {
         display: flex;
         align-items: center;
@@ -43,7 +43,6 @@
         font-weight: 700;
         font-size: 1.25rem;
         color: #184b8c;
-        letter-spacing: -0.3px;
       }
 
       .back-link {
@@ -61,7 +60,7 @@
         color: #184b8c;
       }
 
-      /* ===== Main ===== */
+      /* ======== MAIN CARD ======== */
       main {
         flex: 1;
         display: flex;
@@ -94,7 +93,7 @@
         margin-bottom: 1.8rem;
       }
 
-      /* ===== Hash input ===== */
+      /* ======== HASH BOX ======== */
       .hash-box {
         display: flex;
         align-items: center;
@@ -121,7 +120,6 @@
         padding: 12px 18px;
         cursor: pointer;
         font-weight: 600;
-        border-radius: 0;
         transition: 0.3s;
       }
 
@@ -129,7 +127,7 @@
         background: #153d72;
       }
 
-      /* ===== QR buttons ===== */
+      /* ======== QR BUTTONS ======== */
       .qr-actions {
         display: flex;
         flex-direction: column;
@@ -173,7 +171,7 @@
         background: #e0e7ff;
       }
 
-      /* ===== Footer ===== */
+      /* ======== FOOTER ======== */
       footer {
         border-top: 1px solid #e2e8f0;
         background: white;
@@ -194,6 +192,7 @@
       }
     </style>
   </head>
+
   <body>
     <!-- HEADER -->
     <header class="header">
@@ -201,26 +200,32 @@
         <img src="logo-udochain.png" alt="UDoChain Logo" class="logo" />
         <span class="header-title notranslate" translate="no">UDoChain Verify</span>
       </div>
-      <a href="https://wapp.udochain.com" class="back-link">Atrás</a>
+      <a href="https://wapp.udochain.com" class="back-link">Back</a>
     </header>
 
     <!-- MAIN -->
     <main>
       <section class="verify-card">
-        <h2>Verificar documento</h2>
-        <p class="subtitle">Escanea un código QR o ingresa un hash para comprobar su autenticidad.</p>
+        <h2>Verify Document</h2>
+        <p class="subtitle">
+          Scan a QR code or enter a hash to verify authenticity.
+        </p>
 
         <div class="hash-box">
-          <input type="text" id="hashInput" placeholder="Pegar o ingresar hash del documento..." />
-          <button id="verifyBtn">Buscar</button>
+          <input
+            type="text"
+            id="hashInput"
+            placeholder="Paste or enter document hash..."
+          />
+          <button id="verifyBtn">Search</button>
         </div>
 
         <div class="qr-actions">
           <button class="qr-btn gallery" id="scanGallery">
-            <img src="icon-gallery.svg" alt="" /> Importar desde galería
+            <img src="icon-gallery.svg" alt="" /> Import from gallery
           </button>
           <button class="qr-btn camera" id="scanCamera">
-            <img src="icon-camera.svg" alt="" /> Escanear con cámara
+            <img src="icon-camera.svg" alt="" /> Scan with camera
           </button>
         </div>
 
@@ -233,6 +238,8 @@
       <p>© 2025 UDoChain — All rights reserved.</p>
     </footer>
 
+    <!-- Scripts -->
     <script src="verify.js"></script>
+    <script src="script-translate.js"></script>
   </body>
 </html>
