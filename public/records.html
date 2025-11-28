@@ -4,12 +4,12 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>My Records | UDoChain Verify</title>
-    <link rel="stylesheet" href="/records.css" />
+    <link rel="stylesheet" href="records.css" />
   </head>
   <body>
     <header class="header">
       <div class="header-left">
-        <img src="/logo-udochain.png" class="logo" alt="UDoChain Logo" />
+        <img src="logo-udochain.png" class="logo" alt="UDoChain Logo" />
         <h1>My Records</h1>
       </div>
       <a href="https://wapp.udochain.com" class="nav-link">Dashboard</a>
@@ -41,14 +41,15 @@
         </div>
       </div>
 
-      <div id="recordsList" class="records-list">Loading...</div>
+      <div id="recordsList" class="records-list">
+        <div class="loading">Loading records...</div>
+      </div>
     </main>
 
     <footer class="footer">
       <p>UDoChain Records — Private Management</p>
     </footer>
 
-    <script type="module" src="/records.js"></script>
-    <script src="/script-translate.js"></script>
+    <script type="module" src="records.js"></script>
   </body>
 </html>
