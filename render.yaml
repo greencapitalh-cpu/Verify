@@ -10,14 +10,10 @@ services:
         value: production
       - key: PORT
         value: 8080
-
-      # Mongo dual
       - key: MONGO_URI_VALIDATE
         sync: false
       - key: MONGO_URI_VERIFY
         sync: false
-
-      # Aereware
       - key: AEREWARE_KEYFILE_JSON
         sync: false
       - key: AEREWARE_GATEWAY_HOST
@@ -26,5 +22,4 @@ services:
         value: "443"
       - key: AEREWARE_GATEWAY_PROTOCOL
         value: https
-
     staticPublishPath: public
