@@ -20,11 +20,12 @@ async function loadRecords() {
         "x-udo-email": email,
       },
     });
+
     const data = await res.json();
     loadingDiv.style.display = "none";
 
     if (!data.ok || !data.validations?.length) {
-      listDiv.innerHTML = `<p style="text-align:center;color:#777;">No records found.</p>`;
+      listDiv.innerHTML = `<p class="status">No records found.</p>`;
       return;
     }
 
@@ -39,20 +40,17 @@ function renderRecords(records) {
   listDiv.innerHTML = records
     .map(
       (v) => `
-      <div class="record-card">
-        <div class="record-header">
-          <h3 class="record-title">${v.evidenceTitle}</h3>
-          <span class="status ${v.status}">${v.status}</span>
+      <div class="evidence-card">
+        <h3 class="evidence-title">${v.evidenceTitle}</h3>
+        <p class="evidence-meta">Hash: ${v.txHash}</p>
+        <p class="evidence-meta">Date: ${new Date(v.createdAt).toLocaleString()}</p>
+
+        <div class="evidence-actions">
+          <a href="/verify-public?tx=${v.txHash}" class="btn-validate">View Public</a>
+          <a href="/verify-private?storage=${v.storageId}&token=${token}&email=${email}" class="btn-validate" style="background:#2563eb;">View Private</a>
         </div>
-        <div class="record-meta">
-          <div><b>Hash:</b> ${v.txHash}</div>
-          <div><b>Date:</b> ${new Date(v.createdAt).toLocaleString()}</div>
-        </div>
-        <div class="actions">
-          <a href="/verify-public?tx=${v.txHash}" class="public">View Public</a>
-          <a href="/verify-private?storage=${v.storageId}&token=${token}&email=${email}" class="private">View Private</a>
-        </div>
-      </div>`
+      </div>
+    `
     )
     .join("");
 }
