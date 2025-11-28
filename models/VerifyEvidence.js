@@ -8,7 +8,7 @@ const verifyEvidenceSchema = new mongoose.Schema({
   privateAccess: { type: Boolean, default: false },
   status: { type: String, default: "active" },
   version: { type: Number, default: 1 },
-  createdAt: { type: Date, default: Date.now },
+  createdAt: { type: Date, default: Date.now }
 });
 
 const conn = global.mongoConnections?.verifyConn || mongoose;
