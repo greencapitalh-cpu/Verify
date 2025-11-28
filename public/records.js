@@ -1,113 +1,103 @@
-// ======================================================
-// 📋 UDoChain Verify — Records Dashboard v5.0
-// ======================================================
-const API_URL = "https://verify.udochain.com/api/verify";
-const userToken = localStorage.getItem("udo_token");
+const recordsList = document.getElementById("recordsList");
+const filterType = document.getElementById("filterType");
+const orderBy = document.getElementById("orderBy");
+const searchInput = document.getElementById("searchInput");
+const dateFrom = document.getElementById("dateFrom");
+const dateTo = document.getElementById("dateTo");
 
-if (!userToken) {
+const params = new URLSearchParams(window.location.search);
+const token = params.get("token");
+const email = params.get("email");
+
+if (!token) {
   window.location.href = "https://app.udochain.com/login";
 }
 
-const listContainer = document.getElementById("recordsList");
-const searchInput = document.getElementById("searchInput");
-const filterType = document.getElementById("filterType");
-const dateFrom = document.getElementById("dateFrom");
-const dateTo = document.getElementById("dateTo");
-const orderBy = document.getElementById("orderBy");
+let allRecords = [];
 
-let records = [];
-
-// ======================================================
-// 🚀 Load records
-// ======================================================
-async function loadRecords() {
+async function fetchRecords() {
   try {
-    const res = await fetch(`${API_URL}/all/${userToken}`);
+    recordsList.innerHTML = `<div class="loading">Loading records...</div>`;
+    const res = await fetch(`/api/verify/all/${token}`);
     const data = await res.json();
     if (!data.ok || !data.validations) {
-      listContainer.innerHTML = `<p>${data.message || "No records found."}</p>`;
+      recordsList.innerHTML = `<div class="loading">No records found.</div>`;
       return;
     }
-    records = data.validations;
-    render(records);
+    allRecords = data.validations;
+    renderRecords();
   } catch (err) {
-    console.error("❌ Error loading records:", err);
-    listContainer.innerHTML = `<p>Error loading records.</p>`;
+    console.error("Error loading records:", err);
+    recordsList.innerHTML = `<div class="loading">Error loading records.</div>`;
   }
 }
 
-// ======================================================
-// 🎨 Render list
-// ======================================================
-function render(list) {
-  listContainer.innerHTML = "";
-  if (!list.length) {
-    listContainer.innerHTML = "<p>No records found.</p>";
+function renderRecords() {
+  let filtered = [...allRecords];
+
+  const type = filterType.value;
+  if (type !== "all") filtered = filtered.filter((r) => r.type === type);
+
+  const search = searchInput.value.toLowerCase();
+  if (search)
+    filtered = filtered.filter(
+      (r) =>
+        r.evidenceTitle.toLowerCase().includes(search) ||
+        r.txHash.toLowerCase().includes(search)
+    );
+
+  const from = dateFrom.value ? new Date(dateFrom.value) : null;
+  const to = dateTo.value ? new Date(dateTo.value) : null;
+  if (from || to) {
+    filtered = filtered.filter((r) => {
+      const date = new Date(r.createdAt);
+      if (from && date < from) return false;
+      if (to && date > to) return false;
+      return true;
+    });
+  }
+
+  const order = orderBy.value;
+  if (order === "newest")
+    filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  else if (order === "oldest")
+    filtered.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+  else if (order === "az")
+    filtered.sort((a, b) =>
+      a.evidenceTitle.localeCompare(b.evidenceTitle, "en", { sensitivity: "base" })
+    );
+  else if (order === "za")
+    filtered.sort((a, b) =>
+      b.evidenceTitle.localeCompare(a.evidenceTitle, "en", { sensitivity: "base" })
+    );
+
+  if (!filtered.length) {
+    recordsList.innerHTML = `<div class="loading">No results found.</div>`;
     return;
   }
 
-  list.forEach((r) => {
-    const div = document.createElement("div");
-    div.className = "record-item";
-    div.innerHTML = `
-      <div class="record-info">
-        <div class="record-title">${r.evidenceTitle || "Untitled"}</div>
-        <div class="record-meta">
-          <span class="record-type">${r.type}</span>
-          <span class="record-date">${new Date(r.createdAt).toLocaleDateString()}</span>
+  recordsList.innerHTML = filtered
+    .map(
+      (r) => `
+      <div class="record-item" onclick="window.location.href='/verify-private?tx=${r.txHash}&token=${token}'">
+        <div class="record-info">
+          <div class="record-title">${r.evidenceTitle}</div>
+          <div class="record-meta">
+            <span class="record-type">${r.type}</span>
+            <span class="status ${r.status}">${r.status}</span>
+            <span>${new Date(r.createdAt).toLocaleDateString()}</span>
+          </div>
         </div>
-      </div>
-      <div class="record-actions">
-        <button class="btn-view" onclick="openRecord('${r.txHash}')">View</button>
-      </div>
-    `;
-    listContainer.appendChild(div);
-  });
+        <div class="record-actions">
+          <button class="btn-view">View</button>
+        </div>
+      </div>`
+    )
+    .join("");
 }
 
-// ======================================================
-// 🔎 Search & Filters
-// ======================================================
-function applyFilters() {
-  const q = searchInput.value.toLowerCase();
-  const type = filterType.value;
-  const from = dateFrom.value ? new Date(dateFrom.value) : null;
-  const to = dateTo.value ? new Date(dateTo.value) : null;
-  const order = orderBy.value;
+[filterType, orderBy, searchInput, dateFrom, dateTo].forEach((el) =>
+  el.addEventListener("input", renderRecords)
+);
 
-  let filtered = records.filter((r) => {
-    const matchQuery =
-      r.evidenceTitle?.toLowerCase().includes(q) ||
-      r.txHash?.toLowerCase().includes(q);
-    const matchType = type === "all" || r.type === type;
-    const created = new Date(r.createdAt);
-    const matchDate =
-      (!from || created >= from) && (!to || created <= to);
-    return matchQuery && matchType && matchDate;
-  });
-
-  if (order === "newest") filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-  if (order === "oldest") filtered.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
-  if (order === "az") filtered.sort((a, b) => (a.evidenceTitle || "").localeCompare(b.evidenceTitle || ""));
-  if (order === "za") filtered.sort((a, b) => (b.evidenceTitle || "").localeCompare(a.evidenceTitle || ""));
-
-  render(filtered);
-}
-
-searchInput.addEventListener("input", applyFilters);
-filterType.addEventListener("change", applyFilters);
-dateFrom.addEventListener("change", applyFilters);
-dateTo.addEventListener("change", applyFilters);
-orderBy.addEventListener("change", applyFilters);
-
-// ======================================================
-// 📂 Open Record Detail
-// ======================================================
-window.openRecord = function (txHash) {
-  window.location.href = `record-detail.html?tx=${txHash}`;
-};
-
-// ======================================================
-// 🏁 Init
-// ======================================================
-loadRecords();
+fetchRecords();
