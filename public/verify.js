@@ -1,75 +1,159 @@
-// UDoChain Verify — Search or Scan
-const params = new URLSearchParams(window.location.search);
-const token = params.get("token") || localStorage.getItem("udo_token");
-const email = params.get("email") || localStorage.getItem("user_email");
+// ======================================================
+// ✅ UDoChain Verify — Cross-Browser QR + Hash Scanner v6.0
+// Works on Chrome, Safari, Firefox, Edge (Desktop + Mobile)
+// ======================================================
 
-if (!token || !email) {
-  window.location.href = "https://app.udochain.com/login";
-}
+// Importa jsQR desde CDN
+import jsQR from "https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js";
 
-localStorage.setItem("udo_token", token);
-localStorage.setItem("user_email", email);
-
+// --- Elementos del DOM ---
 const hashInput = document.getElementById("hashInput");
-const searchBtn = document.getElementById("searchBtn");
+const verifyBtn = document.getElementById("verifyBtn");
 const scanGallery = document.getElementById("scanGallery");
 const scanCamera = document.getElementById("scanCamera");
 const result = document.getElementById("result");
 
-// Buscar hash manualmente
-searchBtn.onclick = () => {
-  const hash = hashInput.value.trim();
-  if (!hash) return alert("Please enter a hash.");
-  window.location.href = `/verify-public?tx=${hash}`;
-};
+// ======================================================
+// 🧠 Helpers
+// ======================================================
+function isValidHash(str) {
+  return /^[a-f0-9]{64}$/i.test(str.trim());
+}
 
-// Escanear desde galería (lector QR por imagen)
-scanGallery.onclick = () => {
+function showMessage(text, type = "info") {
+  result.textContent = text;
+  result.style.color =
+    type === "error" ? "#b91c1c" : type === "info" ? "#475569" : "#184b8c";
+}
+
+function handleQRValue(value) {
+  if (!value) return;
+  showMessage("Redirecting...", "info");
+
+  if (value.startsWith("http")) {
+    window.location.href = value;
+  } else if (isValidHash(value)) {
+    window.location.href = `verify-public.html?tx=${value}`;
+  } else {
+    showMessage("Unrecognized QR content.", "error");
+  }
+}
+
+// ======================================================
+// 🔍 Manual Hash Input
+// ======================================================
+verifyBtn.addEventListener("click", () => {
+  const hash = hashInput.value.trim();
+  if (!hash) return showMessage("Please enter a document hash.", "error");
+  if (!isValidHash(hash)) return showMessage("Invalid hash format.", "error");
+
+  showMessage("Checking document...", "info");
+  setTimeout(() => {
+    window.location.href = `verify-public.html?tx=${hash}`;
+  }, 600);
+});
+
+// ======================================================
+// 🖼️ Escanear QR desde imagen
+// ======================================================
+scanGallery.addEventListener("click", () => {
   const input = document.createElement("input");
   input.type = "file";
   input.accept = "image/*";
   input.onchange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = async (event) => {
-      const { default: QrScanner } = await import("https://unpkg.com/qr-scanner@1.4.2/qr-scanner.min.js");
-      const qrResult = await QrScanner.scanImage(event.target.result);
-      handleQR(qrResult);
+    showMessage("Processing image...", "info");
+
+    const img = new Image();
+    img.src = URL.createObjectURL(file);
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0);
+      const imageData = ctx.getImageData(0, 0, img.width, img.height);
+      const code = jsQR(imageData.data, img.width, img.height);
+      if (code) {
+        handleQRValue(code.data.trim());
+      } else {
+        showMessage("No QR code detected.", "error");
+      }
     };
-    reader.readAsDataURL(file);
   };
   input.click();
-};
+});
 
-// Escanear con cámara en vivo
-scanCamera.onclick = async () => {
-  const { default: QrScanner } = await import("https://unpkg.com/qr-scanner@1.4.2/qr-scanner.min.js");
-  const videoElem = document.createElement("video");
-  videoElem.style.width = "100%";
-  result.innerHTML = "";
-  result.appendChild(videoElem);
+// ======================================================
+// 📸 Escanear QR con cámara (universal)
+// ======================================================
+scanCamera.addEventListener("click", async () => {
+  try {
+    // Solicita permisos de cámara (modo trasero en móviles)
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: "environment" },
+    });
 
-  const scanner = new QrScanner(videoElem, (qr) => {
-    scanner.stop();
-    handleQR(qr);
-  });
-  await scanner.start();
-};
+    const video = document.createElement("video");
+    video.srcObject = stream;
+    video.setAttribute("playsinline", true);
+    video.play();
 
-// Interpretar QR (público o privado)
-function handleQR(qr) {
-  if (!qr) return alert("No QR detected.");
-  if (qr.includes("verify-public")) {
-    window.location.href = qr;
-  } else if (qr.includes("verify-private")) {
-    const url = new URL(qr);
-    url.searchParams.set("token", token);
-    url.searchParams.set("email", email);
-    window.location.href = url.toString();
-  } else if (qr.startsWith("0x") || qr.length > 30) {
-    window.location.href = `/verify-public?tx=${qr}`;
-  } else {
-    alert("Unrecognized QR data.");
+    // Overlay de cámara
+    const overlay = document.createElement("div");
+    overlay.style.cssText = `
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.85);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    `;
+
+    const closeBtn = document.createElement("button");
+    closeBtn.textContent = "×";
+    closeBtn.style.cssText = `
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      font-size: 32px;
+      background: transparent;
+      border: none;
+      color: white;
+      cursor: pointer;
+    `;
+    closeBtn.onclick = () => {
+      stream.getTracks().forEach((t) => t.stop());
+      overlay.remove();
+    };
+
+    overlay.appendChild(video);
+    overlay.appendChild(closeBtn);
+    document.body.appendChild(overlay);
+
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+
+    const loop = setInterval(() => {
+      if (video.readyState === video.HAVE_ENOUGH_DATA) {
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const code = jsQR(imageData.data, canvas.width, canvas.height);
+
+        if (code) {
+          clearInterval(loop);
+          stream.getTracks().forEach((t) => t.stop());
+          overlay.remove();
+          handleQRValue(code.data.trim());
+        }
+      }
+    }, 300);
+  } catch (err) {
+    console.error("Camera error:", err);
+    showMessage("Unable to access camera.", "error");
   }
-}
+});
