@@ -12,60 +12,37 @@
         <img src="logo-udochain.png" class="logo" alt="UDoChain Logo" />
         <h1>My Records</h1>
       </div>
-      <a href="https://wapp.udochain.com" class="nav-link">Back</a>
+      <a href="https://wapp.udochain.com" class="nav-link">Dashboard</a>
     </header>
 
     <main class="container">
-      <h2>Your Validations</h2>
-      <p class="subtitle">Manage your verified evidences and QR status.</p>
+      <div class="toolbar">
+        <input type="text" id="searchInput" placeholder="🔍 Search by title or hash..." />
+        <div class="filters">
+          <select id="filterType">
+            <option value="all">All Types</option>
+            <option value="Validate">Validate</option>
+            <option value="Sign">Sign</option>
+            <option value="Trace">Trace</option>
+            <option value="Vote">Vote</option>
+          </select>
+          <input type="date" id="dateFrom" />
+          <input type="date" id="dateTo" />
+          <select id="orderBy">
+            <option value="newest">Newest First</option>
+            <option value="oldest">Oldest First</option>
+            <option value="az">A-Z</option>
+            <option value="za">Z-A</option>
+          </select>
+        </div>
+      </div>
 
-      <!-- Filters -->
-      <section class="filters">
-        <select id="filterType">
-          <option value="all">All Types</option>
-          <option value="Validate">Validate</option>
-          <option value="Sign">Sign</option>
-          <option value="Trace">Trace</option>
-          <option value="Vote">Vote</option>
-        </select>
-
-        <select id="filterStatus">
-          <option value="all">All Status</option>
-          <option value="active">Active</option>
-          <option value="blocked">Blocked</option>
-          <option value="updated">Updated</option>
-        </select>
-      </section>
-
-      <!-- List -->
       <div id="recordsList" class="records-list">Loading...</div>
     </main>
 
     <footer class="footer">
       <p>UDoChain Records — Private Management</p>
     </footer>
-
-    <!-- ======================================================
-         🧩 Seguridad: Autologin y token forwarding
-         ====================================================== -->
-    <script>
-      (function ensureLogin() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const tokenFromUrl = urlParams.get("token");
-        const storedToken = localStorage.getItem("udo_token");
-
-        // 🔹 Si viene desde Wapp (con token) → guardarlo
-        if (tokenFromUrl) {
-          localStorage.setItem("udo_token", tokenFromUrl);
-        }
-
-        // 🔒 Si no hay token ni guardado ni por URL → redirigir al login
-        const token = tokenFromUrl || storedToken;
-        if (!token) {
-          window.location.href = "https://app.udochain.com/login";
-        }
-      })();
-    </script>
 
     <script type="module" src="records.js"></script>
     <script src="script-translate.js"></script>
