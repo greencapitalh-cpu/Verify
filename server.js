@@ -1,168 +1,60 @@
-// ======================================================
-// 🚀 UDoChain Verify v5.2 — Secure Access + Dual Mongo + Aereware + QR + Logs + NoCache
-// ======================================================
+import "./db.js";
 import express from "express";
 import cors from "cors";
-import dotenv from "dotenv";
-import mongoose from "mongoose";
 import path from "path";
-import fs from "fs";
 import { fileURLToPath } from "url";
-import { ensureAerewareKeyfile } from "./utils/initKeyfile.js";
 import verifyRoutes from "./routes/verifyRoutes.js";
 
-dotenv.config();
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-// ======================================================
-// 🔑 Inicialización de Aereware Keyfile
-// ======================================================
-ensureAerewareKeyfile();
-
-// ======================================================
-// 📂 Creación de carpetas necesarias
-// ======================================================
-["public"].forEach((dir) => {
-  const folder = path.join(__dirname, dir);
-  if (!fs.existsSync(folder)) fs.mkdirSync(folder);
-});
-
-// ======================================================
-// ⚙️ Inicialización de Express
-// ======================================================
 const app = express();
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-// ======================================================
-// 🌐 Configuración CORS — Solo dominios oficiales UDoChain
-// ======================================================
 app.use(
   cors({
     origin: [
-      "https://verify.udochain.com",
+      "https://app.udochain.com",
+      "https://wapp.udochain.com",
       "https://validate.udochain.com",
       "https://bioid.udochain.com",
-      "https://wapp.udochain.com",
-      "https://app.udochain.com",
-      "http://localhost:8080",
-      "http://localhost:5173",
+      "https://verify.udochain.com",
+      "http://localhost:3000",
     ],
     credentials: true,
   })
 );
 
-app.use(express.json({ limit: "50mb" }));
-app.use(express.urlencoded({ extended: true, limit: "50mb" }));
+app.use(express.json());
 
-// ======================================================
-// 🗄️ MongoDB — Conexiones dobles (Validate + Verify)
-// ======================================================
-(async () => {
-  try {
-    const validateConn = await mongoose.createConnection(
-      process.env.MONGO_URI_VALIDATE,
-      { dbName: "udochain_validate" }
-    );
-    console.log("✅ Conectado a MongoDB (udochain_validate)");
-
-    const verifyConn = await mongoose.createConnection(
-      process.env.MONGO_URI_VERIFY,
-      { dbName: "udochain_verify" }
-    );
-    console.log("✅ Conectado a MongoDB (udochain_verify)");
-
-    global.mongoConnections = { validateConn, verifyConn };
-  } catch (err) {
-    console.error("❌ Error conectando a MongoDB:", err.message);
-  }
-})();
-
-// ======================================================
-// 🧩 Rutas de API
-// ======================================================
-app.use("/api/verify", verifyRoutes);
-
-// ======================================================
-// 🔒 Middleware de seguridad (idéntico a Validate)
-// ======================================================
+// 🔒 Igual que Validate/BioID
 app.use((req, res, next) => {
-  const origin = req.get("origin") || "";
   const token = req.query.token || req.headers["x-udo-token"];
+  const email = req.query.email || req.headers["x-udo-email"];
 
   const publicPaths = [
     "/verify-public",
-    "/verify-private",
     "/api/healthz",
     "/api/verify/hash",
-    "/api/verify/private/",
   ];
-  const isPublic = publicPaths.some((p) => req.path.startsWith(p));
 
-  if (isPublic) return next();
-
-  const allowedOrigin =
-    origin.includes("wapp.udochain.com") || origin.includes("app.udochain.com");
-
-  if (!token && !allowedOrigin) {
-    console.warn(`🚫 Acceso bloqueado a ${req.path} desde ${origin}`);
+  if (publicPaths.some((p) => req.path.startsWith(p))) return next();
+  if (!token || !email)
     return res.redirect("https://app.udochain.com/login");
-  }
 
   next();
 });
 
-// ======================================================
-// 🌍 Archivos estáticos con control de caché desactivado
-// ======================================================
-app.use(
-  express.static(path.join(__dirname, "public"), {
-    setHeaders: (res) => {
-      res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, private");
-      res.setHeader("Pragma", "no-cache");
-      res.setHeader("Expires", "0");
-    },
-  })
+const staticPath = path.join(__dirname, "public");
+app.use(express.static(staticPath));
+app.use("/api/verify", verifyRoutes);
+
+app.get("/api/healthz", (_, res) => res.json({ ok: true }));
+
+app.get("/records", (req, res) =>
+  res.sendFile(path.join(staticPath, "records.html"))
 );
 
-// ======================================================
-// ❤️ Healthcheck
-// ======================================================
-app.get("/api/healthz", (_, res) =>
-  res.json({ ok: true, service: "UDoChain Verify v5.2", timestamp: new Date() })
+app.get("*", (_, res) =>
+  res.redirect("https://app.udochain.com/login")
 );
 
-// ======================================================
-// 🏠 Rutas principales protegidas
-// ======================================================
-app.get("/", (req, res) => {
-  const token = req.query.token;
-  if (!token) return res.redirect("https://app.udochain.com/login");
-  res.sendFile(path.join(__dirname, "public/index.html"));
-});
-
-app.get("/records", (req, res) => {
-  const token = req.query.token;
-  if (!token) return res.redirect("https://app.udochain.com/login");
-  res.sendFile(path.join(__dirname, "public/records.html"));
-});
-
-// ======================================================
-// 🔁 Fallback universal (para QR público y seguridad extra)
-// ======================================================
-app.get("*", (req, res) => {
-  if (
-    req.path.startsWith("/verify-public") ||
-    req.path.startsWith("/verify-private")
-  ) {
-    return res.sendFile(path.join(__dirname, "public/verify.html"));
-  }
-  res.redirect("https://app.udochain.com/login");
-});
-
-// ======================================================
-// 🚀 Inicio del servidor
-// ======================================================
 const PORT = process.env.PORT || 8080;
-app.listen(PORT, () =>
-  console.log(`✅ UDoChain Verify v5.2 corriendo en puerto ${PORT}`)
-);
+app.listen(PORT, () => console.log(`✅ VERIFY running on port ${PORT}`));
