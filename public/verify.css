@@ -1,5 +1,8 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
 
+/* ======================================================
+   🎨 BASE STYLES
+====================================================== */
 body {
   font-family: "Inter", sans-serif;
   background: #f9fafb;
@@ -48,7 +51,7 @@ body {
 }
 
 /* ======================================================
-   📦 CONTAINER / GENERAL LAYOUT
+   📦 CONTAINER / LAYOUT
 ====================================================== */
 .container {
   flex: 1;
@@ -139,7 +142,9 @@ input[type="text"] {
   display: none;
 }
 
-/* Result Box */
+/* ======================================================
+   📦 RESULT BOX
+====================================================== */
 .result-box {
   background: #f8fafc;
   border: 1px solid #e2e8f0;
@@ -180,95 +185,9 @@ input[type="text"] {
 .result-box.success {
   border-left: 4px solid #16a34a;
 }
+
 .result-box.error {
   border-left: 4px solid #dc2626;
-}
-
-/* ======================================================
-   📋 RECORDS VIEW
-====================================================== */
-.filters {
-  margin-bottom: 1rem;
-  display: flex;
-  justify-content: center;
-  gap: 0.8rem;
-}
-
-select {
-  padding: 0.6rem 1rem;
-  border-radius: 8px;
-  border: 1px solid #cbd5e1;
-  font-size: 0.95rem;
-  cursor: pointer;
-}
-
-.records-list {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.record-card {
-  background: #fff;
-  border: 1px solid #e5e7eb;
-  border-radius: 10px;
-  padding: 1rem;
-  margin-bottom: 1rem;
-  text-align: left;
-  transition: all 0.2s;
-}
-
-.record-card:hover {
-  background: #f1f5f9;
-}
-
-.record-card.inactive {
-  opacity: 0.6;
-  background: #f3f4f6;
-}
-
-.record-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.record-title {
-  font-weight: 600;
-  color: #1e3a8a;
-}
-
-.record-type {
-  background: #e0e7ff;
-  color: #1e40af;
-  padding: 2px 8px;
-  border-radius: 8px;
-  font-size: 0.8rem;
-}
-
-.record-actions {
-  margin-top: 0.5rem;
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-}
-
-.status {
-  margin-top: 1rem;
-  font-size: 0.95rem;
-  background: #f8fafc;
-  border-radius: 8px;
-  padding: 1rem;
-}
-
-.status.active {
-  color: #16a34a;
-}
-.status.blocked {
-  color: #dc2626;
-}
-.status.updated {
-  color: #f59e0b;
 }
 
 /* ======================================================
@@ -292,10 +211,6 @@ select {
 
   .title {
     font-size: 1.25rem;
-  }
-
-  .filters {
-    flex-direction: column;
   }
 
   .verify-section {
