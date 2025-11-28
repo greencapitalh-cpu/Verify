@@ -2,11 +2,32 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>My Records — UDoChain Verify</title>
+    <link rel="stylesheet" href="css/records.css" />
   </head>
+
   <body>
-    <h1>My Records</h1>
-    <div id="recordsList">Loading...</div>
+    <header class="header">
+      <div class="logo-box">
+        <img src="logo-udochain.png" alt="UDoChain Logo" class="logo" />
+        <h1>My Records</h1>
+      </div>
+      <a href="https://wapp.udochain.com" class="nav-link">🏠 Dashboard</a>
+    </header>
+
+    <main>
+      <section class="records-section">
+        <h2>Your Validated Evidences</h2>
+        <div id="loading" class="loading">Loading records...</div>
+        <div id="recordsList" class="records-list"></div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <p>UDoChain Verify — Blockchain Validation Network</p>
+    </footer>
+
     <script type="module" src="js/records.js"></script>
   </body>
 </html>
