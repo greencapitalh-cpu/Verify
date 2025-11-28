@@ -2,54 +2,11 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>My Records | UDoChain Verify</title>
-    <link rel="stylesheet" href="records.css" />
+    <title>My Records — UDoChain Verify</title>
   </head>
   <body>
-    <header class="header">
-      <div class="header-left">
-        <img src="logo-udochain.png" class="logo" alt="UDoChain Logo" />
-        <h1>My Records</h1>
-      </div>
-      <a href="https://wapp.udochain.com" class="nav-link">Dashboard</a>
-    </header>
-
-    <main class="container">
-      <div class="toolbar">
-        <input
-          type="text"
-          id="searchInput"
-          placeholder="🔍 Search by title or hash..."
-        />
-        <div class="filters">
-          <select id="filterType">
-            <option value="all">All Types</option>
-            <option value="Validate">Validate</option>
-            <option value="Sign">Sign</option>
-            <option value="Trace">Trace</option>
-            <option value="Vote">Vote</option>
-          </select>
-          <input type="date" id="dateFrom" />
-          <input type="date" id="dateTo" />
-          <select id="orderBy">
-            <option value="newest">Newest First</option>
-            <option value="oldest">Oldest First</option>
-            <option value="az">A-Z</option>
-            <option value="za">Z-A</option>
-          </select>
-        </div>
-      </div>
-
-      <div id="recordsList" class="records-list">
-        <div class="loading">Loading records...</div>
-      </div>
-    </main>
-
-    <footer class="footer">
-      <p>UDoChain Records — Private Management</p>
-    </footer>
-
-    <script type="module" src="records.js"></script>
+    <h1>My Records</h1>
+    <div id="recordsList">Loading...</div>
+    <script type="module" src="js/records.js"></script>
   </body>
 </html>
