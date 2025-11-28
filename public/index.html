@@ -6,43 +6,229 @@
     <title>UDoChain Verify</title>
     <link rel="icon" href="logo-udochain.png" />
     <link rel="stylesheet" href="styles.css" />
+    <style>
+      /* 🌐 Base layout */
+      body {
+        font-family: "Inter", system-ui, sans-serif;
+        background: #f9fafb;
+        color: #1e293b;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+      }
+
+      /* ===== Header ===== */
+      .header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: white;
+        padding: 0.9rem 1.6rem;
+        border-bottom: 1px solid #e2e8f0;
+        box-shadow: 0 1px 6px rgba(0, 0, 0, 0.03);
+      }
+
+      .header-left {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .logo {
+        height: 36px;
+      }
+
+      .header-title {
+        font-weight: 700;
+        font-size: 1.25rem;
+        color: #184b8c;
+        letter-spacing: -0.3px;
+      }
+
+      .back-link {
+        font-size: 0.95rem;
+        color: #475569;
+        text-decoration: none;
+        background: #f1f5f9;
+        padding: 6px 14px;
+        border-radius: 8px;
+        transition: all 0.25s;
+      }
+
+      .back-link:hover {
+        background: #e2e8f0;
+        color: #184b8c;
+      }
+
+      /* ===== Main ===== */
+      main {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+        padding: 2rem 1rem;
+      }
+
+      .verify-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+        padding: 2rem;
+        max-width: 480px;
+        width: 100%;
+        text-align: center;
+      }
+
+      h2 {
+        color: #184b8c;
+        font-size: 1.6rem;
+        font-weight: 700;
+        margin-bottom: 0.6rem;
+      }
+
+      .subtitle {
+        color: #6b7a90;
+        font-size: 0.95rem;
+        margin-bottom: 1.8rem;
+      }
+
+      /* ===== Hash input ===== */
+      .hash-box {
+        display: flex;
+        align-items: center;
+        background: #f8fafc;
+        border: 1px solid #d0d7e2;
+        border-radius: 12px;
+        overflow: hidden;
+        margin-bottom: 2rem;
+      }
+
+      .hash-box input {
+        flex: 1;
+        border: none;
+        background: transparent;
+        padding: 12px;
+        font-size: 0.95rem;
+        outline: none;
+      }
+
+      .hash-box button {
+        background: #184b8c;
+        color: white;
+        border: none;
+        padding: 12px 18px;
+        cursor: pointer;
+        font-weight: 600;
+        border-radius: 0;
+        transition: 0.3s;
+      }
+
+      .hash-box button:hover {
+        background: #153d72;
+      }
+
+      /* ===== QR buttons ===== */
+      .qr-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .qr-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        padding: 14px;
+        border-radius: 12px;
+        border: 1px solid transparent;
+        font-weight: 600;
+        font-size: 0.95rem;
+        cursor: pointer;
+        transition: all 0.25s ease;
+      }
+
+      .qr-btn img {
+        width: 20px;
+        height: 20px;
+      }
+
+      .qr-btn.gallery {
+        background: #e9f8ed;
+        color: #14532d;
+      }
+
+      .qr-btn.gallery:hover {
+        background: #d4edda;
+      }
+
+      .qr-btn.camera {
+        background: #edf2f7;
+        color: #1e3a8a;
+      }
+
+      .qr-btn.camera:hover {
+        background: #e0e7ff;
+      }
+
+      /* ===== Footer ===== */
+      footer {
+        border-top: 1px solid #e2e8f0;
+        background: white;
+        padding: 1rem;
+        font-size: 0.85rem;
+        color: #6b7280;
+        text-align: center;
+      }
+
+      @media (max-width: 500px) {
+        .verify-card {
+          padding: 1.5rem;
+          margin-top: 0.5rem;
+        }
+        h2 {
+          font-size: 1.4rem;
+        }
+      }
+    </style>
   </head>
   <body>
     <!-- HEADER -->
     <header class="header">
       <div class="header-left">
-        <img src="logo-udochain.png" class="logo" alt="UDoChain" />
-        <h2 class="notranslate" translate="no">UDoChain Verify</h2>
+        <img src="logo-udochain.png" alt="UDoChain Logo" class="logo" />
+        <span class="header-title notranslate" translate="no">UDoChain Verify</span>
       </div>
-      <nav>
-        <a href="https://wapp.udochain.com" class="nav-link">← Back to Wapp</a>
-      </nav>
+      <a href="https://wapp.udochain.com" class="back-link">Atrás</a>
     </header>
 
     <!-- MAIN -->
-    <main class="container">
-      <h2>Verify a Document</h2>
-      <p class="subtitle">Scan a QR code or enter a document hash to check authenticity.</p>
+    <main>
+      <section class="verify-card">
+        <h2>Verificar documento</h2>
+        <p class="subtitle">Escanea un código QR o ingresa un hash para comprobar su autenticidad.</p>
 
-      <div class="verify-options">
-        <!-- Hash Search -->
-        <div class="verify-block">
-          <input type="text" id="hashInput" placeholder="Enter or paste document hash..." />
-          <button class="btn-validate" id="searchBtn">Search</button>
+        <div class="hash-box">
+          <input type="text" id="hashInput" placeholder="Pegar o ingresar hash del documento..." />
+          <button id="verifyBtn">Buscar</button>
         </div>
 
-        <!-- QR Options -->
-        <div class="qr-section">
-          <button class="btn-validate" id="scanGallery">Import from Gallery</button>
-          <button class="btn-validate" id="scanCamera">Scan with Camera</button>
+        <div class="qr-actions">
+          <button class="qr-btn gallery" id="scanGallery">
+            <img src="icon-gallery.svg" alt="" /> Importar desde galería
+          </button>
+          <button class="qr-btn camera" id="scanCamera">
+            <img src="icon-camera.svg" alt="" /> Escanear con cámara
+          </button>
         </div>
-      </div>
 
-      <div id="result" class="status"></div>
+        <div id="result" class="status"></div>
+      </section>
     </main>
 
-    <!-- FOOTER -->
-    <footer class="footer">
+    <footer>
       <p class="notranslate" translate="no">You do. We validate.</p>
       <p>© 2025 UDoChain — All rights reserved.</p>
     </footer>
