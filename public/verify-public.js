@@ -1,4 +1,8 @@
-// ===== UDoChain Verify Public =====
+// ======================================================
+// 🌍 UDoChain Verify Public v3.5
+// Compatible con validate.udochain.com/api/validate/tx/:txHash
+// ======================================================
+
 const detailsDiv = document.getElementById("details");
 const dropZone = document.getElementById("dropZone");
 const statusDiv = document.getElementById("status");
@@ -7,37 +11,55 @@ const badgeDiv = document.getElementById("badge");
 const params = new URLSearchParams(window.location.search);
 const tx = params.get("tx");
 
+// ======================================================
+// 🔹 Load validation data from Validate API
+// ======================================================
 if (!tx) {
   detailsDiv.innerHTML = "<p class='fail'>No transaction hash provided.</p>";
 } else {
   fetch(`https://validate.udochain.com/api/validate/tx/${tx}`)
     .then((res) => res.json())
     .then((data) => {
-      if (!data || !data.tx) {
+      if (!data?.ok) {
         badgeDiv.innerHTML = `<div class="badge unverified">Unverified</div>`;
-        detailsDiv.innerHTML = "<p class='fail'>Validation not found or invalid hash.</p>";
+        detailsDiv.innerHTML =
+          "<p class='fail'>Validation not found or invalid transaction hash.</p>";
         return;
       }
 
-      badgeDiv.innerHTML = `<div class="badge verified">Verified on Blockchain</div>`;
+      badgeDiv.innerHTML = `<div class="badge verified">✅ Verified on Blockchain</div>`;
+
+      const dateFormatted = new Date(data.validatedAt).toLocaleString();
+
+      // Render main info
       detailsDiv.innerHTML = `
-        <div class="field"><span class="label">Document Name:</span> <span class="value">${data.fileName || "—"}</span></div>
-        <div class="field"><span class="label">Hash:</span> <span class="value">${data.tx}</span></div>
-        <div class="field"><span class="label">Validated by:</span> <span class="value">${data.email || "Unknown"}</span></div>
-        <div class="field"><span class="label">Network:</span> <span class="value">${data.network || "Polygon"}</span></div>
-        <div class="field"><span class="label">Date:</span> <span class="value">${new Date(data.date || data.createdAt).toLocaleString()}</span></div>
+        <div class="field"><span class="label">Evidence Title:</span> <span class="value">${data.evidenceTitle || "—"}</span></div>
+        <div class="field"><span class="label">Transaction Hash:</span> <span class="value">${data.txHash}</span></div>
+        <div class="field"><span class="label">Validated By:</span> <span class="value">${data.userEmail || "Unknown"}</span></div>
+        <div class="field"><span class="label">GPS:</span> <span class="value">${data.gps || "—"}</span></div>
+        <div class="field"><span class="label">Date (UTC):</span> <span class="value">${dateFormatted}</span></div>
+        <div class="field"><span class="label">Files:</span> <span class="value">${(data.files || [])
+          .map((f) => `<div>• ${f.name} (${f.hash})</div>`)
+          .join("") || "No files recorded"}</span></div>
       `;
+
+      // Attach file list hashes for local comparison
+      window.validatedFiles = data.files?.map((f) => f.hash.toLowerCase()) || [];
     })
-    .catch(() => {
+    .catch((err) => {
+      console.error("❌ Fetch error:", err);
       badgeDiv.innerHTML = `<div class="badge unverified">Unverified</div>`;
       detailsDiv.innerHTML = "<p class='fail'>Error loading validation details.</p>";
     });
 }
 
-// ===== File verification =====
+// ======================================================
+// 📂 File upload + SHA-256 verification
+// ======================================================
 dropZone.addEventListener("click", () => {
   const input = document.createElement("input");
   input.type = "file";
+  input.accept = "*/*";
   input.onchange = (e) => verifyFile(e.target.files[0]);
   input.click();
 });
@@ -54,21 +76,26 @@ dropZone.addEventListener("drop", (e) => {
   if (file) verifyFile(file);
 });
 
+// ======================================================
+// 🔍 Verify uploaded file hash
+// ======================================================
 async function verifyFile(file) {
-  if (!tx) {
-    statusDiv.innerHTML = "<p class='fail'>Missing reference hash.</p>";
+  if (!file) return;
+  if (!window.validatedFiles?.length) {
+    statusDiv.innerHTML = "<p class='fail'>Validation data not loaded yet.</p>";
     return;
   }
 
-  statusDiv.textContent = "Analyzing file...";
+  statusDiv.textContent = "⏳ Analyzing file...";
+
   const buffer = await file.arrayBuffer();
   const hashBuffer = await crypto.subtle.digest("SHA-256", buffer);
   const hashArray = Array.from(new Uint8Array(hashBuffer));
   const fileHash = hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
 
-  if (fileHash === tx.toLowerCase().replace(/^0x/, "")) {
-    statusDiv.innerHTML = `<p class="ok">This file matches the blockchain record.</p>`;
+  if (window.validatedFiles.includes(fileHash.toLowerCase())) {
+    statusDiv.innerHTML = `<p class="ok">✅ This file matches the blockchain validation record.</p>`;
   } else {
-    statusDiv.innerHTML = `<p class="fail">File does not match this validation.</p>`;
+    statusDiv.innerHTML = `<p class="fail">❌ This file does not match any validated record.</p>`;
   }
 }
