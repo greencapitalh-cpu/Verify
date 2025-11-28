@@ -30,3 +30,6 @@ services:
         value: "443"
       - key: AEREWARE_GATEWAY_PROTOCOL
         value: https
+
+    # 📂 PUBLICACIÓN DE ARCHIVOS ESTÁTICOS
+    staticPublishPath: public
