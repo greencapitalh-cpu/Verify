@@ -1,7 +1,7 @@
 {
   "name": "verify-udochain",
-  "version": "2.0.0",
-  "description": "UDoChain Verify v2 — Full Functional Verification + Aereware + QR Integration",
+  "version": "3.0.0",
+  "description": "UDoChain Verify — Secure dual-mongo verification module",
   "type": "module",
   "main": "server.js",
   "scripts": {
@@ -9,13 +9,12 @@
     "dev": "nodemon server.js"
   },
   "dependencies": {
+    "arweave": "^1.14.0",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.21.1",
     "mongoose": "^8.8.1",
-    "node-fetch": "^3.3.2",
-    "arweave": "^1.14.0",
-    "uuid": "^9.0.1"
+    "node-fetch": "^3.3.2"
   },
   "devDependencies": {
     "nodemon": "^3.1.7"
@@ -23,7 +22,6 @@
   "engines": {
     "node": ">=18.0.0"
   },
-  "keywords": ["udochain", "verify", "blockchain", "aereware", "polygon", "qr", "validation"],
   "author": "UDoChain Labs",
   "license": "MIT"
 }
