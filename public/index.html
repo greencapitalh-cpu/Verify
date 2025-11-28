@@ -3,12 +3,12 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>UDoChain Verify — Check Authenticity</title>
+    <title>UDoChain Verify</title>
     <link rel="icon" href="logo-udochain.png" />
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <!-- 🔹 Header -->
+    <!-- HEADER -->
     <header class="header">
       <div class="header-left">
         <img src="logo-udochain.png" class="logo" alt="UDoChain" />
@@ -19,35 +19,29 @@
       </nav>
     </header>
 
-    <!-- 🔹 Main Container -->
+    <!-- MAIN -->
     <main class="container">
       <h2>Verify a Document</h2>
-      <p class="subtitle">
-        Upload a file, paste a hash, or scan a QR to verify authenticity.
-      </p>
+      <p class="subtitle">Scan a QR code or enter a document hash to check authenticity.</p>
 
-      <!-- Input options -->
-      <div class="options">
-        <div class="drop-zone" id="dropZone">
-          <p>📂 Drop your file here or click to upload</p>
-          <input type="file" id="fileInput" accept=".pdf,.zip,.txt" hidden />
+      <div class="verify-options">
+        <!-- Hash Search -->
+        <div class="verify-block">
+          <input type="text" id="hashInput" placeholder="Enter or paste document hash..." />
+          <button class="btn-validate" id="searchBtn">Search</button>
         </div>
 
-        <div class="toggle">
-          <input type="text" id="hashInput" placeholder="Paste or enter hash..." />
-          <button class="btn-validate" id="verifyBtn">Verify</button>
-        </div>
-
-        <div class="toggle">
-          <button class="btn-icon" id="scanQR">📷 Scan QR</button>
+        <!-- QR Options -->
+        <div class="qr-section">
+          <button class="btn-validate" id="scanGallery">Import from Gallery</button>
+          <button class="btn-validate" id="scanCamera">Scan with Camera</button>
         </div>
       </div>
 
-      <!-- Result -->
       <div id="result" class="status"></div>
     </main>
 
-    <!-- 🔹 Footer -->
+    <!-- FOOTER -->
     <footer class="footer">
       <p class="notranslate" translate="no">You do. We validate.</p>
       <p>© 2025 UDoChain — All rights reserved.</p>
