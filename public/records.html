@@ -5,35 +5,32 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>My Records — UDoChain Verify</title>
 
-    <!-- CSS directo -->
-    <link rel="stylesheet" href="records.css" />
+    <!-- Usa el mismo CSS global que Validate -->
+    <link rel="stylesheet" href="styles.css" />
   </head>
 
   <body>
     <header class="header">
       <div class="header-left">
         <img src="logo-udochain.png" alt="UDoChain Logo" class="logo" />
-        <h1>UDoChain Records</h1>
+        <h1>UDoChain Verify</h1>
       </div>
-      <a href="https://wapp.udochain.com" class="btn-dashboard">Dashboard</a>
+      <a href="https://wapp.udochain.com" class="nav-link">🏠 Dashboard</a>
     </header>
 
-    <main class="content">
-      <h2 class="section-title">Your Validatedvvvbbbbbb Evidences</h2>
+    <main class="container">
+      <h2>My Records</h2>
+      <p class="subtitle">All evidences verified via UDoChain blockchain</p>
 
-      <div id="loading" class="loading">
-        <div class="spinner"></div>
-        <p>Loading your records...</p>
-      </div>
+      <div id="loading" class="status">Loading records...</div>
 
-      <div id="recordsList" class="records-list"></div>
+      <div id="recordsList" class="evidence-list"></div>
     </main>
 
     <footer class="footer">
       <p>© 2025 UDoChain Verify — Blockchain Validation Network</p>
     </footer>
 
-    <!-- JS directo -->
     <script type="module" src="records.js"></script>
   </body>
 </html>
