@@ -1,35 +1,36 @@
 import Validation from "../models/Validation.js";
 import VerifyEvidence from "../models/VerifyEvidence.js";
 
-export const getValidationsByUser = async (req, res) => {
+// POST /api/verify/hash
+export const verifyHash = async (req, res) => {
   try {
-    const { token } = req.params;
+    const { hash } = req.body;
     const email = req.headers["x-udo-email"];
-    if (!token || !email)
-      return res.status(400).json({ ok: false, message: "Missing token or email" });
 
-    const validations = await Validation.find({ userEmail: email }).lean();
-    const live = await VerifyEvidence.find({
-      txHash: { $in: validations.map((v) => v.txHash) }
-    }).lean();
+    if (!hash) return res.status(400).json({ ok: false, error: "Missing hash" });
 
-    const merged = validations.map((v) => {
-      const state = live.find((x) => x.txHash === v.txHash);
-      return {
-        evidenceTitle: v.evidenceTitle,
-        txHash: v.txHash,
-        storageId: v.storageId,
-        pdfUrl: state?.currentPdfUrl || v.pdfUrl,
-        createdAt: v.createdAt,
-        type: v.type,
-        status: state?.status || "active",
-        qrActive: state?.qrActive ?? true,
-        privateAccess: state?.privateAccess ?? false,
-        version: state?.version || 1
-      };
+    // 1️⃣ Buscar en Validation (evidencia original)
+    const validation = await Validation.findOne({ "files.hash": hash }).lean();
+
+    if (!validation) {
+      return res.json({ ok: false, error: "No validation found for this hash." });
+    }
+
+    // 2️⃣ Buscar estado vivo en VerifyEvidence
+    const live = await VerifyEvidence.findOne({ txHash: validation.txHash }).lean();
+
+    // 3️⃣ Armar respuesta combinada
+    res.json({
+      ok: true,
+      evidenceTitle: validation.evidenceTitle,
+      txHash: validation.txHash,
+      storageId: validation.storageId,
+      pdfUrl: live?.currentPdfUrl || validation.pdfUrl,
+      qrActive: live?.qrActive ?? true,
+      status: live?.status || "active",
+      version: live?.version || 1,
+      validatedAt: validation.createdAt,
     });
-
-    res.json({ ok: true, validations: merged });
   } catch (err) {
     res.status(500).json({ ok: false, error: err.message });
   }
