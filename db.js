@@ -11,5 +11,4 @@ export const verifyConn = await mongoose.createConnection(
 );
 
 global.mongoConnections = { validateConn, verifyConn };
-
 console.log("✅ Mongo connected (validate + verify)");
