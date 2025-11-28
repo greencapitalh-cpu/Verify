@@ -11,19 +11,15 @@ services:
       - key: PORT
         value: 8080
 
-      # 🟦 MongoDB Validate — Lectura de evidencias (solo lectura)
+      # Mongo dual
       - key: MONGO_URI_VALIDATE
         sync: false
-
-      # 🟨 MongoDB Verify — Logs y registros de verificaciones
       - key: MONGO_URI_VERIFY
         sync: false
 
-      # 🔑 Keyfile JSON para conexión segura a Aereware
+      # Aereware
       - key: AEREWARE_KEYFILE_JSON
         sync: false
-
-      # 🌍 Configuración opcional del gateway Aereware
       - key: AEREWARE_GATEWAY_HOST
         value: arweave.net
       - key: AEREWARE_GATEWAY_PORT
@@ -31,5 +27,4 @@ services:
       - key: AEREWARE_GATEWAY_PROTOCOL
         value: https
 
-    # 📂 PUBLICACIÓN DE ARCHIVOS ESTÁTICOS
     staticPublishPath: public
