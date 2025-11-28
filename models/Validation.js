@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const fileSchema = new mongoose.Schema({
   name: String,
-  hash: String,
+  hash: String
 });
 
 const validationSchema = new mongoose.Schema({
@@ -14,7 +14,7 @@ const validationSchema = new mongoose.Schema({
   pdfUrl: String,
   type: String,
   files: [fileSchema],
-  createdAt: { type: Date, default: Date.now },
+  createdAt: { type: Date, default: Date.now }
 });
 
 const conn = global.mongoConnections?.validateConn || mongoose;
