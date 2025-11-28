@@ -1,6 +1,5 @@
 import Validation from "../models/Validation.js";
 import VerifyEvidence from "../models/VerifyEvidence.js";
-import fetch from "node-fetch";
 
 export const getValidationsByUser = async (req, res) => {
   try {
@@ -11,7 +10,7 @@ export const getValidationsByUser = async (req, res) => {
 
     const validations = await Validation.find({ userEmail: email }).lean();
     const live = await VerifyEvidence.find({
-      txHash: { $in: validations.map((v) => v.txHash) },
+      txHash: { $in: validations.map((v) => v.txHash) }
     }).lean();
 
     const merged = validations.map((v) => {
@@ -26,7 +25,7 @@ export const getValidationsByUser = async (req, res) => {
         status: state?.status || "active",
         qrActive: state?.qrActive ?? true,
         privateAccess: state?.privateAccess ?? false,
-        version: state?.version || 1,
+        version: state?.version || 1
       };
     });
 
