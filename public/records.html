@@ -9,23 +9,26 @@
 
   <body>
     <header class="header">
-      <div class="logo-box">
+      <div class="header-left">
         <img src="logo-udochain.png" alt="UDoChain Logo" class="logo" />
-        <h1>My Records</h1>
+        <h1>UDoChain Records</h1>
       </div>
-      <a href="https://wapp.udochain.com" class="nav-link">🏠 Dashboard</a>
+      <a href="https://wapp.udochain.com" class="btn-dashboard">Dashboard</a>
     </header>
 
-    <main>
-      <section class="records-section">
-        <h2>Your Validated Evidences</h2>
-        <div id="loading" class="loading">Loading records...</div>
-        <div id="recordsList" class="records-list"></div>
-      </section>
+    <main class="content">
+      <h2 class="section-title">Your Validated Evidences</h2>
+
+      <div id="loading" class="loading">
+        <div class="spinner"></div>
+        <p>Loading your records...</p>
+      </div>
+
+      <div id="recordsList" class="records-list"></div>
     </main>
 
     <footer class="footer">
-      <p>UDoChain Verify — Blockchain Validation Network</p>
+      <p>© 2025 UDoChain Verify — Blockchain Validation Network</p>
     </footer>
 
     <script type="module" src="js/records.js"></script>
