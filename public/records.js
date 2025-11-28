@@ -1,6 +1,6 @@
 const params = new URLSearchParams(window.location.search);
-const token = params.get("token");
-const email = params.get("email");
+const token = params.get("token") || localStorage.getItem("udo_token");
+const email = params.get("email") || localStorage.getItem("user_email");
 
 if (!token || !email) {
   window.location.href = "https://app.udochain.com/login";
@@ -9,45 +9,36 @@ if (!token || !email) {
 localStorage.setItem("udo_token", token);
 localStorage.setItem("user_email", email);
 
-const listDiv = document.getElementById("recordsList");
-const loadingDiv = document.getElementById("loading");
-
 async function loadRecords() {
-  try {
-    const res = await fetch(`/api/verify/all/${token}`, {
-      headers: {
-        "x-udo-token": token,
-        "x-udo-email": email,
-      },
-    });
-
-    const data = await res.json();
-    loadingDiv.style.display = "none";
-
-    if (!data.ok || !data.validations?.length) {
-      listDiv.innerHTML = `<p class="status">No records found.</p>`;
-      return;
+  const res = await fetch(`/api/verify/all/${token}`, {
+    headers: {
+      "x-udo-token": token,
+      "x-udo-email": email
     }
+  });
 
-    renderRecords(data.validations);
-  } catch (err) {
-    console.error(err);
-    loadingDiv.textContent = "Error loading records.";
+  const data = await res.json();
+  const div = document.getElementById("recordsList");
+
+  if (!data.ok) {
+    div.innerHTML = `<p>Error: ${data.error}</p>`;
+    return;
   }
-}
 
-function renderRecords(records) {
-  listDiv.innerHTML = records
+  if (data.validations.length === 0) {
+    div.innerHTML = `<p>No records found.</p>`;
+    return;
+  }
+
+  div.innerHTML = data.validations
     .map(
       (v) => `
       <div class="evidence-card">
         <h3 class="evidence-title">${v.evidenceTitle}</h3>
-        <p class="evidence-meta">Hash: ${v.txHash}</p>
-        <p class="evidence-meta">Date: ${new Date(v.createdAt).toLocaleString()}</p>
-
+        <p class="evidence-meta">${new Date(v.createdAt).toLocaleString()}</p>
+        <p>Status: ${v.status}</p>
         <div class="evidence-actions">
-          <a href="/verify-public?tx=${v.txHash}" class="btn-validate">View Public</a>
-          <a href="/verify-private?storage=${v.storageId}&token=${token}&email=${email}" class="btn-validate" style="background:#2563eb;">View Private</a>
+          <a href="${v.pdfUrl}" target="_blank" class="btn-validate">Open PDF</a>
         </div>
       </div>
     `
