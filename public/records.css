@@ -47,12 +47,12 @@ h1 {
 
 /* MAIN CONTAINER */
 .container {
-  max-width: 960px;
+  max-width: 1000px;
   margin: 2rem auto;
   background: white;
   padding: 1.5rem;
-  border-radius: 14px;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+  border-radius: 16px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.05);
 }
 
 /* TOOLBAR + FILTERS */
@@ -94,18 +94,19 @@ input[type="date"] {
 }
 
 .record-item {
-  background: #f9fafb;
+  background: #ffffff;
   border: 1px solid #e5e7eb;
   border-radius: 12px;
-  padding: 1rem 1.2rem;
+  padding: 1.2rem 1.4rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
   transition: all 0.25s ease;
+  cursor: pointer;
 }
 
 .record-item:hover {
-  background: #eef2ff;
+  background: #f0f7ff;
   transform: translateY(-2px);
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
 }
@@ -124,6 +125,9 @@ input[type="date"] {
 .record-meta {
   font-size: 0.85rem;
   color: #64748b;
+  display: flex;
+  gap: 8px;
+  align-items: center;
 }
 
 .record-type {
@@ -131,21 +135,21 @@ input[type="date"] {
   color: #1e40af;
   padding: 2px 8px;
   border-radius: 8px;
-  margin-right: 6px;
+  font-size: 0.8rem;
 }
 
-.record-actions .btn-view {
-  background: #184b8c;
-  color: white;
-  border: none;
-  padding: 7px 12px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 0.85rem;
+.status {
   font-weight: 500;
 }
-.btn-view:hover {
-  background: #153e77;
+
+.status.active {
+  color: #16a34a;
+}
+.status.blocked {
+  color: #dc2626;
+}
+.status.updated {
+  color: #f59e0b;
 }
 
 .loading {
@@ -168,10 +172,8 @@ input[type="date"] {
     flex-direction: column;
     align-items: flex-start;
   }
-  .record-actions {
-    margin-top: 8px;
-    width: 100%;
-    text-align: right;
+  .record-meta {
+    flex-wrap: wrap;
   }
   .filters {
     flex-direction: column;
