@@ -6,6 +6,7 @@
     <title>UDoChain Verification</title>
     <link rel="icon" href="logo-udochain.png" />
     <link rel="stylesheet" href="styles.css" />
+
     <style>
       body {
         font-family: "Inter", sans-serif;
@@ -62,6 +63,7 @@
         flex: 1;
         display: flex;
         justify-content: center;
+        align-items: flex-start;
         padding: 2rem 1rem;
       }
 
@@ -70,14 +72,15 @@
         border-radius: 16px;
         box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
         padding: 2rem;
-        max-width: 600px;
+        max-width: 620px;
         width: 100%;
+        text-align: left;
       }
 
       h2 {
         text-align: center;
         color: #184b8c;
-        margin-bottom: 1rem;
+        margin-bottom: 0.6rem;
       }
 
       .subtitle {
@@ -99,6 +102,8 @@
       .value {
         color: #1e293b;
         word-break: break-all;
+        display: block;
+        margin-top: 2px;
       }
 
       .divider {
@@ -137,12 +142,13 @@
       }
 
       .badge {
-        display: inline-block;
+        display: block;
+        width: fit-content;
+        margin: 0 auto 1rem;
         padding: 6px 12px;
         border-radius: 12px;
         font-size: 0.85rem;
         font-weight: 600;
-        margin-bottom: 1rem;
         text-align: center;
       }
 
@@ -169,36 +175,44 @@
         .card {
           padding: 1.5rem;
         }
+
         h2 {
           font-size: 1.3rem;
         }
       }
     </style>
   </head>
+
   <body>
     <header>
       <div class="header-left">
         <img src="logo-udochain.png" alt="UDoChain Logo" class="logo" />
         <span class="header-title notranslate" translate="no">UDoChain Verify</span>
       </div>
-      <a href="https://validate.udochain.com" class="back-link">Back</a>
+      <a href="https://wapp.udochain.com" class="back-link">Back</a>
     </header>
 
     <main>
       <div class="card">
         <div id="badge"></div>
+
         <h2>Validation Details</h2>
-        <p class="subtitle">Check authenticity of a document registered on blockchain.</p>
+        <p class="subtitle">
+          Verify the authenticity of this blockchain validation.
+        </p>
 
         <div id="details">Loading validation data...</div>
 
         <div class="divider"></div>
 
-        <h2>Verify a File</h2>
-        <p class="subtitle">Upload the original file to confirm its authenticity.</p>
+        <h2>File Verification</h2>
+        <p class="subtitle">
+          Upload the original file to check if it matches the registered
+          validation.
+        </p>
 
         <div id="dropZone" class="drop-zone">
-          Drop or click to upload your file.
+          Drop or click to upload a file.
         </div>
 
         <div id="status"></div>
