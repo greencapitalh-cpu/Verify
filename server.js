@@ -1,5 +1,5 @@
 // ======================================================
-// 🚀 UDoChain Verify v5.1 — Secure Access + Dual Mongo + Aereware + QR + Logs
+// 🚀 UDoChain Verify v5.2 — Secure Access + Dual Mongo + Aereware + QR + Logs + NoCache
 // ======================================================
 import express from "express";
 import cors from "cors";
@@ -89,7 +89,6 @@ app.use((req, res, next) => {
   const origin = req.get("origin") || "";
   const token = req.query.token || req.headers["x-udo-token"];
 
-  // Excepciones públicas
   const publicPaths = [
     "/verify-public",
     "/verify-private",
@@ -101,7 +100,6 @@ app.use((req, res, next) => {
 
   if (isPublic) return next();
 
-  // Permitir acceso si viene de WAPP o APP autenticado
   const allowedOrigin =
     origin.includes("wapp.udochain.com") || origin.includes("app.udochain.com");
 
@@ -114,15 +112,23 @@ app.use((req, res, next) => {
 });
 
 // ======================================================
-// 🌍 Archivos estáticos
+// 🌍 Archivos estáticos con control de caché desactivado
 // ======================================================
-app.use(express.static(path.join(__dirname, "public")));
+app.use(
+  express.static(path.join(__dirname, "public"), {
+    setHeaders: (res) => {
+      res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, private");
+      res.setHeader("Pragma", "no-cache");
+      res.setHeader("Expires", "0");
+    },
+  })
+);
 
 // ======================================================
 // ❤️ Healthcheck
 // ======================================================
 app.get("/api/healthz", (_, res) =>
-  res.json({ ok: true, service: "UDoChain Verify v5.1", timestamp: new Date() })
+  res.json({ ok: true, service: "UDoChain Verify v5.2", timestamp: new Date() })
 );
 
 // ======================================================
@@ -150,8 +156,6 @@ app.get("*", (req, res) => {
   ) {
     return res.sendFile(path.join(__dirname, "public/verify.html"));
   }
-
-  // Cualquier otro acceso no válido → redirige a login
   res.redirect("https://app.udochain.com/login");
 });
 
@@ -160,5 +164,5 @@ app.get("*", (req, res) => {
 // ======================================================
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () =>
-  console.log(`✅ UDoChain Verify v5.1 corriendo en puerto ${PORT}`)
+  console.log(`✅ UDoChain Verify v5.2 corriendo en puerto ${PORT}`)
 );
