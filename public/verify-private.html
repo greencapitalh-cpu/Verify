@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>UDoChain Verify — Private</title>
+    <link rel="stylesheet" href="verify.css" />
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <img src="logo-udochain.png" class="logo" alt="UDoChain Logo" />
+        <h1>UDoChain Verify</h1>
+        <button onclick="window.history.back()" class="back-btn">Back</button>
+      </header>
+
+      <div id="badge" class="status-badge"></div>
+
+      <section id="details" class="details-box">
+        <p>Loading private validation details...</p>
+      </section>
+
+      <section id="files-section" class="details-box" style="display:none;">
+        <h2>Private Files</h2>
+        <p>Files uploaded in custody are listed below:</p>
+        <div id="fileList"></div>
+      </section>
+
+      <footer>
+        <p>You do. We validate.</p>
+        <small>© 2025 UDoChain — All rights reserved.</small>
+      </footer>
+    </div>
+
+    <script src="verify-private.js"></script>
+  </body>
+</html>
