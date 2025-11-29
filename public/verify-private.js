@@ -1,5 +1,5 @@
 // ======================================================
-// 🟪 UDoChain Verify Private v4.5
+// 🟪 UDoChain Verify Private v4.6
 // Public display — shows private validation data + downloads real binary ZIP
 // ======================================================
 
@@ -53,7 +53,7 @@ async function loadPrivateValidation() {
       </div>
     `;
 
-    // ✅ Mostrar botón que descarga desde tu backend (ZIP real)
+    // ✅ Mostrar botón que descarga desde tu backend (ZIP real con nombre de evidencia)
     if (data.hasBinaryBackup || (data.storageId && data.storageId.startsWith("ar://"))) {
       const cleanStorageId = data.storageId.replace("ar://", "");
       const downloadUrl = `https://validate.udochain.com/api/validate/aereware/download/${encodeURIComponent(cleanStorageId)}`;
