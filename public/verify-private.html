@@ -6,192 +6,6 @@
     <title>UDoChain Private Verification</title>
     <link rel="icon" href="logo-udochain.png" />
     <link rel="stylesheet" href="styles.css" />
-
-    <style>
-      body {
-        font-family: "Inter", sans-serif;
-        background: #f9fafb;
-        color: #1e293b;
-        margin: 0;
-        display: flex;
-        flex-direction: column;
-        min-height: 100vh;
-      }
-
-      header {
-        background: white;
-        padding: 1rem 1.5rem;
-        border-bottom: 1px solid #e2e8f0;
-        box-shadow: 0 1px 6px rgba(0, 0, 0, 0.05);
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-      }
-
-      .header-left {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-      }
-
-      .logo {
-        height: 36px;
-      }
-
-      .header-title {
-        font-weight: 700;
-        font-size: 1.25rem;
-        color: #5b2e90;
-      }
-
-      .back-link {
-        font-size: 0.95rem;
-        color: #475569;
-        text-decoration: none;
-        background: #f1f5f9;
-        padding: 6px 14px;
-        border-radius: 8px;
-        transition: all 0.25s;
-      }
-
-      .back-link:hover {
-        background: #e2e8f0;
-        color: #5b2e90;
-      }
-
-      main {
-        flex: 1;
-        display: flex;
-        justify-content: center;
-        align-items: flex-start;
-        padding: 2rem 1rem;
-      }
-
-      .card {
-        background: white;
-        border-radius: 16px;
-        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
-        padding: 2rem;
-        max-width: 620px;
-        width: 100%;
-        text-align: left;
-      }
-
-      h2 {
-        text-align: center;
-        color: #5b2e90;
-        margin-bottom: 0.6rem;
-      }
-
-      .subtitle {
-        text-align: center;
-        color: #64748b;
-        font-size: 0.95rem;
-        margin-bottom: 1.5rem;
-      }
-
-      .field {
-        margin-bottom: 0.8rem;
-      }
-
-      .label {
-        font-weight: 600;
-        color: #475569;
-      }
-
-      .value {
-        color: #1e293b;
-        word-break: break-all;
-        display: block;
-        margin-top: 2px;
-      }
-
-      .divider {
-        border-top: 1px solid #e2e8f0;
-        margin: 1.5rem 0;
-      }
-
-      #status {
-        text-align: center;
-        margin-top: 1rem;
-        font-weight: 600;
-      }
-
-      .ok {
-        color: #14532d;
-      }
-
-      .fail {
-        color: #b91c1c;
-      }
-
-      .badge {
-        display: block;
-        width: fit-content;
-        margin: 0 auto 1rem;
-        padding: 6px 12px;
-        border-radius: 12px;
-        font-size: 0.85rem;
-        font-weight: 600;
-        text-align: center;
-      }
-
-      .badge.verified {
-        background: #ede9fe;
-        color: #5b2e90;
-      }
-
-      .badge.unverified {
-        background: #fee2e2;
-        color: #991b1b;
-      }
-
-      .download-btn {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        width: 100%;
-        margin-top: 1.2rem;
-        padding: 10px;
-        border: none;
-        border-radius: 10px;
-        background-color: #5b2e90;
-        color: white;
-        font-weight: 600;
-        cursor: pointer;
-        transition: 0.25s;
-      }
-
-      .download-btn:hover {
-        background-color: #4b256f;
-      }
-
-      .download-icon {
-        width: 18px;
-        height: 18px;
-        fill: white;
-      }
-
-      footer {
-        border-top: 1px solid #e2e8f0;
-        background: white;
-        padding: 1rem;
-        font-size: 0.85rem;
-        color: #6b7280;
-        text-align: center;
-      }
-
-      @media (max-width: 600px) {
-        .card {
-          padding: 1.5rem;
-        }
-
-        h2 {
-          font-size: 1.3rem;
-        }
-      }
-    </style>
   </head>
 
   <body>
@@ -212,7 +26,7 @@
           Verify the authenticity and custody details of this private blockchain validation.
         </p>
 
-        <div id="details">Loading private validation data...</div>
+        <div id="details">Loading validation data...</div>
 
         <div class="divider"></div>
 
@@ -222,7 +36,6 @@
         </p>
 
         <div id="downloads"></div>
-        <div id="status"></div>
       </div>
     </main>
 
@@ -232,6 +45,5 @@
     </footer>
 
     <script src="verify-private.js"></script>
-    <script src="script-translate.js"></script>
   </body>
 </html>
