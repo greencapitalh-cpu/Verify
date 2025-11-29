@@ -146,25 +146,39 @@
         color: #991b1b;
       }
 
+      /* ✅ Botones de descarga */
       .download-btn {
         display: flex;
         align-items: center;
         justify-content: center;
         gap: 8px;
         width: 100%;
-        margin-top: 1.2rem;
-        padding: 10px;
+        margin-top: 1rem;
+        padding: 12px;
         border: none;
         border-radius: 10px;
-        background-color: #5b2e90;
-        color: white;
         font-weight: 600;
         cursor: pointer;
         transition: 0.25s;
+        font-size: 0.95rem;
       }
 
-      .download-btn:hover {
+      .download-files {
+        background-color: #5b2e90;
+        color: white;
+      }
+
+      .download-files:hover {
         background-color: #4b256f;
+      }
+
+      .download-meta {
+        background-color: #475569;
+        color: white;
+      }
+
+      .download-meta:hover {
+        background-color: #334155;
       }
 
       .download-icon {
@@ -218,7 +232,7 @@
 
         <h2>File Downloads</h2>
         <p class="subtitle">
-          The following files or binary backups are securely stored in Aereware.
+          The following files or metadata are securely stored in Aereware.
         </p>
 
         <div id="downloads"></div>
@@ -231,7 +245,89 @@
       <p>© 2025 UDoChain — All rights reserved.</p>
     </footer>
 
-    <script src="verify-private.js"></script>
-    <script src="script-translate.js"></script>
+    <script>
+      const detailsDiv = document.getElementById("details");
+      const downloadsDiv = document.getElementById("downloads");
+      const badgeDiv = document.getElementById("badge");
+
+      const params = new URLSearchParams(window.location.search);
+      const storage = params.get("storage");
+
+      async function loadPrivateValidation() {
+        if (!storage) {
+          detailsDiv.innerHTML = "<p class='fail'>No storage ID provided in URL.</p>";
+          return;
+        }
+
+        try {
+          const cleanId = storage.replace(/^ar:\/\//, "");
+          const res = await fetch(
+            `https://validate.udochain.com/api/validate/storage/${encodeURIComponent(cleanId)}`
+          );
+          const data = await res.json();
+
+          if (!data?.ok) {
+            badgeDiv.innerHTML = `<div class="badge unverified">Unverified</div>`;
+            detailsDiv.innerHTML = `<p class="fail">Validation not found or invalid storage ID.</p>`;
+            return;
+          }
+
+          badgeDiv.innerHTML = `<div class="badge verified">Verified on Blockchain</div>`;
+          const dateFormatted = new Date(data.validatedAt).toLocaleString();
+
+          detailsDiv.innerHTML = `
+            <div class="field"><span class="label">Evidence Title:</span> <span class="value">${data.evidenceTitle || "—"}</span></div>
+            <div class="field"><span class="label">Transaction Hash:</span> <span class="value">${data.txHash}</span></div>
+            <div class="field"><span class="label">Validated By:</span> <span class="value">${data.userEmail || "Unknown"}</span></div>
+            <div class="field"><span class="label">GPS:</span> <span class="value">${data.gps || "—"}</span></div>
+            <div class="field"><span class="label">Date (UTC):</span> <span class="value">${dateFormatted}</span></div>
+            ${data.bioidHash ? `<div class="field"><span class="label">BioID Hash:</span> <span class="value">${data.bioidHash}</span></div>` : ""}
+            <div class="field"><span class="label">Storage ID:</span> <span class="value">${data.storageId || "—"}</span></div>
+            <div class="field"><span class="label">Private Storage:</span> <span class="value">${data.w3Note || "—"}</span></div>
+          `;
+
+          const downloads = [];
+
+          // 📦 Botón para custodia ZIP
+          if (data.binaryStorageId) {
+            const cleanBinaryId = data.binaryStorageId.replace("ar://", "");
+            const binaryUrl = `https://validate.udochain.com/api/validate/aereware/download/files/${encodeURIComponent(cleanBinaryId)}`;
+            downloads.push(`
+              <button class="download-btn download-files" onclick="window.open('${binaryUrl}', '_blank')">
+                <svg xmlns="http://www.w3.org/2000/svg" class="download-icon" viewBox="0 0 24 24">
+                  <path d="M12 3v12m0 0l-4-4m4 4l4-4m-9 8h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                </svg>
+                Download Custody Files (ZIP)
+              </button>
+            `);
+          }
+
+          // 🧾 Botón para metadata JSON
+          if (data.storageId) {
+            const cleanMetaId = data.storageId.replace("ar://", "");
+            const metaUrl = `https://validate.udochain.com/api/validate/aereware/download/metadata/${encodeURIComponent(cleanMetaId)}`;
+            downloads.push(`
+              <button class="download-btn download-meta" onclick="window.open('${metaUrl}', '_blank')">
+                <svg xmlns="http://www.w3.org/2000/svg" class="download-icon" viewBox="0 0 24 24">
+                  <path d="M12 3v12m0 0l-4-4m4 4l4-4m-9 8h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                </svg>
+                Download Metadata (JSON)
+              </button>
+            `);
+          }
+
+          downloadsDiv.innerHTML =
+            downloads.length > 0
+              ? downloads.join("<br>")
+              : "<p class='subtitle'>No downloadable content available.</p>";
+        } catch (err) {
+          console.error("❌ Fetch error:", err);
+          badgeDiv.innerHTML = `<div class="badge unverified">Unverified</div>`;
+          detailsDiv.innerHTML = "<p class='fail'>Error fetching private validation details.</p>";
+        }
+      }
+
+      loadPrivateValidation();
+    </script>
   </body>
 </html>
