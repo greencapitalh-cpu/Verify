@@ -1,5 +1,5 @@
 // ======================================================
-// 🟪 UDoChain Verify Private v4.2
+// 🟪 UDoChain Verify Private v4.3
 // Public display — shows private validation data + allows binary download
 // ======================================================
 
@@ -62,6 +62,9 @@ async function loadPrivateValidation() {
 
       downloadsDiv.innerHTML = `
         <button class="download-btn" onclick="window.open('${link}', '_blank')">
+          <svg xmlns="http://www.w3.org/2000/svg" class="download-icon" viewBox="0 0 24 24">
+            <path d="M12 3v12m0 0l-4-4m4 4l4-4m-9 8h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+          </svg>
           Download Binary Backup
         </button>
       `;
