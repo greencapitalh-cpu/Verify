@@ -1,5 +1,5 @@
 // ======================================================
-// 🟪 UDoChain Verify Private v4.4
+// 🟪 UDoChain Verify Private v4.5
 // Public display — shows private validation data + downloads real binary ZIP
 // ======================================================
 
@@ -22,7 +22,6 @@ async function loadPrivateValidation() {
   }
 
   try {
-    // Limpia el ID en caso de que venga con prefijo ar://
     const cleanId = storage.replace(/^ar:\/\//, "");
     const res = await fetch(`https://validate.udochain.com/api/validate/storage/${encodeURIComponent(cleanId)}`);
     const data = await res.json();
@@ -54,11 +53,9 @@ async function loadPrivateValidation() {
       </div>
     `;
 
-    // Mostrar botón de descarga si hay respaldo binario en Aereware
+    // ✅ Mostrar botón que descarga desde tu backend (ZIP real)
     if (data.hasBinaryBackup || (data.storageId && data.storageId.startsWith("ar://"))) {
       const cleanStorageId = data.storageId.replace("ar://", "");
-
-      // ✅ Enlace a tu backend que envía ZIP real con headers correctos
       const downloadUrl = `https://validate.udochain.com/api/validate/aereware/download/${encodeURIComponent(cleanStorageId)}`;
 
       downloadsDiv.innerHTML = `
@@ -72,6 +69,7 @@ async function loadPrivateValidation() {
     } else {
       downloadsDiv.innerHTML = "<p class='subtitle'>No downloadable binary files available.</p>";
     }
+
   } catch (err) {
     console.error("❌ Fetch error:", err);
     badgeDiv.innerHTML = `<div class="badge unverified">Unverified</div>`;
