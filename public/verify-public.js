@@ -1,5 +1,5 @@
 // ======================================================
-// 🌍 UDoChain Verify Public v4.0
+// 🌍 UDoChain Verify Public v4.1
 // 100% público — compatible con validate.udochain.com/api/validate/tx/:txHash
 // ======================================================
 
@@ -17,7 +17,7 @@ const tx = params.get("tx");
 // ======================================================
 async function loadValidation() {
   if (!tx) {
-    detailsDiv.innerHTML = "<p class='fail'>❌ No transaction hash provided in URL.</p>";
+    detailsDiv.innerHTML = "<p class='fail'>No transaction hash provided in URL.</p>";
     return;
   }
 
@@ -32,42 +32,40 @@ async function loadValidation() {
       return;
     }
 
-    badgeDiv.innerHTML = `<div class="badge verified">✅ Verified on Blockchain</div>`;
+    badgeDiv.innerHTML = `<div class="badge verified">Verified on Blockchain</div>`;
 
-    const dateFormatted = new Date(data.validatedAt || data.createdAt).toLocaleString();
+    const dateFormatted = new Date(data.validatedAt).toLocaleString();
 
-    // Render principal
+    // Renderizar la información de validación
     detailsDiv.innerHTML = `
       <div class="field"><span class="label">Evidence Title:</span> <span class="value">${data.evidenceTitle || "—"}</span></div>
       <div class="field"><span class="label">Transaction Hash:</span> <span class="value">${data.txHash}</span></div>
-      <div class="field"><span class="label">Validated By:</span> <span class="value">${data.userEmail || "Public Record"}</span></div>
+      <div class="field"><span class="label">Validated By:</span> <span class="value">${data.userEmail || "Unknown"}</span></div>
       <div class="field"><span class="label">GPS:</span> <span class="value">${data.gps || "—"}</span></div>
       <div class="field"><span class="label">Date (UTC):</span> <span class="value">${dateFormatted}</span></div>
-      <div class="field"><span class="label">Files:</span> <span class="value">
-        ${(data.files || [])
-          .map(
-            (f) => `
-              <div style="margin-bottom:3px">
-                <span class="file-name">${f.name}</span>
-                <br><span class="file-hash">🔹 ${f.hash}</span>
-              </div>
-            `
-          )
-          .join("") || "No files recorded"}
-      </span></div>
+      <div class="field"><span class="label">Files:</span> 
+        <div class="value file-list">
+          ${(data.files || [])
+            .map(
+              (f) =>
+                `<div>${f.name} — <small>${f.hash}</small></div>`
+            )
+            .join("") || "No files recorded"}
+        </div>
+      </div>
     `;
 
-    // Guardar hashes de archivos validados para la comparación local
+    // Guardar hashes para verificación local
     window.validatedFiles = data.files?.map((f) => f.hash.toLowerCase()) || [];
   } catch (err) {
-    console.error("❌ Error loading validation:", err);
+    console.error("❌ Fetch error:", err);
     badgeDiv.innerHTML = `<div class="badge unverified">Unverified</div>`;
-    detailsDiv.innerHTML = "<p class='fail'>Error fetching validation details.</p>";
+    detailsDiv.innerHTML = "<p class='fail'>Error loading validation details.</p>";
   }
 }
 
 // ======================================================
-// 📂 Subir y verificar archivo local
+// 📂 Subida + verificación de archivos
 // ======================================================
 dropZone.addEventListener("click", () => {
   const input = document.createElement("input");
@@ -90,7 +88,7 @@ dropZone.addEventListener("drop", (e) => {
 });
 
 // ======================================================
-// 🔍 Comparar hash del archivo subido con el blockchain
+// 🔍 Verificar hash del archivo subido
 // ======================================================
 async function verifyFile(file) {
   if (!file) return;
@@ -99,7 +97,7 @@ async function verifyFile(file) {
     return;
   }
 
-  statusDiv.textContent = "⏳ Analyzing file...";
+  statusDiv.textContent = "Analyzing file...";
 
   const buffer = await file.arrayBuffer();
   const hashBuffer = await crypto.subtle.digest("SHA-256", buffer);
@@ -107,13 +105,11 @@ async function verifyFile(file) {
   const fileHash = hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
 
   if (window.validatedFiles.includes(fileHash.toLowerCase())) {
-    statusDiv.innerHTML = `<p class="ok">✅ This file matches the blockchain validation record.</p>`;
+    statusDiv.innerHTML = `<p class="ok">This file matches the blockchain validation record.</p>`;
   } else {
-    statusDiv.innerHTML = `<p class="fail">❌ This file does not match any validated record.</p>`;
+    statusDiv.innerHTML = `<p class="fail">This file does not match any validated record.</p>`;
   }
 }
 
-// ======================================================
-// 🚀 Inicializar
-// ======================================================
+// Ejecutar al cargar
 loadValidation();
