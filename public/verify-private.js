@@ -1,27 +1,29 @@
 // ======================================================
-// 🌍 UDoChain Verify Private v4.2
-// 100% público — muestra validaciones privadas + descargas
+// 🟪 UDoChain Verify Private v4.2
+// Public display — shows private validation data + allows binary download
 // ======================================================
 
 const detailsDiv = document.getElementById("details");
+const downloadsDiv = document.getElementById("downloads");
 const badgeDiv = document.getElementById("badge");
-const fileList = document.getElementById("fileList");
-const downloadArea = document.getElementById("downloadArea");
+const statusDiv = document.getElementById("status");
 
+// Obtener el parámetro "storage" desde la URL
 const params = new URLSearchParams(window.location.search);
-const storageId = params.get("storage");
+const storage = params.get("storage");
 
 // ======================================================
-// 🧠 Cargar validación privada
+// 🧠 Función principal — Cargar validación privada
 // ======================================================
 async function loadPrivateValidation() {
-  if (!storageId) {
+  if (!storage) {
     detailsDiv.innerHTML = "<p class='fail'>No storage ID provided in URL.</p>";
     return;
   }
 
   try {
-    const res = await fetch(`https://validate.udochain.com/api/validate/storage/${storageId}`);
+    const safeId = encodeURIComponent(storage);
+    const res = await fetch(`https://validate.udochain.com/api/validate/storage/${safeId}`);
     const data = await res.json();
 
     if (!data?.ok) {
@@ -34,48 +36,44 @@ async function loadPrivateValidation() {
 
     const dateFormatted = new Date(data.validatedAt).toLocaleString();
 
+    // Mostrar la información principal
     detailsDiv.innerHTML = `
       <div class="field"><span class="label">Evidence Title:</span> <span class="value">${data.evidenceTitle || "—"}</span></div>
       <div class="field"><span class="label">Transaction Hash:</span> <span class="value">${data.txHash}</span></div>
       <div class="field"><span class="label">Validated By:</span> <span class="value">${data.userEmail || "Unknown"}</span></div>
       <div class="field"><span class="label">GPS:</span> <span class="value">${data.gps || "—"}</span></div>
       <div class="field"><span class="label">Date (UTC):</span> <span class="value">${dateFormatted}</span></div>
-      <div class="field"><span class="label">BioID Hash:</span> <span class="value">${data.bioidHash || "—"}</span></div>
-      <div class="field"><span class="label">Aereware Storage ID:</span> <span class="value">${data.storageId || "—"}</span></div>
-      <div class="field"><span class="label">Private Note:</span> <span class="value">${data.w3Note || "—"}</span></div>
-      <div class="field"><span class="label">Binary Backup:</span> <span class="value">${
-        data.hasBinaryBackup ? "Stored on Aereware" : "Not available"
-      }</span></div>
+      ${data.bioidHash ? `<div class="field"><span class="label">BioID Hash:</span> <span class="value">${data.bioidHash}</span></div>` : ""}
+      <div class="field"><span class="label">Storage ID:</span> <span class="value">${data.storageId || "—"}</span></div>
+      <div class="field"><span class="label">Private Storage:</span> <span class="value">${data.w3Note || "—"}</span></div>
+      <div class="field"><span class="label">Files:</span>
+        <div class="value file-list">
+          ${(data.files || []).map(f => `<div>${f.name} — <small>${f.hash}</small></div>`).join("") || "No files recorded"}
+        </div>
+      </div>
     `;
 
-    // Mostrar lista de archivos
-    if (data.files && data.files.length > 0) {
-      fileList.innerHTML = data.files
-        .map(
-          (f) =>
-            `<div class="field"><span class="label">${f.name}</span> <span class="value">${f.hash}</span></div>`
-        )
-        .join("");
-    } else {
-      fileList.innerHTML = "<p>No files recorded for this validation.</p>";
-    }
+    // Si tiene respaldo binario o storage en Aereware, mostrar botón
+    if (data.hasBinaryBackup || (data.storageId && data.storageId.startsWith("ar://"))) {
+      const link =
+        data.storageId.startsWith("ar://")
+          ? `https://arweave.net/${data.storageId.replace("ar://", "")}`
+          : data.storageId;
 
-    // Si tiene respaldo binario en Aereware, mostrar botón de descarga
-    if (data.hasBinaryBackup && data.storageId) {
-      const downloadUrl = `https://arweave.net/${data.storageId}`;
-      downloadArea.innerHTML = `
-        <a href="${downloadUrl}" class="back-link" target="_blank">
-          Download ZIP from Aereware
-        </a>
+      downloadsDiv.innerHTML = `
+        <button class="download-btn" onclick="window.open('${link}', '_blank')">
+          Download Binary Backup
+        </button>
       `;
     } else {
-      downloadArea.innerHTML = `<p class="subtitle">No binary backup available for this record.</p>`;
+      downloadsDiv.innerHTML = "<p class='subtitle'>No downloadable binary files available.</p>";
     }
   } catch (err) {
-    console.error("❌ Error fetching private validation:", err);
+    console.error("❌ Fetch error:", err);
     badgeDiv.innerHTML = `<div class="badge unverified">Unverified</div>`;
     detailsDiv.innerHTML = "<p class='fail'>Error fetching private validation details.</p>";
   }
 }
 
+// Ejecutar al cargar
 loadPrivateValidation();
