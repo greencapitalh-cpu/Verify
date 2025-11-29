@@ -1,6 +1,6 @@
 // ======================================================
-// 🌍 UDoChain Verify Public v4.1
-// 100% público — compatible con validate.udochain.com/api/validate/tx/:txHash
+// 🌍 UDoChain Verify Public v4.2
+// 100% público — limpio, sin emojis, sin íconos
 // ======================================================
 
 const detailsDiv = document.getElementById("details");
