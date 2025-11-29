@@ -1,6 +1,6 @@
 // ======================================================
-// 🌍 UDoChain Verify Public v3.5
-// Compatible con validate.udochain.com/api/validate/tx/:txHash
+// 🌍 UDoChain Verify Public v3.9
+// Compatible con validate.udochain.com/api/validate/tx/:txHash?email=
 // ======================================================
 
 const detailsDiv = document.getElementById("details");
@@ -8,20 +8,28 @@ const dropZone = document.getElementById("dropZone");
 const statusDiv = document.getElementById("status");
 const badgeDiv = document.getElementById("badge");
 
+// ======================================================
+// 🧩 Leer parámetros del QR (tx + email opcional)
+// ======================================================
 const params = new URLSearchParams(window.location.search);
 const tx = params.get("tx");
+const email = params.get("email"); // 🆕 agregado
 
 // ======================================================
-// 🔹 Load validation data from Validate API
+// 🔹 Cargar datos desde la API de Validate
 // ======================================================
 if (!tx) {
-  detailsDiv.innerHTML = "<p class='fail'>No transaction hash provided.</p>";
+  detailsDiv.innerHTML = "<p class='fail'>❌ No transaction hash provided.</p>";
 } else {
-  fetch(`https://validate.udochain.com/api/validate/tx/${tx}`)
+  // Construir URL dinámica (si hay email, lo pasamos)
+  let apiUrl = `https://validate.udochain.com/api/validate/tx/${tx}`;
+  if (email) apiUrl += `?email=${encodeURIComponent(email)}`;
+
+  fetch(apiUrl)
     .then((res) => res.json())
     .then((data) => {
       if (!data?.ok) {
-        badgeDiv.innerHTML = `<div class="badge unverified">Unverified</div>`;
+        badgeDiv.innerHTML = `<div class="badge unverified">❌ Unverified</div>`;
         detailsDiv.innerHTML =
           "<p class='fail'>Validation not found or invalid transaction hash.</p>";
         return;
@@ -35,26 +43,27 @@ if (!tx) {
       detailsDiv.innerHTML = `
         <div class="field"><span class="label">Evidence Title:</span> <span class="value">${data.evidenceTitle || "—"}</span></div>
         <div class="field"><span class="label">Transaction Hash:</span> <span class="value">${data.txHash}</span></div>
-        <div class="field"><span class="label">Validated By:</span> <span class="value">${data.userEmail || "Unknown"}</span></div>
+        <div class="field"><span class="label">Validated By:</span> <span class="value">${data.userEmail || email || "Unknown"}</span></div>
         <div class="field"><span class="label">GPS:</span> <span class="value">${data.gps || "—"}</span></div>
         <div class="field"><span class="label">Date (UTC):</span> <span class="value">${dateFormatted}</span></div>
+        <div class="field"><span class="label">Blockchain Note:</span> <span class="value">${data.w3Note || "Stored on Aereware network"}</span></div>
         <div class="field"><span class="label">Files:</span> <span class="value">${(data.files || [])
           .map((f) => `<div>• ${f.name} (${f.hash})</div>`)
           .join("") || "No files recorded"}</span></div>
       `;
 
-      // Attach file list hashes for local comparison
+      // Guardar los hashes validados para comparar localmente
       window.validatedFiles = data.files?.map((f) => f.hash.toLowerCase()) || [];
     })
     .catch((err) => {
       console.error("❌ Fetch error:", err);
-      badgeDiv.innerHTML = `<div class="badge unverified">Unverified</div>`;
+      badgeDiv.innerHTML = `<div class="badge unverified">❌ Unverified</div>`;
       detailsDiv.innerHTML = "<p class='fail'>Error loading validation details.</p>";
     });
 }
 
 // ======================================================
-// 📂 File upload + SHA-256 verification
+// 📂 Drag & Drop + Upload para verificación de archivos
 // ======================================================
 dropZone.addEventListener("click", () => {
   const input = document.createElement("input");
@@ -77,12 +86,12 @@ dropZone.addEventListener("drop", (e) => {
 });
 
 // ======================================================
-// 🔍 Verify uploaded file hash
+// 🔍 Verificación local por hash SHA-256
 // ======================================================
 async function verifyFile(file) {
   if (!file) return;
   if (!window.validatedFiles?.length) {
-    statusDiv.innerHTML = "<p class='fail'>Validation data not loaded yet.</p>";
+    statusDiv.innerHTML = "<p class='fail'>⚠️ Validation data not loaded yet.</p>";
     return;
   }
 
