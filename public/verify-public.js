@@ -1,6 +1,6 @@
 // ======================================================
 // 🌍 UDoChain Verify Public v3.9
-// Compatible con validate.udochain.com/api/validate/tx/:txHash?email=
+// Compatible con validate.udochain.com/api/validate/tx/:txHash?email=...
 // ======================================================
 
 const detailsDiv = document.getElementById("details");
@@ -8,22 +8,29 @@ const dropZone = document.getElementById("dropZone");
 const statusDiv = document.getElementById("status");
 const badgeDiv = document.getElementById("badge");
 
-// ======================================================
-// 🧩 Leer parámetros del QR (tx + email opcional)
-// ======================================================
 const params = new URLSearchParams(window.location.search);
 const tx = params.get("tx");
-const email = params.get("email"); // 🆕 agregado
 
 // ======================================================
-// 🔹 Cargar datos desde la API de Validate
+// 🔹 Leer email desde hash (#email=) si existe
+// ======================================================
+let email = null;
+if (window.location.hash.includes("#email=")) {
+  email = decodeURIComponent(window.location.hash.replace("#email=", ""));
+  console.log("📧 Email detected from QR:", email);
+}
+
+// ======================================================
+// 🔹 Cargar datos desde la API de validación
 // ======================================================
 if (!tx) {
-  detailsDiv.innerHTML = "<p class='fail'>❌ No transaction hash provided.</p>";
+  detailsDiv.innerHTML = "<p class='fail'>No transaction hash provided.</p>";
 } else {
-  // Construir URL dinámica (si hay email, lo pasamos)
-  let apiUrl = `https://validate.udochain.com/api/validate/tx/${tx}`;
-  if (email) apiUrl += `?email=${encodeURIComponent(email)}`;
+  const apiUrl = email
+    ? `https://validate.udochain.com/api/validate/tx/${tx}?email=${encodeURIComponent(email)}`
+    : `https://validate.udochain.com/api/validate/tx/${tx}`;
+
+  console.log("🔗 Fetching validation data from:", apiUrl);
 
   fetch(apiUrl)
     .then((res) => res.json())
@@ -46,13 +53,16 @@ if (!tx) {
         <div class="field"><span class="label">Validated By:</span> <span class="value">${data.userEmail || email || "Unknown"}</span></div>
         <div class="field"><span class="label">GPS:</span> <span class="value">${data.gps || "—"}</span></div>
         <div class="field"><span class="label">Date (UTC):</span> <span class="value">${dateFormatted}</span></div>
-        <div class="field"><span class="label">Blockchain Note:</span> <span class="value">${data.w3Note || "Stored on Aereware network"}</span></div>
-        <div class="field"><span class="label">Files:</span> <span class="value">${(data.files || [])
-          .map((f) => `<div>• ${f.name} (${f.hash})</div>`)
-          .join("") || "No files recorded"}</span></div>
+        <div class="field"><span class="label">Files:</span> 
+          <span class="value">
+            ${(data.files || [])
+              .map((f) => `<div>• ${f.name} (${f.hash})</div>`)
+              .join("") || "No files recorded"}
+          </span>
+        </div>
       `;
 
-      // Guardar los hashes validados para comparar localmente
+      // Guardar lista de hashes para comparación local
       window.validatedFiles = data.files?.map((f) => f.hash.toLowerCase()) || [];
     })
     .catch((err) => {
@@ -63,7 +73,7 @@ if (!tx) {
 }
 
 // ======================================================
-// 📂 Drag & Drop + Upload para verificación de archivos
+// 📂 File upload + SHA-256 verification
 // ======================================================
 dropZone.addEventListener("click", () => {
   const input = document.createElement("input");
@@ -86,12 +96,12 @@ dropZone.addEventListener("drop", (e) => {
 });
 
 // ======================================================
-// 🔍 Verificación local por hash SHA-256
+// 🔍 Verify uploaded file hash
 // ======================================================
 async function verifyFile(file) {
   if (!file) return;
   if (!window.validatedFiles?.length) {
-    statusDiv.innerHTML = "<p class='fail'>⚠️ Validation data not loaded yet.</p>";
+    statusDiv.innerHTML = "<p class='fail'>Validation data not loaded yet.</p>";
     return;
   }
 
