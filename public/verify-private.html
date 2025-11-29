@@ -3,35 +3,50 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>UDoChain Verify — Private</title>
-    <link rel="stylesheet" href="verify.css" />
+    <title>UDoChain Private Verification</title>
+    <link rel="icon" href="logo-udochain.png" />
+    <link rel="stylesheet" href="styles.css" />
   </head>
+
   <body>
-    <div class="container">
-      <header>
-        <img src="logo-udochain.png" class="logo" alt="UDoChain Logo" />
-        <h1>UDoChain Verify</h1>
-        <button onclick="window.history.back()" class="back-btn">Back</button>
-      </header>
+    <header>
+      <div class="header-left">
+        <img src="logo-udochain.png" alt="UDoChain Logo" class="logo" />
+        <span class="header-title notranslate" translate="no">UDoChain Verify</span>
+      </div>
+      <a href="https://wapp.udochain.com" class="back-link">Back</a>
+    </header>
 
-      <div id="badge" class="status-badge"></div>
+    <main>
+      <div class="card">
+        <div id="badge"></div>
 
-      <section id="details" class="details-box">
-        <p>Loading private validation details...</p>
-      </section>
+        <h2>Private Validation Details</h2>
+        <p class="subtitle">
+          Verify the authenticity and custody details of this private blockchain validation.
+        </p>
 
-      <section id="files-section" class="details-box" style="display:none;">
-        <h2>Private Files</h2>
-        <p>Files uploaded in custody are listed below:</p>
-        <div id="fileList"></div>
-      </section>
+        <div id="details">Loading private validation data...</div>
 
-      <footer>
-        <p>You do. We validate.</p>
-        <small>© 2025 UDoChain — All rights reserved.</small>
-      </footer>
-    </div>
+        <div class="divider"></div>
+
+        <h2>File Downloads</h2>
+        <p class="subtitle">
+          The following files or binary backups are securely stored in Aereware.
+        </p>
+
+        <div id="fileList" class="file-list"></div>
+
+        <div id="downloadArea" class="download-area"></div>
+      </div>
+    </main>
+
+    <footer>
+      <p class="notranslate" translate="no">You do. We validate.</p>
+      <p>© 2025 UDoChain — All rights reserved.</p>
+    </footer>
 
     <script src="verify-private.js"></script>
+    <script src="script-translate.js"></script>
   </body>
 </html>
