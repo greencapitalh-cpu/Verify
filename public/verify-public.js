@@ -1,5 +1,5 @@
 // ======================================================
-// 🌍 UDoChain Verify Public v4.2
+// 🌍 UDoChain Verify Public v4.3
 // 100% público — limpio, sin emojis, sin íconos
 // ======================================================
 
@@ -33,23 +33,51 @@ async function loadValidation() {
     }
 
     badgeDiv.innerHTML = `<div class="badge verified">Verified on Blockchain</div>`;
-
     const dateFormatted = new Date(data.validatedAt).toLocaleString();
 
-    // Renderizar la información de validación
+    // ======================================================
+    // 🧾 Render público de la evidencia
+    // ======================================================
     detailsDiv.innerHTML = `
-      <div class="field"><span class="label">Evidence Title:</span> <span class="value">${data.evidenceTitle || "—"}</span></div>
-      <div class="field"><span class="label">Transaction Hash:</span> <span class="value">${data.txHash}</span></div>
-      <div class="field"><span class="label">Validated By:</span> <span class="value">${data.userEmail || "Unknown"}</span></div>
-      <div class="field"><span class="label">GPS:</span> <span class="value">${data.gps || "—"}</span></div>
-      <div class="field"><span class="label">Date (UTC):</span> <span class="value">${dateFormatted}</span></div>
-      <div class="field"><span class="label">Files:</span> 
+      <div class="field">
+        <span class="label">Evidence Title:</span>
+        <span class="value">${data.evidenceTitle || "—"}</span>
+      </div>
+
+      ${data.summary ? `
+        <div class="field">
+          <span class="label">Summary:</span>
+          <span class="value">${data.summary}</span>
+        </div>
+      ` : ""}
+
+      ${data.linkedSmartContract ? `
+        <div class="field">
+          <span class="label">Linked Smart Contract:</span>
+          <span class="value">${data.linkedSmartContract}</span>
+        </div>
+      ` : ""}
+
+      <div class="field">
+        <span class="label">Transaction Hash:</span>
+        <span class="value">${data.txHash}</span>
+      </div>
+
+      <div class="field">
+        <span class="label">GPS:</span>
+        <span class="value">${data.gps || "—"}</span>
+      </div>
+
+      <div class="field">
+        <span class="label">Date (UTC):</span>
+        <span class="value">${dateFormatted}</span>
+      </div>
+
+      <div class="field">
+        <span class="label">Files:</span>
         <div class="value file-list">
           ${(data.files || [])
-            .map(
-              (f) =>
-                `<div>${f.name} — <small>${f.hash}</small></div>`
-            )
+            .map(f => `<div>${f.name} — <small>${f.hash}</small></div>`)
             .join("") || "No files recorded"}
         </div>
       </div>
