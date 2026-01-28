@@ -1,5 +1,5 @@
 // ======================================================
-// 🟪 UDoChain Verify Private v4.7
+// 🟪 UDoChain Verify Private v4.8
 // Public display — shows private validation data + separate downloads
 // ======================================================
 
@@ -37,17 +37,68 @@ async function loadPrivateValidation() {
     badgeDiv.innerHTML = `<div class="badge verified">Verified on Blockchain</div>`;
     const dateFormatted = new Date(data.validatedAt).toLocaleString();
 
-    // Mostrar información principal
+    // ======================================================
+    // 🧾 Información principal
+    // ======================================================
     detailsDiv.innerHTML = `
-      <div class="field"><span class="label">Evidence Title:</span> <span class="value">${data.evidenceTitle || "—"}</span></div>
-      <div class="field"><span class="label">Transaction Hash:</span> <span class="value">${data.txHash}</span></div>
-      <div class="field"><span class="label">Validated By:</span> <span class="value">${data.userEmail || "Unknown"}</span></div>
-      <div class="field"><span class="label">GPS:</span> <span class="value">${data.gps || "—"}</span></div>
-      <div class="field"><span class="label">Date (UTC):</span> <span class="value">${dateFormatted}</span></div>
-      ${data.bioidHash ? `<div class="field"><span class="label">BioID Hash:</span> <span class="value">${data.bioidHash}</span></div>` : ""}
-      <div class="field"><span class="label">Storage ID:</span> <span class="value">${data.storageId || "—"}</span></div>
-      <div class="field"><span class="label">Private Storage:</span> <span class="value">${data.w3Note || "—"}</span></div>
-      <div class="field"><span class="label">Files:</span>
+      <div class="field">
+        <span class="label">Evidence Title:</span>
+        <span class="value">${data.evidenceTitle || "—"}</span>
+      </div>
+
+      ${data.summary ? `
+        <div class="field">
+          <span class="label">Summary:</span>
+          <span class="value">${data.summary}</span>
+        </div>
+      ` : ""}
+
+      ${data.linkedSmartContract ? `
+        <div class="field">
+          <span class="label">Linked Smart Contract:</span>
+          <span class="value">${data.linkedSmartContract}</span>
+        </div>
+      ` : ""}
+
+      <div class="field">
+        <span class="label">Transaction Hash:</span>
+        <span class="value">${data.txHash}</span>
+      </div>
+
+      <div class="field">
+        <span class="label">Validated By:</span>
+        <span class="value">${data.userEmail || "Unknown"}</span>
+      </div>
+
+      <div class="field">
+        <span class="label">GPS:</span>
+        <span class="value">${data.gps || "—"}</span>
+      </div>
+
+      <div class="field">
+        <span class="label">Date (UTC):</span>
+        <span class="value">${dateFormatted}</span>
+      </div>
+
+      ${data.bioidHash ? `
+        <div class="field">
+          <span class="label">Identity Hash:</span>
+          <span class="value">${data.bioidHash}</span>
+        </div>
+      ` : ""}
+
+      <div class="field">
+        <span class="label">Storage ID:</span>
+        <span class="value">${data.storageId || "—"}</span>
+      </div>
+
+      <div class="field">
+        <span class="label">Private Storage:</span>
+        <span class="value">${data.w3Note || "—"}</span>
+      </div>
+
+      <div class="field">
+        <span class="label">Files:</span>
         <div class="value file-list">
           ${(data.files || [])
             .map(f => `<div>${f.name} — <small>${f.hash}</small></div>`)
@@ -61,7 +112,7 @@ async function loadPrivateValidation() {
     // ======================================================
     const downloads = [];
 
-    // 📦 Si tiene custodia ZIP
+    // 📦 Custodia ZIP
     if (data.binaryStorageId) {
       const cleanBinaryId = data.binaryStorageId.replace("ar://", "");
       const binaryUrl = `https://validate.udochain.com/api/validate/aereware/download/files/${encodeURIComponent(cleanBinaryId)}`;
@@ -75,7 +126,7 @@ async function loadPrivateValidation() {
       `);
     }
 
-    // 🧾 Siempre puede descargar metadata
+    // 🧾 Metadata JSON
     if (data.storageId) {
       const cleanMetaId = data.storageId.replace("ar://", "");
       const metaUrl = `https://validate.udochain.com/api/validate/aereware/download/metadata/${encodeURIComponent(cleanMetaId)}`;
@@ -89,11 +140,10 @@ async function loadPrivateValidation() {
       `);
     }
 
-    if (downloads.length > 0) {
-      downloadsDiv.innerHTML = downloads.join("<br>");
-    } else {
-      downloadsDiv.innerHTML = "<p class='subtitle'>No downloadable content available.</p>";
-    }
+    downloadsDiv.innerHTML =
+      downloads.length > 0
+        ? downloads.join("<br>")
+        : "<p class='subtitle'>No downloadable content available.</p>";
   } catch (err) {
     console.error("❌ Fetch error:", err);
     badgeDiv.innerHTML = `<div class="badge unverified">Unverified</div>`;
