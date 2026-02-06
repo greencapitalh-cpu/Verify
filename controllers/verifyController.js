@@ -1,37 +1,87 @@
-import Validation from "../models/Validation.js";
+// ======================================================
+// 🔍 UDoChain Verify Controller — PROTOCOLO FUNCIONAL
+// Fuente de verdad: api.udochain.com (Validate)
+// ======================================================
+
+import fetch from "node-fetch";
 import VerifyEvidence from "../models/VerifyEvidence.js";
 
 // POST /api/verify/hash
 export const verifyHash = async (req, res) => {
   try {
     const { hash } = req.body;
-    const email = req.headers["x-udo-email"];
 
-    if (!hash) return res.status(400).json({ ok: false, error: "Missing hash" });
-
-    // 1️⃣ Buscar en Validation (evidencia original)
-    const validation = await Validation.findOne({ "files.hash": hash }).lean();
-
-    if (!validation) {
-      return res.json({ ok: false, error: "No validation found for this hash." });
+    if (!hash) {
+      return res.status(400).json({
+        ok: false,
+        error: "Missing hash",
+      });
     }
 
-    // 2️⃣ Buscar estado vivo en VerifyEvidence
-    const live = await VerifyEvidence.findOne({ txHash: validation.txHash }).lean();
+    // --------------------------------------------------
+    // 🌍 Fuente de verdad: VALIDATE API
+    // --------------------------------------------------
+    const VALIDATE_API =
+      process.env.VALIDATE_API_BASE ||
+      "https://api.udochain.com/validate/api";
 
-    // 3️⃣ Armar respuesta combinada
-    res.json({
+    const validateRes = await fetch(
+      `${VALIDATE_API}/verify/hash`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ hash }),
+      }
+    );
+
+    if (!validateRes.ok) {
+      return res.json({
+        ok: false,
+        error: "Validation service unreachable",
+      });
+    }
+
+    const validation = await validateRes.json();
+
+    if (!validation?.ok) {
+      return res.json({
+        ok: false,
+        error: "No validation found for this hash.",
+      });
+    }
+
+    // --------------------------------------------------
+    // 🧠 Estado vivo (Verify local DB)
+    // --------------------------------------------------
+    const live = await VerifyEvidence.findOne({
+      txHash: validation.txHash,
+    }).lean();
+
+    // --------------------------------------------------
+    // ✅ Respuesta unificada
+    // --------------------------------------------------
+    return res.json({
       ok: true,
+
+      // Evidencia base (Validate)
       evidenceTitle: validation.evidenceTitle,
       txHash: validation.txHash,
       storageId: validation.storageId,
       pdfUrl: live?.currentPdfUrl || validation.pdfUrl,
+      files: validation.files || [],
+      gps: validation.gps || null,
+      validatedAt: validation.validatedAt,
+
+      // Estado dinámico (Verify)
       qrActive: live?.qrActive ?? true,
       status: live?.status || "active",
       version: live?.version || 1,
-      validatedAt: validation.createdAt,
     });
   } catch (err) {
-    res.status(500).json({ ok: false, error: err.message });
+    console.error("❌ verifyHash error:", err);
+    return res.status(500).json({
+      ok: false,
+      error: "Internal verify error",
+    });
   }
 };
