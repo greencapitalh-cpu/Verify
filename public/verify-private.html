@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>UDoChain Private Verification</title>
+
     <link rel="icon" href="logo-udochain.png" />
     <link rel="stylesheet" href="styles.css" />
 
@@ -13,19 +14,18 @@
         background: #f9fafb;
         color: #1e293b;
         margin: 0;
+        min-height: 100vh;
         display: flex;
         flex-direction: column;
-        min-height: 100vh;
       }
 
       header {
         background: white;
         padding: 1rem 1.5rem;
         border-bottom: 1px solid #e2e8f0;
-        box-shadow: 0 1px 6px rgba(0, 0, 0, 0.05);
         display: flex;
-        align-items: center;
         justify-content: space-between;
+        align-items: center;
       }
 
       .header-left {
@@ -45,42 +45,34 @@
       }
 
       .back-link {
-        font-size: 0.95rem;
-        color: #475569;
         text-decoration: none;
         background: #f1f5f9;
         padding: 6px 14px;
         border-radius: 8px;
-        transition: all 0.25s;
-      }
-
-      .back-link:hover {
-        background: #e2e8f0;
-        color: #5b2e90;
+        color: #475569;
+        font-size: 0.9rem;
       }
 
       main {
         flex: 1;
         display: flex;
         justify-content: center;
-        align-items: flex-start;
         padding: 2rem 1rem;
       }
 
       .card {
         background: white;
         border-radius: 16px;
-        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
         padding: 2rem;
         max-width: 620px;
         width: 100%;
-        text-align: left;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
       }
 
       h2 {
         text-align: center;
         color: #5b2e90;
-        margin-bottom: 0.6rem;
+        margin-bottom: 0.5rem;
       }
 
       .subtitle {
@@ -90,50 +82,13 @@
         margin-bottom: 1.5rem;
       }
 
-      .field {
-        margin-bottom: 0.8rem;
-      }
-
-      .label {
-        font-weight: 600;
-        color: #475569;
-      }
-
-      .value {
-        color: #1e293b;
-        word-break: break-all;
-        display: block;
-        margin-top: 2px;
-      }
-
-      .divider {
-        border-top: 1px solid #e2e8f0;
-        margin: 1.5rem 0;
-      }
-
-      #status {
-        text-align: center;
-        margin-top: 1rem;
-        font-weight: 600;
-      }
-
-      .ok {
-        color: #14532d;
-      }
-
-      .fail {
-        color: #b91c1c;
-      }
-
       .badge {
-        display: block;
-        width: fit-content;
         margin: 0 auto 1rem;
-        padding: 6px 12px;
+        padding: 6px 14px;
         border-radius: 12px;
-        font-size: 0.85rem;
         font-weight: 600;
-        text-align: center;
+        font-size: 0.85rem;
+        width: fit-content;
       }
 
       .badge.verified {
@@ -146,64 +101,53 @@
         color: #991b1b;
       }
 
-      /* ✅ Botones de descarga */
+      .field {
+        margin-bottom: 0.8rem;
+      }
+
+      .label {
+        font-weight: 600;
+        color: #475569;
+      }
+
+      .value {
+        display: block;
+        margin-top: 2px;
+        word-break: break-all;
+      }
+
+      .divider {
+        border-top: 1px solid #e2e8f0;
+        margin: 1.5rem 0;
+      }
+
       .download-btn {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
         width: 100%;
-        margin-top: 1rem;
         padding: 12px;
-        border: none;
         border-radius: 10px;
+        border: none;
         font-weight: 600;
         cursor: pointer;
-        transition: 0.25s;
-        font-size: 0.95rem;
+        margin-top: 0.8rem;
       }
 
       .download-files {
-        background-color: #5b2e90;
+        background: #5b2e90;
         color: white;
-      }
-
-      .download-files:hover {
-        background-color: #4b256f;
       }
 
       .download-meta {
-        background-color: #475569;
+        background: #475569;
         color: white;
       }
 
-      .download-meta:hover {
-        background-color: #334155;
-      }
-
-      .download-icon {
-        width: 18px;
-        height: 18px;
-        fill: white;
-      }
-
       footer {
-        border-top: 1px solid #e2e8f0;
-        background: white;
+        text-align: center;
         padding: 1rem;
         font-size: 0.85rem;
         color: #6b7280;
-        text-align: center;
-      }
-
-      @media (max-width: 600px) {
-        .card {
-          padding: 1.5rem;
-        }
-
-        h2 {
-          font-size: 1.3rem;
-        }
+        border-top: 1px solid #e2e8f0;
+        background: white;
       }
     </style>
   </head>
@@ -211,8 +155,8 @@
   <body>
     <header>
       <div class="header-left">
-        <img src="logo-udochain.png" alt="UDoChain Logo" class="logo" />
-        <span class="header-title notranslate" translate="no">UDoChain Verify</span>
+        <img src="logo-udochain.png" class="logo" />
+        <span class="header-title">UDoChain Verify</span>
       </div>
       <a href="https://wapp.udochain.com" class="back-link">Back</a>
     </header>
@@ -236,12 +180,11 @@
         </p>
 
         <div id="downloads"></div>
-        <div id="status"></div>
       </div>
     </main>
 
     <footer>
-      <p class="notranslate" translate="no">You do. We validate.</p>
+      <p>You do. We validate.</p>
       <p>© 2025 UDoChain — All rights reserved.</p>
     </footer>
 
@@ -253,77 +196,76 @@
       const params = new URLSearchParams(window.location.search);
       const storage = params.get("storage");
 
+      // ✅ PROTOCOLO FUNCIONAL: fuente viva
+      const VALIDATE_API = "https://validate.udochain.com";
+
       async function loadPrivateValidation() {
         if (!storage) {
-          detailsDiv.innerHTML = "<p class='fail'>No storage ID provided in URL.</p>";
+          detailsDiv.innerHTML =
+            "<p class='fail'>No storage ID provided.</p>";
           return;
         }
 
         try {
           const cleanId = storage.replace(/^ar:\/\//, "");
+
           const res = await fetch(
-            `https://validate.udochain.com/api/validate/storage/${encodeURIComponent(cleanId)}`
+            `${VALIDATE_API}/api/validate/storage/${encodeURIComponent(cleanId)}`
           );
+
           const data = await res.json();
 
           if (!data?.ok) {
-            badgeDiv.innerHTML = `<div class="badge unverified">Unverified</div>`;
-            detailsDiv.innerHTML = `<p class="fail">Validation not found or invalid storage ID.</p>`;
+            badgeDiv.innerHTML =
+              `<div class="badge unverified">Unverified</div>`;
+            detailsDiv.innerHTML =
+              "<p class='fail'>Validation not found.</p>";
             return;
           }
 
-          badgeDiv.innerHTML = `<div class="badge verified">Verified on Blockchain</div>`;
-          const dateFormatted = new Date(data.validatedAt).toLocaleString();
+          badgeDiv.innerHTML =
+            `<div class="badge verified">Verified on Blockchain</div>`;
+
+          const date = new Date(data.validatedAt).toLocaleString();
 
           detailsDiv.innerHTML = `
-            <div class="field"><span class="label">Evidence Title:</span> <span class="value">${data.evidenceTitle || "—"}</span></div>
-            <div class="field"><span class="label">Transaction Hash:</span> <span class="value">${data.txHash}</span></div>
-            <div class="field"><span class="label">Validated By:</span> <span class="value">${data.userEmail || "Unknown"}</span></div>
-            <div class="field"><span class="label">GPS:</span> <span class="value">${data.gps || "—"}</span></div>
-            <div class="field"><span class="label">Date (UTC):</span> <span class="value">${dateFormatted}</span></div>
-            ${data.bioidHash ? `<div class="field"><span class="label">BioID Hash:</span> <span class="value">${data.bioidHash}</span></div>` : ""}
-            <div class="field"><span class="label">Storage ID:</span> <span class="value">${data.storageId || "—"}</span></div>
-            <div class="field"><span class="label">Private Storage:</span> <span class="value">${data.w3Note || "—"}</span></div>
+            <div class="field"><span class="label">Evidence Title:</span><span class="value">${data.evidenceTitle}</span></div>
+            <div class="field"><span class="label">Transaction Hash:</span><span class="value">${data.txHash}</span></div>
+            <div class="field"><span class="label">Validated By:</span><span class="value">${data.userEmail || "—"}</span></div>
+            <div class="field"><span class="label">GPS:</span><span class="value">${data.gps || "—"}</span></div>
+            <div class="field"><span class="label">Date (UTC):</span><span class="value">${date}</span></div>
+            <div class="field"><span class="label">Storage ID:</span><span class="value">${data.storageId}</span></div>
+            <div class="field"><span class="label">Private Storage:</span><span class="value">${data.w3Note}</span></div>
           `;
 
           const downloads = [];
 
-          // 📦 Botón para custodia ZIP
           if (data.binaryStorageId) {
-            const cleanBinaryId = data.binaryStorageId.replace("ar://", "");
-            const binaryUrl = `https://validate.udochain.com/api/validate/aereware/download/files/${encodeURIComponent(cleanBinaryId)}`;
+            const id = data.binaryStorageId.replace("ar://", "");
             downloads.push(`
-              <button class="download-btn download-files" onclick="window.open('${binaryUrl}', '_blank')">
-                <svg xmlns="http://www.w3.org/2000/svg" class="download-icon" viewBox="0 0 24 24">
-                  <path d="M12 3v12m0 0l-4-4m4 4l4-4m-9 8h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-                </svg>
+              <button class="download-btn download-files"
+                onclick="window.open('${VALIDATE_API}/api/validate/aereware/download/files/${id}')">
                 Download Custody Files (ZIP)
               </button>
             `);
           }
 
-          // 🧾 Botón para metadata JSON
           if (data.storageId) {
-            const cleanMetaId = data.storageId.replace("ar://", "");
-            const metaUrl = `https://validate.udochain.com/api/validate/aereware/download/metadata/${encodeURIComponent(cleanMetaId)}`;
+            const id = data.storageId.replace("ar://", "");
             downloads.push(`
-              <button class="download-btn download-meta" onclick="window.open('${metaUrl}', '_blank')">
-                <svg xmlns="http://www.w3.org/2000/svg" class="download-icon" viewBox="0 0 24 24">
-                  <path d="M12 3v12m0 0l-4-4m4 4l4-4m-9 8h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-                </svg>
+              <button class="download-btn download-meta"
+                onclick="window.open('${VALIDATE_API}/api/validate/aereware/download/metadata/${id}')">
                 Download Metadata (JSON)
               </button>
             `);
           }
 
-          downloadsDiv.innerHTML =
-            downloads.length > 0
-              ? downloads.join("<br>")
-              : "<p class='subtitle'>No downloadable content available.</p>";
-        } catch (err) {
-          console.error("❌ Fetch error:", err);
-          badgeDiv.innerHTML = `<div class="badge unverified">Unverified</div>`;
-          detailsDiv.innerHTML = "<p class='fail'>Error fetching private validation details.</p>";
+          downloadsDiv.innerHTML = downloads.join("");
+        } catch (e) {
+          badgeDiv.innerHTML =
+            `<div class="badge unverified">Unverified</div>`;
+          detailsDiv.innerHTML =
+            "<p class='fail'>Fetch error.</p>";
         }
       }
 
