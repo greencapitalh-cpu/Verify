@@ -196,8 +196,8 @@
       const params = new URLSearchParams(window.location.search);
       const storage = params.get("storage");
 
-      // ✅ PROTOCOLO FUNCIONAL: fuente viva
-      const VALIDATE_API = "https://validate.udochain.com";
+      // ✅ PROTOCOLO FUNCIONAL: fuente viva (API)
+      const VALIDATE_API = "https://api.udochain.com/validate";
 
       async function loadPrivateValidation() {
         if (!storage) {
@@ -229,7 +229,7 @@
           const date = new Date(data.validatedAt).toLocaleString();
 
           detailsDiv.innerHTML = `
-            <div class="field"><span class="label">Evidence Title:</span><span class="value">${data.evidenceTitle}</span></div>
+            <div class="field"><span class="label">Evidence Title:</span><span class="value">${data.evidenceTitle || "—"}</span></div>
             <div class="field"><span class="label">Transaction Hash:</span><span class="value">${data.txHash}</span></div>
             <div class="field"><span class="label">Validated By:</span><span class="value">${data.userEmail || "—"}</span></div>
             <div class="field"><span class="label">GPS:</span><span class="value">${data.gps || "—"}</span></div>
@@ -244,7 +244,7 @@
             const id = data.binaryStorageId.replace("ar://", "");
             downloads.push(`
               <button class="download-btn download-files"
-                onclick="window.open('${VALIDATE_API}/api/validate/aereware/download/files/${id}')">
+                onclick="window.open('${VALIDATE_API}/api/validate/aereware/download/files/${id}','_blank')">
                 Download Custody Files (ZIP)
               </button>
             `);
@@ -254,7 +254,7 @@
             const id = data.storageId.replace("ar://", "");
             downloads.push(`
               <button class="download-btn download-meta"
-                onclick="window.open('${VALIDATE_API}/api/validate/aereware/download/metadata/${id}')">
+                onclick="window.open('${VALIDATE_API}/api/validate/aereware/download/metadata/${id}','_blank')">
                 Download Metadata (JSON)
               </button>
             `);
