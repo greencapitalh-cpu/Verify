@@ -506,15 +506,15 @@ loadValidation();
 
 */
 
+
 // ======================================================
-// 🟪 UDoChain Verify Private v4.9 — FINAL FUNCIONAL
-// Private display — API desacoplada de validate.udochain.com
+// 🌍 UDoChain Verify Public — STABLE STORAGE VERSION
 // ======================================================
 
 const detailsDiv = document.getElementById("details");
-const downloadsDiv = document.getElementById("downloads");
-const badgeDiv = document.getElementById("badge");
+const dropZone = document.getElementById("dropZone");
 const statusDiv = document.getElementById("status");
+const badgeDiv = document.getElementById("badge");
 
 // ------------------------------------------------------
 // 🔗 PARAMS
@@ -528,9 +528,9 @@ const storage = params.get("storage");
 const VALIDATE_API = "https://api.udochain.com/validate";
 
 // ======================================================
-// 🧠 Load private validation
+// 🧠 Load PUBLIC validation via storageId
 // ======================================================
-async function loadPrivateValidation() {
+async function loadValidation() {
   if (!storage) {
     detailsDiv.innerHTML =
       "<p class='fail'>No storage ID provided in URL.</p>";
@@ -540,13 +540,12 @@ async function loadPrivateValidation() {
   try {
     const cleanId = storage.replace(/^ar:\/\//, "");
 
-    // ✅ ENDPOINT CORREGIDO
     const res = await fetch(
-      `${VALIDATE_API}/api/verify/private/${encodeURIComponent(cleanId)}`
+      `${VALIDATE_API}/api/validate/storage/${encodeURIComponent(cleanId)}`
     );
 
     if (!res.ok) {
-      throw new Error("Server response not OK");
+      throw new Error(`Server error ${res.status}`);
     }
 
     const data = await res.json();
@@ -555,18 +554,20 @@ async function loadPrivateValidation() {
       badgeDiv.innerHTML =
         `<div class="badge unverified">Unverified</div>`;
       detailsDiv.innerHTML =
-        "<p class='fail'>Validation not found or invalid storage ID.</p>";
+        "<p class='fail'>Validation not found.</p>";
       return;
     }
 
     badgeDiv.innerHTML =
       `<div class="badge verified">Verified on Blockchain</div>`;
 
-    const dateFormatted = new Date(data.validatedAt).toLocaleString();
+    const dateFormatted = new Date(
+      data.validatedAt || data.createdAt
+    ).toLocaleString();
 
-    // ======================================================
-    // 🧾 Main information
-    // ======================================================
+    // --------------------------------------------------
+    // 🧾 Render PUBLIC evidence
+    // --------------------------------------------------
     detailsDiv.innerHTML = `
       <div class="field">
         <span class="label">Evidence Title:</span>
@@ -597,11 +598,6 @@ async function loadPrivateValidation() {
       </div>
 
       <div class="field">
-        <span class="label">Validated By:</span>
-        <span class="value">${data.userEmail || "Unknown"}</span>
-      </div>
-
-      <div class="field">
         <span class="label">GPS:</span>
         <span class="value">${data.gps || "—"}</span>
       </div>
@@ -611,32 +607,14 @@ async function loadPrivateValidation() {
         <span class="value">${dateFormatted}</span>
       </div>
 
-      ${
-        data.bioidHash
-          ? `<div class="field">
-               <span class="label">Identity Hash:</span>
-               <span class="value">${data.bioidHash}</span>
-             </div>`
-          : ""
-      }
-
-      <div class="field">
-        <span class="label">Storage ID:</span>
-        <span class="value">${data.storageId || "—"}</span>
-      </div>
-
-      <div class="field">
-        <span class="label">Private Storage:</span>
-        <span class="value">${data.w3Note || "—"}</span>
-      </div>
-
       <div class="field">
         <span class="label">Files:</span>
         <div class="value file-list">
           ${
             (data.files || [])
               .map(
-                (f) => `<div>${f.name} — <small>${f.hash}</small></div>`
+                (f) =>
+                  `<div>${f.name} — <small>${f.hash}</small></div>`
               )
               .join("") || "No files recorded"
           }
@@ -644,58 +622,85 @@ async function loadPrivateValidation() {
       </div>
     `;
 
-    // ======================================================
-    // 📦 Downloads (Aereware)
-    // ======================================================
-    const downloads = [];
-
-    // 📦 Custody ZIP
-    if (data.binaryStorageId) {
-      const cleanBinaryId = data.binaryStorageId.replace("ar://", "");
-      const binaryUrl =
-        `${VALIDATE_API}/api/validate/aereware/download/files/` +
-        encodeURIComponent(cleanBinaryId);
-
-      downloads.push(`
-        <button class="download-btn"
-          onclick="window.open('${binaryUrl}', '_blank')">
-          Download Custody Files (ZIP)
-        </button>
-      `);
-    }
-
-    // 🧾 Metadata JSON
-    if (data.storageId) {
-      const cleanMetaId = data.storageId.replace("ar://", "");
-      const metaUrl =
-        `${VALIDATE_API}/api/validate/aereware/download/metadata/` +
-        encodeURIComponent(cleanMetaId);
-
-      downloads.push(`
-        <button class="download-btn"
-          style="background-color:#475569"
-          onclick="window.open('${metaUrl}', '_blank')">
-          Download Metadata (JSON)
-        </button>
-      `);
-    }
-
-    downloadsDiv.innerHTML =
-      downloads.length > 0
-        ? downloads.join("<br>")
-        : "<p class='subtitle'>No downloadable content available.</p>";
+    // --------------------------------------------------
+    // 🔐 Cache hashes for local verification
+    // --------------------------------------------------
+    window.validatedFiles = (data.files || [])
+      .filter(f => f && typeof f.hash === "string")
+      .map(f => f.hash.toLowerCase());
 
   } catch (err) {
-    console.error("❌ Verify private fetch error:", err);
+    console.error("❌ Verify public fetch error:", err);
+
     badgeDiv.innerHTML =
       `<div class="badge unverified">Unverified</div>`;
+
     detailsDiv.innerHTML =
-      "<p class='fail'>Error fetching private validation details.</p>";
+      "<p class='fail'>Error loading validation details.</p>";
+  }
+}
+
+// ======================================================
+// 📂 File upload / drop
+// ======================================================
+dropZone.addEventListener("click", () => {
+  const input = document.createElement("input");
+  input.type = "file";
+  input.accept = "*/*";
+  input.onchange = (e) => verifyFile(e.target.files[0]);
+  input.click();
+});
+
+dropZone.addEventListener("dragover", (e) => {
+  e.preventDefault();
+  dropZone.classList.add("dragover");
+});
+
+dropZone.addEventListener("dragleave", () =>
+  dropZone.classList.remove("dragover")
+);
+
+dropZone.addEventListener("drop", (e) => {
+  e.preventDefault();
+  dropZone.classList.remove("dragover");
+  const file = e.dataTransfer.files[0];
+  if (file) verifyFile(file);
+});
+
+// ======================================================
+// 🔍 Local file hash verification
+// ======================================================
+async function verifyFile(file) {
+  if (!file) return;
+
+  if (!window.validatedFiles?.length) {
+    statusDiv.innerHTML =
+      "<p class='fail'>Validation data not loaded yet.</p>";
+    return;
+  }
+
+  statusDiv.textContent = "Analyzing file...";
+
+  const buffer = await file.arrayBuffer();
+  const hashBuffer = await crypto.subtle.digest("SHA-256", buffer);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+
+  const fileHash = hashArray
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("")
+    .toLowerCase();
+
+  if (window.validatedFiles.includes(fileHash)) {
+    statusDiv.innerHTML =
+      `<p class="ok">This file matches the blockchain validation record.</p>`;
+  } else {
+    statusDiv.innerHTML =
+      `<p class="fail">This file does not match any validated record.</p>`;
   }
 }
 
 // ======================================================
 // 🚀 INIT
 // ======================================================
-loadPrivateValidation();
+loadValidation();
 
