@@ -1,55 +1,64 @@
-console.log("RAW RESPONSE:", record);
 const params = new URLSearchParams(window.location.search);
 const id = params.get("id");
 
 if (!id) {
-  document.getElementById("title").innerText = "Invalid Record";
+  document.body.innerHTML = "<h2>Missing ID</h2>";
   throw new Error("Missing storage ID");
 }
 
 async function loadRecord() {
   try {
     const res = await fetch(`/api/records/${encodeURIComponent(id)}`);
-    const record = await res.json();
+    const raw = await res.json();
+
+    console.log("RAW RESPONSE:", raw);
+
+    // 🔥 Detectar dónde viene el metadata realmente
+    const record =
+      raw.evidence ? raw :
+      raw.metadata ? raw.metadata :
+      raw.record ? raw.record :
+      raw.data ? raw.data :
+      raw;
 
     if (!record) {
-      document.getElementById("title").innerText = "Record not found";
+      document.body.innerHTML = "<h2>Record not found</h2>";
       return;
     }
 
-    // 🔹 TITLE
     document.getElementById("title").innerText =
-      record.evidence?.title || "Untitled Evidence";
+      record.evidence?.title || record.title || "Untitled Evidence";
 
-    // 🔹 TX HASH
     document.getElementById("txHash").innerText =
-      record.anchors?.polygon?.txHash || "-";
+      record.anchors?.polygon?.txHash ||
+      record.txHash ||
+      "-";
 
-    // 🔹 DATE
     document.getElementById("date").innerText =
       record.evidence?.validatedAt
         ? new Date(record.evidence.validatedAt).toLocaleString()
         : "-";
 
-    // 🔹 GPS
     document.getElementById("gps").innerText =
-      record.evidence?.gps || "GPS not provided";
+      record.evidence?.gps ||
+      record.gps ||
+      "GPS not provided";
 
-    // 🔹 STORAGE ID
     document.getElementById("storageId").innerText =
       record.storageId || id;
 
-    // 🔹 FILES LIST
     const filesContainer = document.getElementById("files");
     filesContainer.innerHTML = "";
 
-    if (Array.isArray(record.files) && record.files.length > 0) {
-      record.files.forEach(file => {
+    const files = record.files || record.evidence?.files || [];
+
+    if (Array.isArray(files) && files.length > 0) {
+      files.forEach(file => {
         const div = document.createElement("div");
         div.className = "file-item";
         div.innerHTML = `
-          <strong>${file.name}</strong><br/>
-          <small>SHA256: ${file.hash}</small>
+          <strong>${file.name || "File"}</strong><br/>
+          <small>${file.hash || "-"}</small>
         `;
         filesContainer.appendChild(div);
       });
@@ -57,11 +66,9 @@ async function loadRecord() {
       filesContainer.innerText = "No files registered.";
     }
 
-    // 🔹 CUSTODY DOWNLOAD BUTTON
     if (record.custody?.hasBinaryBackup === true) {
       const btn = document.getElementById("downloadBtn");
       btn.classList.remove("hidden");
-
       btn.onclick = () => {
         window.location.href =
           `/api/custody/download/${encodeURIComponent(id)}`;
@@ -69,8 +76,8 @@ async function loadRecord() {
     }
 
   } catch (err) {
-    console.error("Verify load error:", err);
-    document.getElementById("title").innerText = "Error loading record";
+    console.error("VERIFY ERROR:", err);
+    document.body.innerHTML = "<h2>Error loading record</h2>";
   }
 }
 
