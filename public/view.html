@@ -170,4 +170,73 @@ ${
 
 validatedFiles = (data.files || []).map(f => f.hash.toLowerCase());
 
-if (
+if (data.binaryStorageId) {
+const binId = data.binaryStorageId.replace("ar://", "");
+
+downloadsDiv.innerHTML = `
+<div class="info-box">
+This validation includes custody backup stored in Aereware.
+</div>
+<button class="download-btn"
+onclick="window.open('${VALIDATE_API}/api/validate/aereware/download/files/${binId}','_blank')">
+Download Custody Files (ZIP)
+</button>
+`;
+}
+
+} catch (err) {
+badgeDiv.innerHTML = `<div class="badge unverified">Unverified</div>`;
+detailsDiv.innerHTML = "<p class='fail'>Error loading validation.</p>";
+}
+}
+
+dropZone.addEventListener("click", () => {
+const input = document.createElement("input");
+input.type = "file";
+input.accept = "*/*";
+input.onchange = e => verifyFile(e.target.files[0]);
+input.click();
+});
+
+dropZone.addEventListener("dragover", e => {
+e.preventDefault();
+dropZone.classList.add("dragover");
+});
+
+dropZone.addEventListener("dragleave", () => {
+dropZone.classList.remove("dragover");
+});
+
+dropZone.addEventListener("drop", e => {
+e.preventDefault();
+dropZone.classList.remove("dragover");
+const file = e.dataTransfer.files[0];
+if (file) verifyFile(file);
+});
+
+async function verifyFile(file) {
+
+if (!validatedFiles.length) {
+statusDiv.innerHTML = "<p class='fail'>Validation data not loaded.</p>";
+return;
+}
+
+statusDiv.textContent = "Analyzing file...";
+
+const buffer = await file.arrayBuffer();
+const hashBuffer = await crypto.subtle.digest("SHA-256", buffer);
+const hashArray = Array.from(new Uint8Array(hashBuffer));
+const fileHash = hashArray.map(b => b.toString(16).padStart(2,"0")).join("").toLowerCase();
+
+if (validatedFiles.includes(fileHash)) {
+statusDiv.innerHTML = `<p class="ok">This file matches the blockchain record.</p>`;
+} else {
+statusDiv.innerHTML = `<p class="fail">This file does NOT match the registered hash.</p>`;
+}
+}
+
+loadValidation();
+</script>
+
+</body>
+</html>
