@@ -107,8 +107,7 @@ async function loadValidation() {
     // --------------------------------------------------
     // 🔐 Cache hashes for local verification
     // --------------------------------------------------
-    window.validatedFiles =
-      data.files?.map((f) => f.hash.toLowerCase()) || [];
+   window.validatedFiles = (data.files || []) .filter(f => f && typeof f.hash === "string") .map(f => f.hash.toLowerCase());
   } catch (err) {
     console.error("❌ Verify public fetch error:", err);
     badgeDiv.innerHTML =
