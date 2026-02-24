@@ -47,6 +47,11 @@ background:#eff6ff;
 .ok { color:#14532d; }
 .fail { color:#b91c1c; }
 
+.download-section {
+margin-top:1.5rem;
+text-align:center;
+}
+
 .download-btn {
 width:100%;
 padding:12px;
@@ -57,6 +62,15 @@ cursor:pointer;
 margin-top:0.8rem;
 background:#184b8c;
 color:white;
+}
+
+.info-box {
+margin-top:1rem;
+padding:12px;
+border-radius:10px;
+background:#eff6ff;
+color:#1e3a8a;
+font-size:0.9rem;
 }
 
 .badge {
@@ -92,7 +106,7 @@ footer { text-align:center; padding:1rem; border-top:1px solid #e2e8f0; backgrou
 
 <h2>Validation Details</h2>
 <p class="subtitle">
-View blockchain validation and verify files integrity.
+View blockchain validation and verify file integrity.
 </p>
 
 <div id="details">Loading validation data...</div>
@@ -101,7 +115,7 @@ View blockchain validation and verify files integrity.
 
 <h2>File Verification</h2>
 <p class="subtitle">
-Upload original file to check if it matches the registered blockchain hash.
+Upload the original file to check if it matches the registered blockchain hash.
 </p>
 
 <div id="dropZone" class="drop-zone">
@@ -110,7 +124,7 @@ Drop or click to upload file
 
 <div id="status"></div>
 
-<div id="downloads"></div>
+<div id="downloads" class="download-section"></div>
 
 </div>
 </main>
@@ -128,31 +142,27 @@ const statusDiv = document.getElementById("status");
 const downloadsDiv = document.getElementById("downloads");
 
 const params = new URLSearchParams(window.location.search);
-const tx = params.get("tx");
-const storage = params.get("storage");
+const id = params.get("id");
 
 const VALIDATE_API = "https://api.udochain.com/validate";
 
 let validatedFiles = [];
 
 // ======================================================
-// LOAD VALIDATION (TX o STORAGE)
+// LOAD VALIDATION (SOLO STORAGE)
 // ======================================================
 async function loadValidation() {
 
-try {
-
-let url;
-
-if (tx) {
-url = `${VALIDATE_API}/api/validate/tx/${encodeURIComponent(tx)}`;
-} else if (storage) {
-const clean = storage.replace(/^ar:\/\//, "");
-url = `${VALIDATE_API}/api/validate/storage/${encodeURIComponent(clean)}`;
-} else {
-detailsDiv.innerHTML = "<p class='fail'>No tx or storage provided.</p>";
+if (!id) {
+detailsDiv.innerHTML = "<p class='fail'>No storage ID provided.</p>";
 return;
 }
+
+try {
+
+const cleanStorage = id.replace(/^ar:\/\//, "");
+
+const url = `${VALIDATE_API}/api/validate/storage/${encodeURIComponent(cleanStorage)}`;
 
 const res = await fetch(url);
 const data = await res.json();
@@ -175,7 +185,7 @@ detailsDiv.innerHTML = `
 <div class="field"><span class="label">Date:</span><span class="value">${dateFormatted}</span></div>
 
 <div class="field">
-<span class="label">Files:</span>
+<span class="label">Registered Files:</span>
 <div class="value file-list">
 ${
 (data.files || [])
@@ -188,10 +198,19 @@ ${
 
 validatedFiles = (data.files || []).map(f => f.hash.toLowerCase());
 
-// ZIP DOWNLOAD
+// ======================================================
+// CUSTODY DOWNLOAD (si existe binario)
+// ======================================================
 if (data.binaryStorageId) {
+
 const cleanBinary = data.binaryStorageId.replace("ar://", "");
+
 downloadsDiv.innerHTML = `
+<div class="info-box">
+This validation includes a custody backup stored securely in Aereware.
+Authorized users may download the original archived files.
+</div>
+
 <button class="download-btn"
 onclick="window.open('${VALIDATE_API}/api/validate/aereware/download/files/${cleanBinary}','_blank')">
 Download Custody Files (ZIP)
