@@ -1,5 +1,5 @@
 // ======================================================
-// 🌍 UDoChain Unified View — Public + Custody
+// 🌍 UDoChain Unified View — Public + Custody FINAL
 // ======================================================
 
 const VALIDATE_API = "https://api.udochain.com/validate";
@@ -26,12 +26,12 @@ async function fetchValidation() {
       url = `${VALIDATE_API}/api/validate/storage/${encodeURIComponent(cleanId)}`;
     }
 
-    if (tx) {
+    if (!url && tx) {
       url = `${VALIDATE_API}/api/validate/tx/${encodeURIComponent(tx)}`;
     }
 
     if (!url) {
-      detailsDiv.innerHTML = "<p>No validation identifier provided.</p>";
+      renderUnverified("No validation identifier provided.");
       return;
     }
 
@@ -46,6 +46,7 @@ async function fetchValidation() {
     renderValidation(data);
 
   } catch (err) {
+    console.error("View fetch error:", err);
     renderUnverified("Error loading validation.");
   }
 }
