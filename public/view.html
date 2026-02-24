@@ -119,4 +119,174 @@
     }
 
     footer {
-      text-align:
+      text-align: center;
+      padding: 1rem;
+      font-size: 0.85rem;
+      color: #6b7280;
+      border-top: 1px solid #e2e8f0;
+      background: white;
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <div style="display:flex;align-items:center;gap:10px;">
+    <img src="logo-udochain.png" class="logo" />
+    <span class="header-title">UDoChain Verify</span>
+  </div>
+</header>
+
+<main>
+  <div class="card">
+    <div id="badge"></div>
+
+    <h2>Validation Details</h2>
+    <p class="subtitle">
+      Verify the authenticity of this registered evidence.
+    </p>
+
+    <div id="details">Loading validation data...</div>
+
+    <div class="divider"></div>
+
+    <div id="downloads"></div>
+  </div>
+</main>
+
+<footer>
+  <p>You do. We validate.</p>
+  <p>© 2025 UDoChain — All rights reserved.</p>
+</footer>
+
+<script>
+const VALIDATE_API = "https://api.udochain.com/validate";
+const params = new URLSearchParams(window.location.search);
+const id = params.get("id");
+const tx = params.get("tx");
+
+const badgeDiv = document.getElementById("badge");
+const detailsDiv = document.getElementById("details");
+const downloadsDiv = document.getElementById("downloads");
+
+const token = localStorage.getItem("udo_token");
+
+// ----------------------------------------------------
+// 🔍 Fetch logic
+// ----------------------------------------------------
+async function fetchValidation() {
+
+  try {
+    let url = null;
+
+    if (id) {
+      const clean = id.replace(/^ar:\/\//, "");
+      url = `${VALIDATE_API}/api/validate/storage/${encodeURIComponent(clean)}`;
+    }
+
+    if (tx) {
+      url = `${VALIDATE_API}/api/validate/tx/${encodeURIComponent(tx)}`;
+    }
+
+    if (!url) {
+      detailsDiv.innerHTML = "<p>No validation identifier provided.</p>";
+      return;
+    }
+
+    const res = await fetch(url);
+    const data = await res.json();
+
+    if (!data?.ok) {
+      badgeDiv.innerHTML = `<div class="badge unverified">Unverified</div>`;
+      detailsDiv.innerHTML = "<p>Validation not found.</p>";
+      return;
+    }
+
+    renderValidation(data);
+
+  } catch (err) {
+    badgeDiv.innerHTML = `<div class="badge unverified">Unverified</div>`;
+    detailsDiv.innerHTML = "<p>Error loading validation.</p>";
+  }
+}
+
+// ----------------------------------------------------
+// 🧠 Render
+// ----------------------------------------------------
+function renderValidation(data) {
+
+  badgeDiv.innerHTML =
+    `<div class="badge verified">Verified Record</div>`;
+
+  const dateFormatted = new Date(data.validatedAt).toLocaleString();
+
+  detailsDiv.innerHTML = `
+    <div class="field">
+      <span class="label">Evidence Title:</span>
+      <span class="value">${data.evidenceTitle || "—"}</span>
+    </div>
+
+    <div class="field">
+      <span class="label">Transaction Hash:</span>
+      <span class="value">${data.txHash || "—"}</span>
+    </div>
+
+    <div class="field">
+      <span class="label">Date:</span>
+      <span class="value">${dateFormatted}</span>
+    </div>
+
+    <div class="field">
+      <span class="label">GPS:</span>
+      <span class="value">${data.gps || "—"}</span>
+    </div>
+
+    <div class="field">
+      <span class="label">Storage ID:</span>
+      <span class="value">${data.storageId || "—"}</span>
+    </div>
+
+    <div class="field">
+      <span class="label">Files:</span>
+      <div class="value">
+        ${
+          (data.files || [])
+            .map(f => `<div>${f.name} — <small>${f.hash}</small></div>`)
+            .join("") || "No files recorded"
+        }
+      </div>
+    </div>
+  `;
+
+  // ----------------------------------------------------
+  // 📦 Custody button logic (Modo B)
+  // ----------------------------------------------------
+  if (data.binaryStorageId) {
+
+    const cleanBinary = data.binaryStorageId.replace("ar://", "");
+    const downloadUrl =
+      `${VALIDATE_API}/api/validate/aereware/download/files/${encodeURIComponent(cleanBinary)}`;
+
+    downloadsDiv.innerHTML = `
+      <button class="download-btn" id="downloadBtn">
+        Download Custody Files
+      </button>
+    `;
+
+    document.getElementById("downloadBtn").addEventListener("click", () => {
+      if (token) {
+        window.open(downloadUrl, "_blank");
+      } else {
+        window.location.href = "https://app.udochain.com/login";
+      }
+    });
+  }
+}
+
+// ----------------------------------------------------
+fetchValidation();
+</script>
+
+</body>
+</html>
