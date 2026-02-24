@@ -1,152 +1,76 @@
-// ======================================================
-// 🌍 UDoChain Unified View — Public + Custody FINAL
-// ======================================================
-
-const VALIDATE_API = "https://api.udochain.com/validate";
-
 const params = new URLSearchParams(window.location.search);
 const id = params.get("id");
-const tx = params.get("tx");
 
-const badgeDiv = document.getElementById("badge");
-const detailsDiv = document.getElementById("details");
-const downloadsDiv = document.getElementById("downloads");
+if (!id) {
+  document.getElementById("title").innerText = "Invalid Record";
+  throw new Error("Missing storage ID");
+}
 
-const token = localStorage.getItem("udo_token");
-
-// ------------------------------------------------------
-// 🔍 Fetch validation
-// ------------------------------------------------------
-async function fetchValidation() {
+async function loadRecord() {
   try {
-    let url = null;
+    const res = await fetch(`/api/records/${encodeURIComponent(id)}`);
+    const record = await res.json();
 
-    if (id) {
-      const cleanId = id.replace(/^ar:\/\//, "");
-      url = `${VALIDATE_API}/api/validate/storage/${encodeURIComponent(cleanId)}`;
-    }
-
-    if (!url && tx) {
-      url = `${VALIDATE_API}/api/validate/tx/${encodeURIComponent(tx)}`;
-    }
-
-    if (!url) {
-      renderUnverified("No validation identifier provided.");
+    if (!record) {
+      document.getElementById("title").innerText = "Record not found";
       return;
     }
 
-    const res = await fetch(url);
-    const data = await res.json();
+    // 🔹 TITLE
+    document.getElementById("title").innerText =
+      record.evidence?.title || "Untitled Evidence";
 
-    if (!data?.ok) {
-      renderUnverified("Validation not found.");
-      return;
+    // 🔹 TX HASH
+    document.getElementById("txHash").innerText =
+      record.anchors?.polygon?.txHash || "-";
+
+    // 🔹 DATE
+    document.getElementById("date").innerText =
+      record.evidence?.validatedAt
+        ? new Date(record.evidence.validatedAt).toLocaleString()
+        : "-";
+
+    // 🔹 GPS
+    document.getElementById("gps").innerText =
+      record.evidence?.gps || "GPS not provided";
+
+    // 🔹 STORAGE ID
+    document.getElementById("storageId").innerText =
+      record.storageId || id;
+
+    // 🔹 FILES LIST
+    const filesContainer = document.getElementById("files");
+    filesContainer.innerHTML = "";
+
+    if (Array.isArray(record.files) && record.files.length > 0) {
+      record.files.forEach(file => {
+        const div = document.createElement("div");
+        div.className = "file-item";
+        div.innerHTML = `
+          <strong>${file.name}</strong><br/>
+          <small>SHA256: ${file.hash}</small>
+        `;
+        filesContainer.appendChild(div);
+      });
+    } else {
+      filesContainer.innerText = "No files registered.";
     }
 
-    renderValidation(data);
+    // 🔹 CUSTODY DOWNLOAD BUTTON
+    if (record.custody?.hasBinaryBackup === true) {
+      const btn = document.getElementById("downloadBtn");
+      btn.classList.remove("hidden");
+
+      btn.onclick = () => {
+        window.location.href =
+          `/api/custody/download/${encodeURIComponent(id)}`;
+      };
+    }
 
   } catch (err) {
-    console.error("View fetch error:", err);
-    renderUnverified("Error loading validation.");
+    console.error("Verify load error:", err);
+    document.getElementById("title").innerText = "Error loading record";
   }
 }
 
-// ------------------------------------------------------
-// ❌ Unverified state
-// ------------------------------------------------------
-function renderUnverified(message) {
-  badgeDiv.innerHTML =
-    `<div class="badge unverified">Unverified</div>`;
-  detailsDiv.innerHTML = `<p>${message}</p>`;
-}
-
-// ------------------------------------------------------
-// ✅ Render verified record
-// ------------------------------------------------------
-function renderValidation(data) {
-
-  badgeDiv.innerHTML =
-    `<div class="badge verified">Verified Record</div>`;
-
-  const dateFormatted =
-    data.validatedAt
-      ? new Date(data.validatedAt).toLocaleString()
-      : "—";
-
-  detailsDiv.innerHTML = `
-    <div class="field">
-      <span class="label">Evidence Title:</span>
-      <span class="value">${data.evidenceTitle || "—"}</span>
-    </div>
-
-    <div class="field">
-      <span class="label">Transaction Hash:</span>
-      <span class="value">${data.txHash || "—"}</span>
-    </div>
-
-    <div class="field">
-      <span class="label">Date:</span>
-      <span class="value">${dateFormatted}</span>
-    </div>
-
-    <div class="field">
-      <span class="label">GPS:</span>
-      <span class="value">${data.gps || "—"}</span>
-    </div>
-
-    <div class="field">
-      <span class="label">Storage ID:</span>
-      <span class="value">${data.storageId || "—"}</span>
-    </div>
-
-    <div class="field">
-      <span class="label">Files:</span>
-      <div class="value">
-        ${
-          (data.files || [])
-            .map(f => `<div>${f.name} — <small>${f.hash}</small></div>`)
-            .join("") || "No files recorded"
-        }
-      </div>
-    </div>
-  `;
-
-  renderCustodyButton(data);
-}
-
-// ------------------------------------------------------
-// 📦 Custody button (Modo B)
-// ------------------------------------------------------
-function renderCustodyButton(data) {
-
-  if (!data.binaryStorageId) return;
-
-  const cleanBinary =
-    data.binaryStorageId.replace("ar://", "");
-
-  const downloadUrl =
-    `${VALIDATE_API}/api/validate/aereware/download/files/` +
-    encodeURIComponent(cleanBinary);
-
-  downloadsDiv.innerHTML = `
-    <button class="download-btn" id="downloadBtn">
-      Download Custody Files
-    </button>
-  `;
-
-  document
-    .getElementById("downloadBtn")
-    .addEventListener("click", () => {
-
-      if (token) {
-        window.open(downloadUrl, "_blank");
-      } else {
-        window.location.href =
-          "https://app.udochain.com/login";
-      }
-
-    });
-}
-
-// ------------------------------------------------------
-fetchValidation();
+loadRecord();
