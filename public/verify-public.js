@@ -28,8 +28,8 @@ async function loadValidation() {
     detailsDiv.innerHTML =
       "<p class='fail'>No transaction hash provided in URL.</p>";
     return;
-  }
-
+  }*/
+/*
   try {
     const res = await fetch(`${VALIDATE_API}/api/validate/tx/${tx}`);
     const data = await res.json();
@@ -506,7 +506,7 @@ loadValidation();
 
 */
 
-
+/*
 // ======================================================
 // 🌍 UDoChain Verify Public — STABLE STORAGE VERSION
 // ======================================================
@@ -646,6 +646,198 @@ async function loadValidation() {
 dropZone.addEventListener("click", () => {
   const input = document.createElement("input");
   input.type = "file";
+  input.accept = "*%*";
+  input.onchange = (e) => verifyFile(e.target.files[0]);
+  input.click();
+});
+
+dropZone.addEventListener("dragover", (e) => {
+  e.preventDefault();
+  dropZone.classList.add("dragover");
+});
+
+dropZone.addEventListener("dragleave", () =>
+  dropZone.classList.remove("dragover")
+);
+
+dropZone.addEventListener("drop", (e) => {
+  e.preventDefault();
+  dropZone.classList.remove("dragover");
+  const file = e.dataTransfer.files[0];
+  if (file) verifyFile(file);
+});
+
+// ======================================================
+// 🔍 Local file hash verification
+// ======================================================
+async function verifyFile(file) {
+  if (!file) return;
+
+  if (!window.validatedFiles?.length) {
+    statusDiv.innerHTML =
+      "<p class='fail'>Validation data not loaded yet.</p>";
+    return;
+  }
+
+  statusDiv.textContent = "Analyzing file...";
+
+  const buffer = await file.arrayBuffer();
+  const hashBuffer = await crypto.subtle.digest("SHA-256", buffer);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+
+  const fileHash = hashArray
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("")
+    .toLowerCase();
+
+  if (window.validatedFiles.includes(fileHash)) {
+    statusDiv.innerHTML =
+      `<p class="ok">This file matches the blockchain validation record.</p>`;
+  } else {
+    statusDiv.innerHTML =
+      `<p class="fail">This file does not match any validated record.</p>`;
+  }
+}
+
+// ======================================================
+// 🚀 INIT
+// ======================================================
+loadValidation();*/
+
+// ======================================================
+// 🌍 UDoChain Verify Public — STABLE STORAGE VERSION v6.0
+// Backend aligned with /validate/api/verify
+// ======================================================
+
+const detailsDiv = document.getElementById("details");
+const dropZone = document.getElementById("dropZone");
+const statusDiv = document.getElementById("status");
+const badgeDiv = document.getElementById("badge");
+
+// ------------------------------------------------------
+// 🔗 PARAMS
+// ------------------------------------------------------
+const params = new URLSearchParams(window.location.search);
+const storage = params.get("storage");
+
+// ------------------------------------------------------
+// 🔗 API BASE (ALINEADO CON BACKEND REAL)
+// ------------------------------------------------------
+const VALIDATE_API = "https://api.udochain.com/validate/api/verify";
+
+// ======================================================
+// 🧠 Load PUBLIC validation via storageId
+// ======================================================
+async function loadValidation() {
+  if (!storage) {
+    detailsDiv.innerHTML =
+      "<p class='fail'>No storage ID provided in URL.</p>";
+    return;
+  }
+
+  try {
+    const cleanId = storage.replace(/^ar:\/\//, "");
+
+    const endpoint =
+      `${VALIDATE_API}/storage/${encodeURIComponent(cleanId)}`;
+
+    const res = await fetch(endpoint);
+
+    if (!res.ok) {
+      throw new Error(`Server error ${res.status}`);
+    }
+
+    const data = await res.json();
+
+    if (!data?.ok || !data.data) {
+      badgeDiv.innerHTML =
+        `<div class="badge unverified">Unverified</div>`;
+      detailsDiv.innerHTML =
+        "<p class='fail'>Validation not found.</p>";
+      return;
+    }
+
+    const payload = data.data;
+
+    badgeDiv.innerHTML =
+      `<div class="badge verified">Verified on Blockchain</div>`;
+
+    const dateFormatted = new Date(
+      payload.evidence?.validatedAt
+    ).toLocaleString();
+
+    // --------------------------------------------------
+    // 🧾 Render PUBLIC evidence (Metadata v2 compatible)
+    // --------------------------------------------------
+    detailsDiv.innerHTML = `
+      <div class="field">
+        <span class="label">Evidence Title:</span>
+        <span class="value">${payload.evidence?.title || "—"}</span>
+      </div>
+
+      ${
+        payload.evidence?.summary
+          ? `<div class="field">
+               <span class="label">Summary:</span>
+               <span class="value">${payload.evidence.summary}</span>
+             </div>`
+          : ""
+      }
+
+      <div class="field">
+        <span class="label">Transaction Hash:</span>
+        <span class="value">${payload.anchors?.polygon?.txHash || "—"}</span>
+      </div>
+
+      <div class="field">
+        <span class="label">GPS:</span>
+        <span class="value">${payload.evidence?.gps || "—"}</span>
+      </div>
+
+      <div class="field">
+        <span class="label">Date (UTC):</span>
+        <span class="value">${dateFormatted}</span>
+      </div>
+
+      <div class="field">
+        <span class="label">Files:</span>
+        <div class="value file-list">
+          ${
+            (payload.files || [])
+              .map(
+                (f) =>
+                  `<div>${f.name} — <small>${f.hash}</small></div>`
+              )
+              .join("") || "No files recorded"
+          }
+        </div>
+      </div>
+    `;
+
+    // --------------------------------------------------
+    // 🔐 Cache hashes for local verification
+    // --------------------------------------------------
+    window.validatedFiles = (payload.files || [])
+      .filter(f => f && typeof f.hash === "string")
+      .map(f => f.hash.toLowerCase());
+
+  } catch (err) {
+    console.error("❌ Verify public fetch error:", err);
+
+    badgeDiv.innerHTML =
+      `<div class="badge unverified">Unverified</div>`;
+
+    detailsDiv.innerHTML =
+      "<p class='fail'>Error loading validation details.</p>";
+  }
+}
+
+// ======================================================
+// 📂 File upload / drop
+// ======================================================
+dropZone.addEventListener("click", () => {
+  const input = document.createElement("input");
+  input.type = "file";
   input.accept = "*/*";
   input.onchange = (e) => verifyFile(e.target.files[0]);
   input.click();
@@ -703,4 +895,3 @@ async function verifyFile(file) {
 // 🚀 INIT
 // ======================================================
 loadValidation();
-
