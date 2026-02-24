@@ -1,3 +1,4 @@
+/*
 // ======================================================
 // 🟪 UDoChain Verify Private v4.9 — FINAL FUNCIONAL
 // Private display — API desacoplada de validate.udochain.com
@@ -184,3 +185,79 @@ async function loadPrivateValidation() {
 // 🚀 INIT
 // ======================================================
 loadPrivateValidation();
+
+*/
+
+// ======================================================
+// 🟪 UDoChain Verify Private v5.0 — PRODUCTION FIXED
+// Compatible with /validate module mounting
+// ======================================================
+
+const detailsDiv = document.getElementById("details");
+const downloadsDiv = document.getElementById("downloads");
+const badgeDiv = document.getElementById("badge");
+
+// ------------------------------------------------------
+// 🔗 PARAMS
+// ------------------------------------------------------
+const params = new URLSearchParams(window.location.search);
+const storage = params.get("storage");
+
+// ------------------------------------------------------
+// 🔗 API BASE CORRECTA
+// ------------------------------------------------------
+// Tu módulo está montado en /validate
+// Y las rutas internas son /api/validate/...
+// Resultado final:
+// https://api.udochain.com/validate/api/validate/...
+
+const API_BASE = "https://api.udochain.com";
+
+// ======================================================
+// 🧠 Load private validation
+// ======================================================
+async function loadPrivateValidation() {
+  if (!storage) {
+    detailsDiv.innerHTML =
+      "<p class='fail'>No storage ID provided in URL.</p>";
+    return;
+  }
+
+  try {
+    const cleanId = storage.replace(/^ar:\/\//, "");
+
+    const endpoint =
+      `${API_BASE}/validate/api/validate/storage/` +
+      encodeURIComponent(cleanId);
+
+    const res = await fetch(endpoint);
+
+    if (!res.ok) {
+      throw new Error("Network response not OK");
+    }
+
+    const data = await res.json();
+
+    if (!data?.ok) {
+      badgeDiv.innerHTML =
+        `<div class="badge unverified">Unverified</div>`;
+      detailsDiv.innerHTML =
+        "<p class='fail'>Validation not found.</p>";
+      return;
+    }
+
+    badgeDiv.innerHTML =
+      `<div class="badge verified">Verified on Blockchain</div>`;
+
+    const dateFormatted = new Date(
+      data.validatedAt || data.createdAt
+    ).toLocaleString();
+
+    // ======================================================
+    // 🧾
+
+
+
+
+
+
