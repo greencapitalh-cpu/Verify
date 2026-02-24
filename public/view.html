@@ -3,54 +3,260 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>UDoChain Verify</title>
+<title>UDoChain Verification</title>
+<link rel="icon" href="logo-udochain.png" />
+<link rel="stylesheet" href="styles.css" />
 
 <style>
-body {
-  margin: 0;
-  font-family: system-ui, -apple-system, sans-serif;
-  background: #f3f4f6;
+body { background:#f9fafb; margin:0; font-family:Inter,sans-serif; }
+header { background:white; padding:1rem 1.5rem; border-bottom:1px solid #e2e8f0; display:flex; justify-content:space-between; align-items:center; }
+.header-left { display:flex; align-items:center; gap:10px; }
+.logo { height:36px; }
+.header-title { font-weight:700; color:#184b8c; }
+.back-link { background:#f1f5f9; padding:6px 14px; border-radius:8px; text-decoration:none; color:#475569; }
+
+main { display:flex; justify-content:center; padding:2rem 1rem; }
+.card { background:white; border-radius:16px; padding:2rem; max-width:720px; width:100%; box-shadow:0 4px 14px rgba(0,0,0,0.06); }
+
+h2 { text-align:center; color:#184b8c; margin-bottom:0.5rem; }
+.subtitle { text-align:center; color:#64748b; font-size:0.95rem; margin-bottom:1.5rem; }
+
+.field { margin-bottom:0.8rem; }
+.label { font-weight:600; color:#475569; }
+.value { display:block; margin-top:2px; word-break:break-all; }
+
+.file-list div { margin-bottom:6px; }
+
+.divider { border-top:1px solid #e2e8f0; margin:1.5rem 0; }
+
+.drop-zone {
+border:2px dashed #cbd5e1;
+border-radius:10px;
+padding:40px;
+text-align:center;
+cursor:pointer;
+transition:0.3s;
+color:#64748b;
+}
+.drop-zone.dragover {
+border-color:#184b8c;
+background:#eff6ff;
 }
 
-header {
-  background: white;
-  padding: 20px;
-  font-weight: bold;
-  font-size: 20px;
-  color: #184B8C;
-  text-align: center;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-}
+#status { margin-top:1rem; font-weight:600; text-align:center; }
+.ok { color:#14532d; }
+.fail { color:#b91c1c; }
 
-.card {
-  max-width: 650px;
-  margin: 40px auto;
-  background: white;
-  border-radius: 18px;
-  padding: 35px;
-  box-shadow: 0 10px 40px rgba(0,0,0,0.06);
+.download-btn {
+width:100%;
+padding:12px;
+border-radius:10px;
+border:none;
+font-weight:600;
+cursor:pointer;
+margin-top:0.8rem;
+background:#184b8c;
+color:white;
 }
 
 .badge {
-  display: inline-block;
-  background: #dcfce7;
-  color: #166534;
-  padding: 6px 16px;
-  border-radius: 20px;
-  font-weight: 600;
-  font-size: 13px;
-  margin-bottom: 20px;
+display:block;
+width:fit-content;
+margin:0 auto 1rem;
+padding:6px 12px;
+border-radius:12px;
+font-size:0.85rem;
+font-weight:600;
+}
+.badge.verified { background:#dcfce7; color:#14532d; }
+.badge.unverified { background:#fee2e2; color:#991b1b; }
+
+footer { text-align:center; padding:1rem; border-top:1px solid #e2e8f0; background:white; font-size:0.85rem; color:#6b7280; }
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="header-left">
+    <img src="logo-udochain.png" class="logo" />
+    <span class="header-title">UDoChain Verify</span>
+  </div>
+  <a href="https://wapp.udochain.com" class="back-link">Back</a>
+</header>
+
+<main>
+<div class="card">
+
+<div id="badge"></div>
+
+<h2>Validation Details</h2>
+<p class="subtitle">
+View blockchain validation and verify files integrity.
+</p>
+
+<div id="details">Loading validation data...</div>
+
+<div class="divider"></div>
+
+<h2>File Verification</h2>
+<p class="subtitle">
+Upload original file to check if it matches the registered blockchain hash.
+</p>
+
+<div id="dropZone" class="drop-zone">
+Drop or click to upload file
+</div>
+
+<div id="status"></div>
+
+<div id="downloads"></div>
+
+</div>
+</main>
+
+<footer>
+<p>You do. We validate.</p>
+<p>© 2025 UDoChain — All rights reserved.</p>
+</footer>
+
+<script>
+const detailsDiv = document.getElementById("details");
+const badgeDiv = document.getElementById("badge");
+const dropZone = document.getElementById("dropZone");
+const statusDiv = document.getElementById("status");
+const downloadsDiv = document.getElementById("downloads");
+
+const params = new URLSearchParams(window.location.search);
+const tx = params.get("tx");
+const storage = params.get("storage");
+
+const VALIDATE_API = "https://api.udochain.com/validate";
+
+let validatedFiles = [];
+
+// ======================================================
+// LOAD VALIDATION (TX o STORAGE)
+// ======================================================
+async function loadValidation() {
+
+try {
+
+let url;
+
+if (tx) {
+url = `${VALIDATE_API}/api/validate/tx/${encodeURIComponent(tx)}`;
+} else if (storage) {
+const clean = storage.replace(/^ar:\/\//, "");
+url = `${VALIDATE_API}/api/validate/storage/${encodeURIComponent(clean)}`;
+} else {
+detailsDiv.innerHTML = "<p class='fail'>No tx or storage provided.</p>";
+return;
 }
 
-h2 {
-  margin-top: 0;
-  color: #1e293b;
+const res = await fetch(url);
+const data = await res.json();
+
+if (!data?.ok) {
+badgeDiv.innerHTML = `<div class="badge unverified">Unverified</div>`;
+detailsDiv.innerHTML = "<p class='fail'>Validation not found.</p>";
+return;
 }
 
-.section {
-  margin-top: 18px;
+badgeDiv.innerHTML = `<div class="badge verified">Verified on Blockchain</div>`;
+
+const dateFormatted = new Date(data.validatedAt).toLocaleString();
+
+detailsDiv.innerHTML = `
+<div class="field"><span class="label">Evidence Title:</span><span class="value">${data.evidenceTitle || "—"}</span></div>
+<div class="field"><span class="label">Transaction Hash:</span><span class="value">${data.txHash}</span></div>
+<div class="field"><span class="label">Storage ID:</span><span class="value">${data.storageId || "—"}</span></div>
+<div class="field"><span class="label">GPS:</span><span class="value">${data.gps || "—"}</span></div>
+<div class="field"><span class="label">Date:</span><span class="value">${dateFormatted}</span></div>
+
+<div class="field">
+<span class="label">Files:</span>
+<div class="value file-list">
+${
+(data.files || [])
+.map(f => `<div>${f.name} — <small>${f.hash}</small></div>`)
+.join("") || "No files recorded"
+}
+</div>
+</div>
+`;
+
+validatedFiles = (data.files || []).map(f => f.hash.toLowerCase());
+
+// ZIP DOWNLOAD
+if (data.binaryStorageId) {
+const cleanBinary = data.binaryStorageId.replace("ar://", "");
+downloadsDiv.innerHTML = `
+<button class="download-btn"
+onclick="window.open('${VALIDATE_API}/api/validate/aereware/download/files/${cleanBinary}','_blank')">
+Download Custody Files (ZIP)
+</button>
+`;
 }
 
-.label {
-  font-weight: 600;
-  color: #
+} catch (err) {
+badgeDiv.innerHTML = `<div class="badge unverified">Unverified</div>`;
+detailsDiv.innerHTML = "<p class='fail'>Error loading validation.</p>";
+}
+}
+
+// ======================================================
+// FILE UPLOAD
+// ======================================================
+dropZone.addEventListener("click", () => {
+const input = document.createElement("input");
+input.type = "file";
+input.onchange = e => verifyFile(e.target.files[0]);
+input.click();
+});
+
+dropZone.addEventListener("dragover", e => {
+e.preventDefault();
+dropZone.classList.add("dragover");
+});
+
+dropZone.addEventListener("dragleave", () => {
+dropZone.classList.remove("dragover");
+});
+
+dropZone.addEventListener("drop", e => {
+e.preventDefault();
+dropZone.classList.remove("dragover");
+const file = e.dataTransfer.files[0];
+if (file) verifyFile(file);
+});
+
+// ======================================================
+// HASH VERIFY
+// ======================================================
+async function verifyFile(file) {
+
+if (!validatedFiles.length) {
+statusDiv.innerHTML = "<p class='fail'>Validation data not loaded.</p>";
+return;
+}
+
+statusDiv.textContent = "Analyzing file...";
+
+const buffer = await file.arrayBuffer();
+const hashBuffer = await crypto.subtle.digest("SHA-256", buffer);
+const hashArray = Array.from(new Uint8Array(hashBuffer));
+const fileHash = hashArray.map(b => b.toString(16).padStart(2, "0")).join("").toLowerCase();
+
+if (validatedFiles.includes(fileHash)) {
+statusDiv.innerHTML = `<p class="ok">This file matches the blockchain record.</p>`;
+} else {
+statusDiv.innerHTML = `<p class="fail">This file does NOT match the registered hash.</p>`;
+}
+}
+
+loadValidation();
+</script>
+
+</body>
+</html>
