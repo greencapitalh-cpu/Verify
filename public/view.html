@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UDoChain Verification</title>
+  <link rel="icon" href="logo-udochain.png" />
+  <link rel="stylesheet" href="styles.css" />
+
+  <style>
+    body {
+      background: #f9fafb;
+      margin: 0;
+      font-family: "Inter", sans-serif;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    header {
+      background: white;
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid #e2e8f0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo { height: 36px; }
+
+    .header-title {
+      font-weight: 700;
+      font-size: 1.25rem;
+      color: #184b8c;
+    }
+
+    main {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      padding: 2rem 1rem;
+    }
+
+    .card {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+      padding: 2rem;
+      max-width: 700px;
+      width: 100%;
+    }
+
+    h2 {
+      text-align: center;
+      color: #184b8c;
+      margin-bottom: 0.5rem;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #64748b;
+      font-size: 0.95rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .field { margin-bottom: 0.9rem; }
+
+    .label {
+      font-weight: 600;
+      color: #475569;
+    }
+
+    .value {
+      display: block;
+      margin-top: 3px;
+      word-break: break-all;
+      color: #1e293b;
+    }
+
+    .badge {
+      display: block;
+      width: fit-content;
+      margin: 0 auto 1rem;
+      padding: 6px 14px;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 0.85rem;
+    }
+
+    .verified {
+      background: #dcfce7;
+      color: #14532d;
+    }
+
+    .unverified {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .divider {
+      border-top: 1px solid #e2e8f0;
+      margin: 1.5rem 0;
+    }
+
+    .download-btn {
+      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 1rem;
+      background: #184b8c;
+      color: white;
+    }
+
+    .download-btn:hover {
+      opacity: 0.9;
+    }
+
+    footer {
+      text-align:
