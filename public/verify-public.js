@@ -899,7 +899,7 @@ async function verifyFile(file) {
 loadValidation();
 */
 
-
+/*
 // ======================================================
 // 🌍 UDoChain Verify Public — STABLE PRODUCTION (Mongo)
 // Compatible with:
@@ -1042,7 +1042,7 @@ async function loadValidation() {
 dropZone.addEventListener("click", () => {
   const input = document.createElement("input");
   input.type = "file";
-  input.accept = "*/*";
+  input.accept = "*%*";
   input.onchange = (e) => verifyFile(e.target.files[0]);
   input.click();
 });
@@ -1099,3 +1099,174 @@ async function verifyFile(file) {
 // 🚀 INIT
 // ======================================================
 loadValidation();
+*/
+
+// Mejora de estética y botón a dashboard 
+// ======================================================
+// 🌍 UDoChain Verify Public — PRODUCTION (Mongo)
+// ======================================================
+
+const detailsDiv = document.getElementById("details");
+const dropZone = document.getElementById("dropZone");
+const statusDiv = document.getElementById("status");
+const badgeDiv = document.getElementById("badge");
+
+const params = new URLSearchParams(window.location.search);
+const storage = params.get("storage");
+
+const VALIDATE_API = "https://api.udochain.com/validate/api/verify";
+
+async function loadValidation() {
+  if (!storage) {
+    detailsDiv.innerHTML =
+      "<p class='fail'>No storage ID provided in URL.</p>";
+    return;
+  }
+
+  try {
+    const cleanId = storage.replace(/^ar:\/\//, "");
+
+    const endpoint =
+      `${VALIDATE_API}/storage/${encodeURIComponent(cleanId)}`;
+
+    const res = await fetch(endpoint);
+
+    if (!res.ok) {
+      throw new Error(`Server error ${res.status}`);
+    }
+
+    const data = await res.json();
+
+    if (!data?.ok) {
+      badgeDiv.innerHTML =
+        `<div class="badge unverified">Unverified</div>`;
+      detailsDiv.innerHTML =
+        "<p class='fail'>Validation not found.</p>";
+      return;
+    }
+
+    badgeDiv.innerHTML =
+      `<div class="badge verified">Verified on Blockchain</div>`;
+
+    const dateFormatted = new Date(
+      data.validatedAt || data.createdAt
+    ).toLocaleString();
+
+    const filesHTML = (data.files || [])
+      .filter(f => f && f.name && f.hash)
+      .map(f => `
+        <div class="file-item">
+          <div class="file-name">${f.name}</div>
+          <div class="file-hash">${f.hash}</div>
+        </div>
+      `).join("");
+
+    detailsDiv.innerHTML = `
+      <div class="field">
+        <div class="label">Evidence Title</div>
+        <div class="value">${data.evidenceTitle || "—"}</div>
+      </div>
+
+      ${data.summary ? `
+      <div class="field">
+        <div class="label">Summary</div>
+        <div class="value">${data.summary}</div>
+      </div>` : ""}
+
+      ${data.linkedSmartContract ? `
+      <div class="field">
+        <div class="label">Linked Smart Contract</div>
+        <div class="value">${data.linkedSmartContract}</div>
+      </div>` : ""}
+
+      <div class="field">
+        <div class="label">Transaction Hash</div>
+        <div class="value">${data.txHash || "—"}</div>
+      </div>
+
+      <div class="field">
+        <div class="label">GPS</div>
+        <div class="value">${data.gps || "—"}</div>
+      </div>
+
+      <div class="field">
+        <div class="label">Date (UTC)</div>
+        <div class="value">${dateFormatted}</div>
+      </div>
+
+      <div class="field">
+        <div class="label">Files</div>
+        ${filesHTML || "<div class='value'>No files recorded</div>"}
+      </div>
+    `;
+
+    window.validatedFiles = (data.files || [])
+      .filter(f => f && typeof f.hash === "string")
+      .map(f => f.hash.toLowerCase());
+
+  } catch (err) {
+    console.error("❌ Verify public fetch error:", err);
+
+    badgeDiv.innerHTML =
+      `<div class="badge unverified">Unverified</div>`;
+
+    detailsDiv.innerHTML =
+      "<p class='fail'>Error loading validation details.</p>";
+  }
+}
+
+dropZone.addEventListener("click", () => {
+  const input = document.createElement("input");
+  input.type = "file";
+  input.accept = "*/*";
+  input.onchange = (e) => verifyFile(e.target.files[0]);
+  input.click();
+});
+
+dropZone.addEventListener("dragover", (e) => {
+  e.preventDefault();
+  dropZone.classList.add("dragover");
+});
+
+dropZone.addEventListener("dragleave", () =>
+  dropZone.classList.remove("dragover")
+);
+
+dropZone.addEventListener("drop", (e) => {
+  e.preventDefault();
+  dropZone.classList.remove("dragover");
+  const file = e.dataTransfer.files[0];
+  if (file) verifyFile(file);
+});
+
+async function verifyFile(file) {
+  if (!file) return;
+
+  if (!window.validatedFiles?.length) {
+    statusDiv.innerHTML =
+      "<p class='fail'>Validation data not loaded yet.</p>";
+    return;
+  }
+
+  statusDiv.textContent = "Analyzing file...";
+
+  const buffer = await file.arrayBuffer();
+  const hashBuffer = await crypto.subtle.digest("SHA-256", buffer);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+
+  const fileHash = hashArray
+    .map(b => b.toString(16).padStart(2, "0"))
+    .join("")
+    .toLowerCase();
+
+  if (window.validatedFiles.includes(fileHash)) {
+    statusDiv.innerHTML =
+      `<p class="ok">This file matches the blockchain validation record.</p>`;
+  } else {
+    statusDiv.innerHTML =
+      `<p class="fail">This file does not match any validated record.</p>`;
+  }
+}
+
+loadValidation();
+
