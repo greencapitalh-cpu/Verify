@@ -1,230 +1,246 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>UDoChain Verification</title>
-    <link rel="icon" href="logo-udochain.png" />
-    <link rel="stylesheet" href="styles.css" />
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>UDoChain Public Verification</title>
 
-    <style>
-      body {
-        font-family: "Inter", sans-serif;
-        background: #f9fafb;
-        color: #1e293b;
-        margin: 0;
-        display: flex;
-        flex-direction: column;
-        min-height: 100vh;
-      }
+<link rel="icon" href="logo-udochain.png" />
+<link rel="stylesheet" href="styles.css" />
 
-      header {
-        background: white;
-        padding: 1rem 1.5rem;
-        border-bottom: 1px solid #e2e8f0;
-        box-shadow: 0 1px 6px rgba(0, 0, 0, 0.05);
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-      }
+<style>
+body{
+  font-family:"Inter",sans-serif;
+  background:#f8fafc;
+  margin:0;
+  color:#1e293b;
+  display:flex;
+  flex-direction:column;
+  min-height:100vh;
+}
 
-      .header-left {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-      }
+/* HEADER */
+header{
+  background:white;
+  padding:1rem 1.5rem;
+  border-bottom:1px solid #e2e8f0;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
 
-      .logo {
-        height: 36px;
-      }
+.header-left{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
 
-      .header-title {
-        font-weight: 700;
-        font-size: 1.25rem;
-        color: #184b8c;
-      }
+.logo{
+  height:36px;
+}
 
-      .back-link {
-        font-size: 0.95rem;
-        color: #475569;
-        text-decoration: none;
-        background: #f1f5f9;
-        padding: 6px 14px;
-        border-radius: 8px;
-        transition: all 0.25s;
-      }
+.header-title{
+  font-weight:700;
+  font-size:1.2rem;
+  color:#5b2e90;
+}
 
-      .back-link:hover {
-        background: #e2e8f0;
-        color: #184b8c;
-      }
+.dashboard-btn{
+  background:#5b2e90;
+  color:white;
+  padding:8px 20px;
+  border-radius:12px;
+  text-decoration:none;
+  font-weight:600;
+  transition:all .2s ease;
+}
 
-      main {
-        flex: 1;
-        display: flex;
-        justify-content: center;
-        align-items: flex-start;
-        padding: 2rem 1rem;
-      }
+.dashboard-btn:hover{
+  background:#4a2476;
+}
 
-      .card {
-        background: white;
-        border-radius: 16px;
-        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
-        padding: 2rem;
-        max-width: 620px;
-        width: 100%;
-        text-align: left;
-      }
+/* MAIN */
+main{
+  flex:1;
+  display:flex;
+  justify-content:center;
+  padding:3rem 1rem;
+}
 
-      h2 {
-        text-align: center;
-        color: #184b8c;
-        margin-bottom: 0.6rem;
-      }
+.card{
+  background:white;
+  border-radius:20px;
+  padding:2.5rem;
+  max-width:720px;
+  width:100%;
+  box-shadow:0 8px 30px rgba(0,0,0,0.05);
+}
 
-      .subtitle {
-        text-align: center;
-        color: #64748b;
-        font-size: 0.95rem;
-        margin-bottom: 1.5rem;
-      }
+.badge{
+  display:inline-block;
+  padding:6px 16px;
+  border-radius:20px;
+  font-size:.8rem;
+  font-weight:600;
+  margin-bottom:1.5rem;
+}
 
-      .field {
-        margin-bottom: 0.8rem;
-      }
+.badge.verified{
+  background:#dcfce7;
+  color:#166534;
+}
 
-      .label {
-        font-weight: 600;
-        color: #475569;
-      }
+.badge.unverified{
+  background:#fee2e2;
+  color:#991b1b;
+}
 
-      .value {
-        color: #1e293b;
-        word-break: break-all;
-        display: block;
-        margin-top: 2px;
-      }
+.title{
+  font-size:1.8rem;
+  font-weight:700;
+  margin-bottom:.5rem;
+}
 
-      .divider {
-        border-top: 1px solid #e2e8f0;
-        margin: 1.5rem 0;
-      }
+.subtitle{
+  color:#64748b;
+  margin-bottom:2rem;
+}
 
-      .drop-zone {
-        border: 2px dashed #cbd5e1;
-        border-radius: 10px;
-        padding: 40px;
-        background: white;
-        text-align: center;
-        color: #64748b;
-        cursor: pointer;
-        transition: 0.3s;
-      }
+.section{
+  margin-bottom:2rem;
+}
 
-      .drop-zone.dragover {
-        border-color: #184b8c;
-        background: #eff6ff;
-      }
+.section-title{
+  font-weight:600;
+  font-size:1rem;
+  margin-bottom:1rem;
+  border-bottom:1px solid #e2e8f0;
+  padding-bottom:.5rem;
+  color:#334155;
+}
 
-      #status {
-        text-align: center;
-        margin-top: 1rem;
-        font-weight: 600;
-      }
+.field{
+  margin-bottom:1.2rem;
+}
 
-      .ok {
-        color: #14532d;
-      }
+.label{
+  font-size:.8rem;
+  color:#64748b;
+  margin-bottom:3px;
+}
 
-      .fail {
-        color: #b91c1c;
-      }
+.value{
+  font-size:.95rem;
+  font-weight:500;
+  word-break:break-all;
+}
 
-      .badge {
-        display: block;
-        width: fit-content;
-        margin: 0 auto 1rem;
-        padding: 6px 12px;
-        border-radius: 12px;
-        font-size: 0.85rem;
-        font-weight: 600;
-        text-align: center;
-      }
+.file-item{
+  background:#f1f5f9;
+  padding:.8rem;
+  border-radius:10px;
+  margin-bottom:.7rem;
+}
 
-      .badge.verified {
-        background: #dcfce7;
-        color: #14532d;
-      }
+.file-name{
+  font-weight:600;
+  font-size:.9rem;
+}
 
-      .badge.unverified {
-        background: #fee2e2;
-        color: #991b1b;
-      }
+.file-hash{
+  font-size:.75rem;
+  color:#64748b;
+  margin-top:4px;
+  word-break:break-all;
+}
 
-      footer {
-        border-top: 1px solid #e2e8f0;
-        background: white;
-        padding: 1rem;
-        font-size: 0.85rem;
-        color: #6b7280;
-        text-align: center;
-      }
+/* DROP ZONE */
+.drop-zone{
+  border:2px dashed #cbd5e1;
+  border-radius:14px;
+  padding:40px;
+  text-align:center;
+  color:#64748b;
+  cursor:pointer;
+  transition:.3s;
+}
 
-      @media (max-width: 600px) {
-        .card {
-          padding: 1.5rem;
-        }
+.drop-zone.dragover{
+  border-color:#5b2e90;
+  background:#f3e8ff;
+}
 
-        h2 {
-          font-size: 1.3rem;
-        }
-      }
-    </style>
-  </head>
+#status{
+  text-align:center;
+  margin-top:1rem;
+  font-weight:600;
+}
 
-  <body>
-    <header>
-      <div class="header-left">
-        <img src="logo-udochain.png" alt="UDoChain Logo" class="logo" />
-        <span class="header-title notranslate" translate="no">UDoChain Verify</span>
+.ok{ color:#166534; }
+.fail{ color:#b91c1c; }
+
+footer{
+  text-align:center;
+  padding:1rem;
+  font-size:.85rem;
+  color:#6b7280;
+  border-top:1px solid #e2e8f0;
+  background:white;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="header-left">
+    <img src="logo-udochain.png" class="logo">
+    <span class="header-title">UDoChain Verify</span>
+  </div>
+
+  <a href="https://app.udochain.com/dashboard" class="dashboard-btn">
+    Go to Dashboard
+  </a>
+</header>
+
+<main>
+  <div class="card">
+
+    <div id="badge"></div>
+
+    <div class="title">Validation Details</div>
+    <div class="subtitle">
+      Verify the authenticity of this blockchain validation.
+    </div>
+
+    <div class="section">
+      <div class="section-title">Evidence Information</div>
+      <div id="details">Loading validation data...</div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">File Verification</div>
+      <div class="subtitle">
+        Upload the original file to check if it matches the blockchain record.
       </div>
-      <a href="https://wapp.udochain.com" class="back-link">Back</a>
-    </header>
 
-    <main>
-      <div class="card">
-        <div id="badge"></div>
-
-        <h2>Validation Details</h2>
-        <p class="subtitle">
-          Verify the authenticity of this blockchain validation.
-        </p>
-
-        <div id="details">Loading validation data...</div>
-
-        <div class="divider"></div>
-
-        <h2>File Verification</h2>
-        <p class="subtitle">
-          Upload the original file to check if it matches the registered
-          validation.
-        </p>
-
-        <div id="dropZone" class="drop-zone">
-          Drop or click to upload a file.
-        </div>
-
-        <div id="status"></div>
+      <div id="dropZone" class="drop-zone">
+        Drop or click to upload a file.
       </div>
-    </main>
 
-    <footer>
-      <p class="notranslate" translate="no">You do. We validate.</p>
-      <p>© 2025 UDoChain — All rights reserved.</p>
-    </footer>
+      <div id="status"></div>
+    </div>
 
-    <script src="verify-public.js"></script>
-    <script src="script-translate.js"></script>
-  </body>
+  </div>
+</main>
+
+<footer>
+  <p>You do. We validate.</p>
+  <p>© 2025 UDoChain — All rights reserved.</p>
+</footer>
+
+<script src="verify-public.js"></script>
+<script src="script-translate.js"></script>
+
+</body>
 </html>
