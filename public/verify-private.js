@@ -274,10 +274,15 @@ async function loadPrivateValidation() {
         <span class="value">${dateFormatted}</span>
       </div>
 
+      ${
+  Array.isArray(data.files) &&
+  data.files.some(f => f?.name && f?.hash)
+    ? `
       <div class="field">
         <span class="label">Files</span>
         ${
-          (data.files || [])
+          data.files
+            .filter(f => f?.name && f?.hash)
             .map(
               f => `
               <div class="file-item">
@@ -286,9 +291,12 @@ async function loadPrivateValidation() {
               </div>
             `
             )
-            .join("") || "No files recorded"
+            .join("")
         }
       </div>
+    `
+    : ""
+      }
     `;
 
     // =========================
