@@ -228,6 +228,8 @@ scanGallery.addEventListener("click", () => {
 });
 */
 
+
+/*
 //despues de modificaciones en backend para txhash
 
 
@@ -379,6 +381,200 @@ scanGallery.addEventListener("click", () => {
   fileInput.accept = "image/*";
 
   fileInput.onchange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const qrCode = new Html5Qrcode("qr-preview");
+
+    try {
+      const text = await qrCode.scanFile(file, true);
+      handleResult(text);
+    } catch {
+      resultDiv.textContent = "No QR detected in the image.";
+    }
+  };
+
+  fileInput.click();
+});
+*/
+
+//version q lee ox o ar antes 
+
+// ======================================================
+// 🔍 UDoChain Smart Verify — Production Stable
+// Detects txHash → Public
+// Detects storageId → Private
+// Smart fallback detection
+// ======================================================
+
+const resultDiv = document.getElementById("result");
+const hashInput = document.getElementById("hashInput");
+const verifyBtn = document.getElementById("verifyBtn");
+const scanGallery = document.getElementById("scanGallery");
+const scanCamera = document.getElementById("scanCamera");
+const qrPreview = document.getElementById("qr-preview");
+
+const API_BASE = "https://api.udochain.com/validate/api/verify";
+
+// ======================================================
+// 🔎 MAIN SEARCH LOGIC (Smart Detection)
+// ======================================================
+async function searchIdentifier(value) {
+
+  if (!value) {
+    resultDiv.innerHTML = "Please enter an identifier.";
+    return;
+  }
+
+  resultDiv.innerHTML = "Searching...";
+
+  const trimmed = value.trim();
+
+  try {
+
+    // ==================================================
+    // 1️⃣ If starts with 0x → treat as txHash
+    // ==================================================
+    if (trimmed.startsWith("0x")) {
+
+      const res = await fetch(
+        `${API_BASE}/tx/${encodeURIComponent(trimmed)}`
+      );
+
+      const data = await res.json();
+
+      if (res.ok && data?.ok) {
+        window.location.href =
+          `/verify-public.html?tx=${encodeURIComponent(trimmed)}`;
+        return;
+      }
+    }
+
+    // ==================================================
+    // 2️⃣ If starts with ar:// → treat as storage
+    // ==================================================
+    if (trimmed.startsWith("ar://")) {
+
+      const cleanId = trimmed.replace(/^ar:\/\//, "");
+
+      const res = await fetch(
+        `${API_BASE}/storage/${encodeURIComponent(cleanId)}`
+      );
+
+      const data = await res.json();
+
+      if (res.ok && data?.ok) {
+        window.location.href =
+          `/verify-private.html?storage=${encodeURIComponent(trimmed)}`;
+        return;
+      }
+    }
+
+    // ==================================================
+    // 3️⃣ Unknown format → try tx first
+    // ==================================================
+    let res = await fetch(
+      `${API_BASE}/tx/${encodeURIComponent(trimmed)}`
+    );
+    let data = await res.json();
+
+    if (res.ok && data?.ok) {
+      window.location.href =
+        `/verify-public.html?tx=${encodeURIComponent(trimmed)}`;
+      return;
+    }
+
+    // ==================================================
+    // 4️⃣ Try as storage fallback
+    // ==================================================
+    const cleanId = trimmed.replace(/^ar:\/\//, "");
+
+    res = await fetch(
+      `${API_BASE}/storage/${encodeURIComponent(cleanId)}`
+    );
+    data = await res.json();
+
+    if (res.ok && data?.ok) {
+      window.location.href =
+        `/verify-private.html?storage=${encodeURIComponent(trimmed)}`;
+      return;
+    }
+
+    throw new Error();
+
+  } catch {
+    resultDiv.innerHTML =
+      "<span style='color:#b91c1c'>No validation found for this identifier.</span>";
+  }
+}
+
+// ======================================================
+// 1️⃣ Manual input
+// ======================================================
+verifyBtn.addEventListener("click", () => {
+  searchIdentifier(hashInput.value.trim());
+});
+
+hashInput.addEventListener("keypress", e => {
+  if (e.key === "Enter") {
+    searchIdentifier(hashInput.value.trim());
+  }
+});
+
+// ======================================================
+// 2️⃣ Handle QR result
+// ======================================================
+function handleResult(text) {
+  if (!text) return;
+
+  resultDiv.textContent = "Detected: " + text;
+
+  setTimeout(() => {
+    searchIdentifier(text.trim());
+  }, 600);
+}
+
+// ======================================================
+// 3️⃣ Camera scan (Animated overlay)
+// ======================================================
+scanCamera.addEventListener("click", async () => {
+
+  qrPreview.innerHTML = `
+    <div id="qr-reader" style="width:100%;"></div>
+    <div id="qr-overlay"><div id="scanner-line"></div></div>
+  `;
+
+  qrPreview.style.display = "block";
+
+  const qrCode = new Html5Qrcode("qr-reader");
+
+  try {
+    await qrCode.start(
+      { facingMode: "environment" },
+      { fps: 10, qrbox: { width: 250, height: 250 } },
+      (decodedText) => {
+        qrCode.stop();
+        qrPreview.style.display = "none";
+        handleResult(decodedText);
+      }
+    );
+  } catch (err) {
+    console.error("Camera error:", err);
+    resultDiv.textContent = "Camera access denied or unavailable.";
+  }
+});
+
+// ======================================================
+// 4️⃣ Gallery scan
+// ======================================================
+scanGallery.addEventListener("click", () => {
+
+  const fileInput = document.createElement("input");
+  fileInput.type = "file";
+  fileInput.accept = "image/*";
+
+  fileInput.onchange = async (e) => {
+
     const file = e.target.files[0];
     if (!file) return;
 
