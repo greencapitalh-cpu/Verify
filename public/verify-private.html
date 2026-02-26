@@ -124,23 +124,26 @@ main{
 }
 
 /* ===============================
-   PASSWORD FIELD (NEW)
+   PASSWORD FIELD FIXED
 ================================= */
 
 .password-wrapper{
   position:relative;
-  margin-bottom:10px;
+  width:100%;
+  margin-bottom:12px;
 }
 
 .password-input{
   width:100%;
-  padding:12px 44px 12px 12px;
-  border-radius:12px;
+  height:48px;
+  padding:0 50px 0 16px;   /* espacio real para el ojo */
+  border-radius:14px;
   border:1px solid #e2e8f0;
   font-size:0.95rem;
   outline:none;
   background:#ffffff;
   transition:border .2s ease, box-shadow .2s ease;
+  box-sizing:border-box;
 }
 
 .password-input:focus{
@@ -150,24 +153,24 @@ main{
 
 .password-toggle{
   position:absolute;
-  right:14px;
-  top:50%;
-  transform:translateY(-50%);
-  background:none;
-  border:none;
-  cursor:pointer;
-  padding:0;
-  width:22px;
-  height:22px;
+  top:0;
+  right:0;
+  height:100%;
+  width:48px;              /* mismo espacio que padding-right */
   display:flex;
   align-items:center;
   justify-content:center;
+  background:transparent;
+  border:none;
+  cursor:pointer;
   color:#64748b;
-  transition:color .2s ease;
+  border-radius:0 14px 14px 0;
+  transition:color .2s ease, background .2s ease;
 }
 
 .password-toggle:hover{
   color:#5b2e90;
+  background:rgba(91,46,144,0.05);
 }
 
 .password-toggle svg{
