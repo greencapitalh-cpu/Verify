@@ -948,7 +948,7 @@ async function downloadWithPassword() {
 loadPrivateValidation();
 */
 
-
+/*
 // ======================================================
 // 🟪 UDoChain Verify Private — Custody Protected Version
 // Proxy Download Compatible (Render streams file)
@@ -1165,6 +1165,168 @@ async function downloadWithPassword() {
 
     statusDiv.innerHTML =
       "<span style='color:#991b1b'>Invalid password or access denied.</span>";
+  }
+}
+
+loadPrivateValidation();
+*/
+
+// ======================================================
+// 🟪 UDoChain Verify Private — DEBUG MODE (NO PASSWORD)
+// Direct Download Compatible
+// ======================================================
+
+const detailsDiv = document.getElementById("details");
+const downloadsDiv = document.getElementById("downloads");
+const badgeDiv = document.getElementById("badge");
+
+const params = new URLSearchParams(window.location.search);
+const storage = params.get("storage");
+
+const VALIDATE_API = "https://api.udochain.com/validate";
+const CUSTODY_API = "https://api.udochain.com/validate/api/custody";
+
+let currentStorageId = null;
+
+// ======================================================
+// 🔍 Load Validation
+// ======================================================
+async function loadPrivateValidation() {
+
+  if (!storage) {
+    detailsDiv.innerHTML = "<p>Invalid storage ID.</p>";
+    return;
+  }
+
+  try {
+
+    const cleanId = storage.replace(/^ar:\/\//, "");
+    currentStorageId = storage;
+
+    const res = await fetch(
+      `${VALIDATE_API}/api/validate/storage/${encodeURIComponent(cleanId)}`
+    );
+
+    const data = await res.json();
+
+    if (!data?.ok) {
+      badgeDiv.innerHTML =
+        `<div class="badge unverified">Unverified</div>`;
+      detailsDiv.innerHTML =
+        "<p>Validation not found.</p>";
+      return;
+    }
+
+    badgeDiv.innerHTML =
+      `<div class="badge verified">Verified on Blockchain</div>`;
+
+    const dateFormatted =
+      new Date(data.validatedAt).toLocaleString();
+
+    detailsDiv.innerHTML = `
+      <div class="field">
+        <span class="label">Evidence Title</span>
+        <span class="value">${data.evidenceTitle || "—"}</span>
+      </div>
+
+      <div class="field">
+        <span class="label">Transaction Hash</span>
+        <span class="value">${data.txHash}</span>
+      </div>
+
+      <div class="field">
+        <span class="label">Storage ID</span>
+        <span class="value">${data.storageId}</span>
+      </div>
+
+      <div class="field">
+        <span class="label">Validated At</span>
+        <span class="value">${dateFormatted}</span>
+      </div>
+    `;
+
+    // ==================================================
+    // 🔓 Direct Download UI (NO PASSWORD)
+    // ==================================================
+    downloadsDiv.innerHTML = `
+      <div style="margin-top:1rem;">
+
+        <button class="download-btn" id="protectedDownload">
+          Download Protected Files (ZIP)
+        </button>
+
+        <div id="custodyStatus"
+          style="margin-top:10px;font-size:0.9rem;">
+        </div>
+
+      </div>
+    `;
+
+    document
+      .getElementById("protectedDownload")
+      .addEventListener("click", downloadDirect);
+
+  } catch (err) {
+
+    console.error(err);
+
+    badgeDiv.innerHTML =
+      `<div class="badge unverified">Unverified</div>`;
+
+    detailsDiv.innerHTML =
+      "<p>Error loading validation.</p>";
+  }
+}
+
+// ======================================================
+// 🔓 Direct Download (NO PASSWORD)
+// ======================================================
+async function downloadDirect() {
+
+  const statusDiv =
+    document.getElementById("custodyStatus");
+
+  statusDiv.innerHTML = "Preparing download...";
+
+  try {
+
+    const res = await fetch(
+      `${CUSTODY_API}/download`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          storageId: currentStorageId
+        })
+      }
+    );
+
+    if (!res.ok) {
+      throw new Error("Download failed");
+    }
+
+    const blob = await res.blob();
+
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+
+    a.href = url;
+    a.download = "evidence.zip";
+    document.body.appendChild(a);
+    a.click();
+
+    a.remove();
+    window.URL.revokeObjectURL(url);
+
+    statusDiv.innerHTML =
+      "<span style='color:#065f46'>Download started.</span>";
+
+  } catch (err) {
+
+    statusDiv.innerHTML =
+      "<span style='color:#991b1b'>Download failed.</span>";
   }
 }
 
