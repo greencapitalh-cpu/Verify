@@ -1,246 +1,275 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>UDoChain Private Verification</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>UDoChain Private Verification</title>
 
-<link rel="icon" href="logo-udochain.png" />
+    <link rel="icon" href="logo-udochain.png" />
+    <link rel="stylesheet" href="styles.css" />
 
-<style>
-body{
-  font-family:"Inter",sans-serif;
-  background:#f9fafb;
-  color:#1e293b;
-  margin:0;
-  display:flex;
-  flex-direction:column;
-  min-height:100vh;
-}
+    <style>
+      body {
+        font-family: "Inter", sans-serif;
+        background: #f9fafb;
+        color: #1e293b;
+        margin: 0;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
 
-/* HEADER */
-header{
-  background:#ffffff;
-  border-bottom:1px solid #e2e8f0;
-  padding:1rem 1.5rem;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-}
+      header {
+        background: white;
+        padding: 1rem 1.5rem;
+        border-bottom: 1px solid #e2e8f0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
 
-.header-left{
-  display:flex;
-  align-items:center;
-  gap:12px;
-}
+      .header-left {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
 
-.logo{height:36px;}
+      .logo {
+        height: 36px;
+      }
 
-.header-title{
-  font-weight:700;
-  font-size:1.2rem;
-  color:#5b2e90;
-}
+      .header-title {
+        font-weight: 700;
+        font-size: 1.25rem;
+        color: #5b2e90;
+      }
 
-.dashboard-btn{
-  background:#5b2e90;
-  color:white;
-  text-decoration:none;
-  padding:8px 18px;
-  border-radius:10px;
-  font-weight:600;
-  font-size:0.9rem;
-  transition:all .2s ease;
-}
+      .back-link {
+        text-decoration: none;
+        background: #f1f5f9;
+        padding: 6px 14px;
+        border-radius: 8px;
+        color: #475569;
+        font-size: 0.9rem;
+      }
 
-.dashboard-btn:hover{
-  background:#4a2476;
-}
+      main {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        padding: 2rem 1rem;
+      }
 
-/* MAIN */
-main{
-  flex:1;
-  display:flex;
-  justify-content:center;
-  padding:3rem 1rem;
-}
+      .card {
+        background: white;
+        border-radius: 16px;
+        padding: 2rem;
+        max-width: 620px;
+        width: 100%;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+      }
 
-.card{
-  background:white;
-  border-radius:18px;
-  padding:2.5rem;
-  max-width:700px;
-  width:100%;
-  box-shadow:0 6px 20px rgba(0,0,0,0.06);
-}
+      h2 {
+        text-align: center;
+        color: #5b2e90;
+        margin-bottom: 0.5rem;
+      }
 
-.section{
-  margin-bottom:2rem;
-}
+      .subtitle {
+        text-align: center;
+        color: #64748b;
+        font-size: 0.95rem;
+        margin-bottom: 1.5rem;
+      }
 
-.section-title{
-  font-weight:600;
-  font-size:1rem;
-  color:#5b2e90;
-  margin-bottom:1rem;
-  border-bottom:1px solid #e2e8f0;
-  padding-bottom:.5rem;
-}
+      .badge {
+        margin: 0 auto 1rem;
+        padding: 6px 14px;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        width: fit-content;
+      }
 
-.badge{
-  display:inline-block;
-  padding:6px 14px;
-  border-radius:12px;
-  font-size:0.8rem;
-  font-weight:600;
-  margin-bottom:1.5rem;
-}
+      .badge.verified {
+        background: #ede9fe;
+        color: #5b2e90;
+      }
 
-.badge.verified{
-  background:#ede9fe;
-  color:#5b2e90;
-}
+      .badge.unverified {
+        background: #fee2e2;
+        color: #991b1b;
+      }
 
-.badge.unverified{
-  background:#fee2e2;
-  color:#991b1b;
-}
+      .field {
+        margin-bottom: 0.8rem;
+      }
 
-.field{
-  margin-bottom:1rem;
-}
+      .label {
+        font-weight: 600;
+        color: #475569;
+      }
 
-.label{
-  font-size:0.8rem;
-  color:#64748b;
-  display:block;
-  margin-bottom:2px;
-}
+      .value {
+        display: block;
+        margin-top: 2px;
+        word-break: break-all;
+      }
 
-.value{
-  font-size:0.95rem;
-  font-weight:500;
-  word-break:break-all;
-}
+      .divider {
+        border-top: 1px solid #e2e8f0;
+        margin: 1.5rem 0;
+      }
 
-/* ===============================
-   PASSWORD FIELD FIXED
-================================= */
+      .download-btn {
+        width: 100%;
+        padding: 12px;
+        border-radius: 10px;
+        border: none;
+        font-weight: 600;
+        cursor: pointer;
+        margin-top: 0.8rem;
+      }
 
-.password-wrapper{
-  position:relative;
-  width:100%;
-  margin-bottom:12px;
-}
+      .download-files {
+        background: #5b2e90;
+        color: white;
+      }
 
-.password-input{
-  width:100%;
-  height:48px;
-  padding:0 50px 0 16px;   /* espacio real para el ojo */
-  border-radius:14px;
-  border:1px solid #e2e8f0;
-  font-size:0.95rem;
-  outline:none;
-  background:#ffffff;
-  transition:border .2s ease, box-shadow .2s ease;
-  box-sizing:border-box;
-}
+      .download-meta {
+        background: #475569;
+        color: white;
+      }
 
-.password-input:focus{
-  border-color:#5b2e90;
-  box-shadow:0 0 0 2px rgba(91,46,144,0.15);
-}
+      footer {
+        text-align: center;
+        padding: 1rem;
+        font-size: 0.85rem;
+        color: #6b7280;
+        border-top: 1px solid #e2e8f0;
+        background: white;
+      }
+    </style>
+  </head>
 
-.password-toggle{
-  position:absolute;
-  top:0;
-  right:0;
-  height:100%;
-  width:48px;              /* mismo espacio que padding-right */
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  background:transparent;
-  border:none;
-  cursor:pointer;
-  color:#64748b;
-  border-radius:0 14px 14px 0;
-  transition:color .2s ease, background .2s ease;
-}
+  <body>
+    <header>
+      <div class="header-left">
+        <img src="logo-udochain.png" class="logo" />
+        <span class="header-title">UDoChain Verify</span>
+      </div>
+      <a href="https://wapp.udochain.com" class="back-link">Back</a>
+    </header>
 
-.password-toggle:hover{
-  color:#5b2e90;
-  background:rgba(91,46,144,0.05);
-}
+    <main>
+      <div class="card">
+        <div id="badge"></div>
 
-.password-toggle svg{
-  width:20px;
-  height:20px;
-}
+        <h2>Private Validation Details</h2>
+        <p class="subtitle">
+          Verify the authenticity and custody details of this private blockchain validation.
+        </p>
 
-/* =============================== */
+        <div id="details">Loading private validation data...</div>
 
-.download-btn{
-  width:100%;
-  padding:14px;
-  border-radius:12px;
-  border:none;
-  font-weight:600;
-  cursor:pointer;
-  background:#5b2e90;
-  color:white;
-  font-size:.95rem;
-  transition:all .2s ease;
-}
+        <div class="divider"></div>
 
-.download-btn:hover{
-  background:#4a2476;
-}
+        <h2>File Downloads</h2>
+        <p class="subtitle">
+          The following files or metadata are securely stored in Aereware.
+        </p>
 
-footer{
-  text-align:center;
-  padding:1rem;
-  font-size:.85rem;
-  color:#6b7280;
-  border-top:1px solid #e2e8f0;
-  background:white;
-}
-</style>
-</head>
+        <div id="downloads"></div>
+      </div>
+    </main>
 
-<body>
+    <footer>
+      <p>You do. We validate.</p>
+      <p>© 2025 UDoChain — All rights reserved.</p>
+    </footer>
 
-<header>
-  <div class="header-left">
-    <img src="logo-udochain.png" class="logo"/>
-    <span class="header-title">UDoChain Verify</span>
-  </div>
-  <a href="https://app.udochain.com/dashboard" class="dashboard-btn">
-    Go to Dashboard
-  </a>
-</header>
+    <script>
+      const detailsDiv = document.getElementById("details");
+      const downloadsDiv = document.getElementById("downloads");
+      const badgeDiv = document.getElementById("badge");
 
-<main>
-  <div class="card">
-    <div id="badge"></div>
+      const params = new URLSearchParams(window.location.search);
+      const storage = params.get("storage");
 
-    <div class="section">
-      <div class="section-title">Evidence Information</div>
-      <div id="details">Loading validation data...</div>
-    </div>
+      // ✅ PROTOCOLO FUNCIONAL: fuente viva (API)
+      const VALIDATE_API = "https://api.udochain.com/validate";
 
-    <div class="section">
-      <div class="section-title">Files</div>
-      <div id="downloads"></div>
-    </div>
-  </div>
-</main>
+      async function loadPrivateValidation() {
+        if (!storage) {
+          detailsDiv.innerHTML =
+            "<p class='fail'>No storage ID provided.</p>";
+          return;
+        }
 
-<footer>
-  <p>You do. We validate.</p>
-  <p>© 2025 UDoChain — All rights reserved.</p>
-</footer>
+        try {
+          const cleanId = storage.replace(/^ar:\/\//, "");
 
-<script src="verify-private.js"></script>
-</body>
+          const res = await fetch(
+            `${VALIDATE_API}/api/validate/storage/${encodeURIComponent(cleanId)}`
+          );
+
+          const data = await res.json();
+
+          if (!data?.ok) {
+            badgeDiv.innerHTML =
+              `<div class="badge unverified">Unverified</div>`;
+            detailsDiv.innerHTML =
+              "<p class='fail'>Validation not found.</p>";
+            return;
+          }
+
+          badgeDiv.innerHTML =
+            `<div class="badge verified">Verified on Blockchain</div>`;
+
+          const date = new Date(data.validatedAt).toLocaleString();
+
+          detailsDiv.innerHTML = `
+            <div class="field"><span class="label">Evidence Title:</span><span class="value">${data.evidenceTitle || "—"}</span></div>
+            <div class="field"><span class="label">Transaction Hash:</span><span class="value">${data.txHash}</span></div>
+            <div class="field"><span class="label">Validated By:</span><span class="value">${data.userEmail || "—"}</span></div>
+            <div class="field"><span class="label">GPS:</span><span class="value">${data.gps || "—"}</span></div>
+            <div class="field"><span class="label">Date (UTC):</span><span class="value">${date}</span></div>
+            <div class="field"><span class="label">Storage ID:</span><span class="value">${data.storageId}</span></div>
+            <div class="field"><span class="label">Private Storage:</span><span class="value">${data.w3Note}</span></div>
+          `;
+
+          const downloads = [];
+
+          if (data.binaryStorageId) {
+            const id = data.binaryStorageId.replace("ar://", "");
+            downloads.push(`
+              <button class="download-btn download-files"
+                onclick="window.open('${VALIDATE_API}/api/validate/aereware/download/files/${id}','_blank')">
+                Download Custody Files (ZIP)
+              </button>
+            `);
+          }
+
+          if (data.storageId) {
+            const id = data.storageId.replace("ar://", "");
+            downloads.push(`
+              <button class="download-btn download-meta"
+                onclick="window.open('${VALIDATE_API}/api/validate/aereware/download/metadata/${id}','_blank')">
+                Download Metadata (JSON)
+              </button>
+            `);
+          }
+
+          downloadsDiv.innerHTML = downloads.join("");
+        } catch (e) {
+          badgeDiv.innerHTML =
+            `<div class="badge unverified">Unverified</div>`;
+          detailsDiv.innerHTML =
+            "<p class='fail'>Fetch error.</p>";
+        }
+      }
+
+      loadPrivateValidation();
+    </script>
+  </body>
 </html>
