@@ -1,26 +1,41 @@
+// ======================================================
+// 🟪 UDoChain Verify Private — FINAL STABLE VERSION
+// Compatible with ValidateRoutes v6.1
+// ======================================================
+
 const detailsDiv = document.getElementById("details");
 const downloadsDiv = document.getElementById("downloads");
 const badgeDiv = document.getElementById("badge");
 
 const params = new URLSearchParams(window.location.search);
-const storage = params.get("storage");
+let storage = params.get("storage");
 
-const VERIFY_API = "https://api.udochain.com/validate/api/verify";
-const VALIDATE_API = "https://api.udochain.com/validate";
+const VERIFY_API = "https://api.udochain.com/validate/api/validate";
 
+// ------------------------------------------------------
+// Normalize ID
+// ------------------------------------------------------
+function cleanId(id) {
+  return id.replace(/^ar:\/\//, "");
+}
+
+// ------------------------------------------------------
+// Load validation
+// ------------------------------------------------------
 async function loadPrivateValidation() {
 
   if (!storage) {
-    detailsDiv.innerHTML = "<p>No storage ID provided.</p>";
+    detailsDiv.innerHTML =
+      "<p class='notice'>No storage ID provided.</p>";
     return;
   }
 
   try {
 
-    const cleanId = storage.replace(/^ar:\/\//, "");
+    const cleanStorage = cleanId(storage);
 
     const res = await fetch(
-      `${VERIFY_API}/storage/${encodeURIComponent(cleanId)}`
+      `${VERIFY_API}/storage/${encodeURIComponent(cleanStorage)}`
     );
 
     const data = await res.json();
@@ -29,7 +44,7 @@ async function loadPrivateValidation() {
       badgeDiv.innerHTML =
         `<div class="badge unverified">Unverified</div>`;
       detailsDiv.innerHTML =
-        "<p>Validation not found.</p>";
+        "<p class='notice'>Validation not found.</p>";
       return;
     }
 
@@ -37,10 +52,12 @@ async function loadPrivateValidation() {
       `<div class="badge verified">Verified on Blockchain</div>`;
 
     const dateFormatted = new Date(
-      data.validatedAt || data.createdAt
+      data.validatedAt
     ).toLocaleString();
 
-    // 🔹 Información básica (sin lista de files)
+    // ------------------------------------------------------
+    // Details
+    // ------------------------------------------------------
     detailsDiv.innerHTML = `
       <div class="field">
         <span class="label">Evidence Title</span>
@@ -64,33 +81,18 @@ async function loadPrivateValidation() {
     `;
 
     // ------------------------------------------------------
-    // 🔥 SOPORTA DOS FORMAS DE CUSTODIA
+    // Download Button (ONLY if binary custody exists)
     // ------------------------------------------------------
+    if (data.hasBinaryBackup && data.binaryStorageId) {
 
-    let downloadId = null;
+      const binaryId = cleanId(data.binaryStorageId);
 
-    // ✅ Forma nueva
-    if (data.binaryStorageId && data.binaryStorageId !== data.storageId) {
-      downloadId = data.binaryStorageId;
-    }
-
-    // ✅ Forma legacy
-    else if (data.hasBinaryBackup === true && data.storageId) {
-      downloadId = data.storageId;
-    }
-
-    if (downloadId) {
-
-      const cleanDownloadId =
-        downloadId.replace(/^ar:\/\//, "");
-
-      const binaryUrl =
-        `${VALIDATE_API}/api/aereware/download/files/` +
-        encodeURIComponent(cleanDownloadId);
+      const downloadUrl =
+        `${VERIFY_API}/aereware/download/files/${encodeURIComponent(binaryId)}`;
 
       downloadsDiv.innerHTML = `
         <button class="download-btn"
-          onclick="window.open('${binaryUrl}', '_blank')">
+          onclick="window.location.href='${downloadUrl}'">
           Download Custody Files (ZIP)
         </button>
       `;
@@ -98,7 +100,7 @@ async function loadPrivateValidation() {
     } else {
 
       downloadsDiv.innerHTML = `
-        <p style="text-align:center;color:#64748b;">
+        <p class="notice">
           This validation was created without binary custody.
         </p>
       `;
@@ -106,14 +108,15 @@ async function loadPrivateValidation() {
 
   } catch (err) {
 
-    console.error("Verify private error:", err);
+    console.error("❌ Private verify error:", err);
 
     badgeDiv.innerHTML =
-      `<div class="badge unverified">Unverified</div>`;
+      `<div class="badge unverified">Error</div>`;
 
     detailsDiv.innerHTML =
-      "<p>Error loading validation.</p>";
+      "<p class='notice'>Error loading validation data.</p>";
   }
 }
 
+// ------------------------------------------------------
 loadPrivateValidation();
