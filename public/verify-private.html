@@ -34,7 +34,9 @@ header {
   gap: 10px;
 }
 
-.logo { height: 36px; }
+.logo {
+  height: 36px;
+}
 
 .header-title {
   font-weight: 700;
@@ -64,7 +66,20 @@ main {
   padding: 2rem;
   max-width: 620px;
   width: 100%;
-  box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+}
+
+h2 {
+  text-align: center;
+  color: #5b2e90;
+  margin-bottom: 0.5rem;
+}
+
+.subtitle {
+  text-align: center;
+  color: #64748b;
+  font-size: 0.95rem;
+  margin-bottom: 1.5rem;
 }
 
 .badge {
@@ -76,21 +91,29 @@ main {
   width: fit-content;
 }
 
-.badge.verified { background: #ede9fe; color: #5b2e90; }
-.badge.unverified { background: #fee2e2; color: #991b1b; }
+.badge.verified {
+  background: #ede9fe;
+  color: #5b2e90;
+}
+
+.badge.unverified {
+  background: #fee2e2;
+  color: #991b1b;
+}
 
 .field {
-  margin-bottom: 1rem;
+  margin-bottom: 0.9rem;
   text-align: center;
 }
 
 .label {
   font-weight: 600;
-  display: block;
-  margin-bottom: 4px;
+  color: #475569;
 }
 
 .value {
+  display: block;
+  margin-top: 4px;
   word-break: break-all;
 }
 
@@ -101,21 +124,21 @@ main {
   border: none;
   font-weight: 600;
   cursor: pointer;
-  margin-top: 1.5rem;
+  margin-top: 1.2rem;
   background: #5b2e90;
   color: white;
+  font-size: 1rem;
 }
 
-.home-btn {
-  width: 100%;
-  padding: 12px;
-  border-radius: 12px;
-  border: none;
-  font-weight: 600;
-  cursor: pointer;
-  margin-top: 1.2rem;
-  background: #475569;
-  color: white;
+.download-btn:hover {
+  opacity: 0.9;
+}
+
+.notice {
+  text-align: center;
+  color: #64748b;
+  font-size: 0.9rem;
+  margin-top: 1rem;
 }
 
 footer {
@@ -143,12 +166,15 @@ footer {
   <div class="card">
 
     <div id="badge"></div>
-    <div id="details"></div>
-    <div id="downloads"></div>
 
-    <button class="home-btn" onclick="window.location.href='index.html'">
-      Back to Verify Home
-    </button>
+    <h2>Private Validation Details</h2>
+    <p class="subtitle">
+      Verify the authenticity and custody details of this private blockchain validation.
+    </p>
+
+    <div id="details">Loading validation data...</div>
+
+    <div id="downloads"></div>
 
   </div>
 </main>
