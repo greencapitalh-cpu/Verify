@@ -368,6 +368,8 @@ async function loadPrivateValidation() {
 // ======================================================
 loadPrivateValidation();
 */
+
+/*
 //sigue corregido igual q el html
 
 // ======================================================
@@ -548,4 +550,130 @@ async function loadPrivateValidation() {
 // ======================================================
 // 🚀 INIT
 // ======================================================
+loadPrivateValidation();
+*/
+
+
+// ======================================================
+// 🟪 UDoChain Verify Private — FIX REAL DOWNLOAD
+// ======================================================
+
+const detailsDiv = document.getElementById("details");
+const downloadsDiv = document.getElementById("downloads");
+const badgeDiv = document.getElementById("badge");
+
+const params = new URLSearchParams(window.location.search);
+const storage = params.get("storage");
+
+const VERIFY_API = "https://api.udochain.com/validate/api/verify";
+const VALIDATE_API = "https://api.udochain.com/validate";
+
+async function loadPrivateValidation() {
+
+  if (!storage) {
+    detailsDiv.innerHTML =
+      "<p class='fail'>No storage ID provided in URL.</p>";
+    return;
+  }
+
+  try {
+
+    const cleanId = storage.replace(/^ar:\/\//, "");
+
+    const res = await fetch(
+      `${VERIFY_API}/storage/${encodeURIComponent(cleanId)}`
+    );
+
+    const data = await res.json();
+
+    if (!data?.ok) {
+      badgeDiv.innerHTML =
+        `<div class="badge unverified">Unverified</div>`;
+      detailsDiv.innerHTML =
+        "<p class='fail'>Validation not found.</p>";
+      return;
+    }
+
+    badgeDiv.innerHTML =
+      `<div class="badge verified">Verified on Blockchain</div>`;
+
+    const dateFormatted = new Date(
+      data.validatedAt || data.createdAt
+    ).toLocaleString();
+
+    // 🔥 NO mostramos lista de files (no es necesario)
+    detailsDiv.innerHTML = `
+      <div class="field">
+        <span class="label">Evidence Title:</span>
+        <span class="value">${data.evidenceTitle || "—"}</span>
+      </div>
+
+      <div class="field">
+        <span class="label">Transaction Hash:</span>
+        <span class="value">${data.txHash || "—"}</span>
+      </div>
+
+      <div class="field">
+        <span class="label">GPS:</span>
+        <span class="value">${data.gps || "—"}</span>
+      </div>
+
+      <div class="field">
+        <span class="label">Date (UTC):</span>
+        <span class="value">${dateFormatted}</span>
+      </div>
+
+      <div class="field">
+        <span class="label">Storage ID:</span>
+        <span class="value">${data.storageId || "—"}</span>
+      </div>
+
+      <div class="field">
+        <span class="label">Custody Status:</span>
+        <span class="value">
+          ${data.binaryStorageId ? "Binary custody enabled" : "Metadata-only validation"}
+        </span>
+      </div>
+    `;
+
+    // ======================================================
+    // 📦 DOWNLOAD BUTTON (SOLO DEPENDE DE binaryStorageId)
+    // ======================================================
+
+    if (data.binaryStorageId) {
+
+      const cleanBinaryId = data.binaryStorageId.replace(/^ar:\/\//, "");
+
+      const binaryUrl =
+        `${VALIDATE_API}/api/aereware/download/files/` +
+        encodeURIComponent(cleanBinaryId);
+
+      downloadsDiv.innerHTML = `
+        <button class="download-btn"
+          onclick="window.open('${binaryUrl}', '_blank')">
+          Download Custody Files (ZIP)
+        </button>
+      `;
+
+    } else {
+
+      downloadsDiv.innerHTML = `
+        <p class="subtitle">
+          This validation was created without binary custody.
+        </p>
+      `;
+    }
+
+  } catch (err) {
+
+    console.error("❌ Verify private fetch error:", err);
+
+    badgeDiv.innerHTML =
+      `<div class="badge unverified">Unverified</div>`;
+
+    detailsDiv.innerHTML =
+      "<p class='fail'>Error loading validation.</p>";
+  }
+}
+
 loadPrivateValidation();
