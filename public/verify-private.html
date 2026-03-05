@@ -66,7 +66,7 @@ main {
   padding: 2rem;
   max-width: 620px;
   width: 100%;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 14px rgba(0,0,0,0.06);
 }
 
 h2 {
@@ -128,10 +128,23 @@ h2 {
   background: #5b2e90;
   color: white;
   font-size: 1rem;
+  transition: all 0.2s ease;
 }
 
 .download-btn:hover {
   opacity: 0.9;
+}
+
+.download-btn.loading {
+  background: #7c3aed;
+  cursor: not-allowed;
+}
+
+.download-status {
+  text-align: center;
+  margin-top: 10px;
+  font-size: 0.9rem;
+  color: #64748b;
 }
 
 .notice {
