@@ -686,7 +686,9 @@ const downloadsDiv = document.getElementById("downloads");
 const badgeDiv = document.getElementById("badge");
 
 const params = new URLSearchParams(window.location.search);
+
 let storage = params.get("storage");
+let authToken = params.get("auth");
 
 const VERIFY_API = "https://api.udochain.com/validate/api/verify";
 const DOWNLOAD_API = "https://api.udochain.com/validate/api/validate";
@@ -700,11 +702,19 @@ function cleanId(id) {
 // ------------------------------------------------------
 
 function getAuthToken() {
+
+  // primero verificar si viene desde dashboard
+  if (authToken) {
+    return authToken;
+  }
+
+  // fallback localStorage
   try {
     return localStorage.getItem("token");
   } catch {
     return null;
   }
+
 }
 
 // ------------------------------------------------------
@@ -947,6 +957,3 @@ async function loadPrivateValidation() {
 }
 
 loadPrivateValidation();
-
-
-
