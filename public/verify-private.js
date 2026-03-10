@@ -1359,14 +1359,46 @@ async function requestDownload(email, storageId) {
 // DIRECT DOWNLOAD
 // ------------------------------------------------------
 
-function directDownload(binaryId) {
+async function directDownload(binaryId) {
 
   const cleanBinary = cleanId(binaryId);
 
   const url =
     `${DOWNLOAD_API}/aereware/download/files/${encodeURIComponent(cleanBinary)}`;
 
-  window.open(url, "_blank");
+  try {
+
+    const res = await fetch(url);
+
+    if (!res.ok) {
+
+      alert("Download failed");
+      return;
+
+    }
+
+    const blob = await res.blob();
+
+    const downloadUrl =
+      window.URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+
+    a.href = downloadUrl;
+    a.download = "evidence.zip";
+
+    document.body.appendChild(a);
+
+    a.click();
+
+    a.remove();
+
+  } catch (err) {
+
+    console.error("Download error:", err);
+    alert("Download failed");
+
+  }
 
 }
 
