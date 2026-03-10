@@ -1114,7 +1114,34 @@ async function searchIdentifier(value) {
     trimmed.startsWith("https://")
   ) {
 
-    window.location.href = trimmed;
+    const verifyEmail =
+      localStorage.getItem("udo_verify_email");
+
+    if (verifyEmail) {
+
+      try {
+
+        const encoded =
+          btoa(verifyEmail);
+
+        const separator =
+          trimmed.includes("?") ? "&" : "?";
+
+        window.location.href =
+          `${trimmed}${separator}e=${encodeURIComponent(encoded)}`;
+
+      } catch {
+
+        window.location.href = trimmed;
+
+      }
+
+    } else {
+
+      window.location.href = trimmed;
+
+    }
+
     return;
 
   }
