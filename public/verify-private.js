@@ -1268,20 +1268,6 @@ function cleanId(id) {
 }
 
 // ------------------------------------------------------
-// DETECT LOGIN TOKEN
-// ------------------------------------------------------
-
-function getAuthToken() {
-
-  try {
-    return localStorage.getItem("token");
-  } catch {
-    return null;
-  }
-
-}
-
-// ------------------------------------------------------
 // DETECT VERIFY EMAIL
 // ------------------------------------------------------
 
@@ -1350,69 +1336,14 @@ async function requestDownload(email, storageId) {
 // DIRECT DOWNLOAD
 // ------------------------------------------------------
 
-async function directDownload(binaryId) {
+function directDownload(binaryId) {
 
   const cleanBinary = cleanId(binaryId);
 
   const url =
     `${DOWNLOAD_API}/aereware/download/files/${encodeURIComponent(cleanBinary)}`;
 
-  const token = getAuthToken();
-
-  try {
-
-    // --------------------------------------------------
-    // TOKEN DOWNLOAD
-    // --------------------------------------------------
-
-    if (token) {
-
-      const res = await fetch(url, {
-
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-
-      });
-
-      if (!res.ok) {
-
-        alert("Download failed");
-        return;
-
-      }
-
-      const blob = await res.blob();
-
-      const downloadUrl =
-        window.URL.createObjectURL(blob);
-
-      const a = document.createElement("a");
-
-      a.href = downloadUrl;
-      a.download = "evidence.zip";
-
-      document.body.appendChild(a);
-
-      a.click();
-      a.remove();
-
-      return;
-
-    }
-
-    // --------------------------------------------------
-    // PUBLIC DIRECT DOWNLOAD
-    // --------------------------------------------------
-
-    window.open(url, "_blank");
-
-  } catch (err) {
-
-    console.error("Download error:", err);
-    alert("Download failed");
-
-  }
+  window.open(url, "_blank");
 
 }
 
@@ -1510,17 +1441,14 @@ async function loadPrivateValidation() {
 
     }
 
-    const token =
-      getAuthToken();
-
     const verifyEmail =
       getVerifyEmail();
 
     // --------------------------------------------------
-    // AUTHENTICATED USER (TOKEN OR VERIFY EMAIL)
+    // USER FROM DASHBOARD → DIRECT DOWNLOAD
     // --------------------------------------------------
 
-    if ((token || verifyEmail) && data.binaryStorageId) {
+    if (verifyEmail && data.binaryStorageId) {
 
       downloadsDiv.innerHTML = `
 
@@ -1532,7 +1460,7 @@ async function loadPrivateValidation() {
         </button>
 
         <div class="download-status">
-          Direct download available for authenticated users.
+          Direct download available for UDoChain users.
         </div>
 
       `;
