@@ -1282,27 +1282,47 @@ function getAuthToken() {
 }
 
 // ------------------------------------------------------
+// DETECT VERIFY EMAIL
+// ------------------------------------------------------
+
+function getVerifyEmail() {
+
+  try {
+    return localStorage.getItem("udo_verify_email");
+  } catch {
+    return null;
+  }
+
+}
+
+// ------------------------------------------------------
 // EMAIL REQUEST
 // ------------------------------------------------------
 
 async function requestDownload(email, storageId) {
 
   if (!email) {
+
     alert("Please enter your email.");
     return;
+
   }
 
   try {
 
     const res = await fetch(`${VERIFY_API}/request-download`, {
+
       method: "POST",
+
       headers: {
         "Content-Type": "application/json"
       },
+
       body: JSON.stringify({
         email,
         storageId
       })
+
     });
 
     const data = await res.json();
@@ -1327,7 +1347,7 @@ async function requestDownload(email, storageId) {
 }
 
 // ------------------------------------------------------
-// DIRECT DOWNLOAD (AUTHENTICATED)
+// DIRECT DOWNLOAD
 // ------------------------------------------------------
 
 async function directDownload(binaryId) {
@@ -1341,27 +1361,51 @@ async function directDownload(binaryId) {
 
   try {
 
-    const res = await fetch(url, {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    });
+    // --------------------------------------------------
+    // TOKEN DOWNLOAD
+    // --------------------------------------------------
 
-    if (!res.ok) {
-      alert("Download failed");
+    if (token) {
+
+      const res = await fetch(url, {
+
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+
+      });
+
+      if (!res.ok) {
+
+        alert("Download failed");
+        return;
+
+      }
+
+      const blob = await res.blob();
+
+      const downloadUrl =
+        window.URL.createObjectURL(blob);
+
+      const a = document.createElement("a");
+
+      a.href = downloadUrl;
+      a.download = "evidence.zip";
+
+      document.body.appendChild(a);
+
+      a.click();
+      a.remove();
+
       return;
+
     }
 
-    const blob = await res.blob();
+    // --------------------------------------------------
+    // PUBLIC DIRECT DOWNLOAD
+    // --------------------------------------------------
 
-    const downloadUrl = window.URL.createObjectURL(blob);
-
-    const a = document.createElement("a");
-    a.href = downloadUrl;
-    a.download = "evidence.zip";
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
+    window.open(url, "_blank");
 
   } catch (err) {
 
@@ -1382,11 +1426,13 @@ async function loadPrivateValidation() {
       "<p class='notice'>No storage ID provided.</p>";
 
     return;
+
   }
 
   try {
 
-    const cleanStorage = cleanId(storage);
+    const cleanStorage =
+      cleanId(storage);
 
     const res = await fetch(
       `${VERIFY_API}/storage/${encodeURIComponent(cleanStorage)}`
@@ -1403,6 +1449,7 @@ async function loadPrivateValidation() {
         "<p class='notice'>Validation not found.</p>";
 
       return;
+
     }
 
     badgeDiv.innerHTML =
@@ -1412,6 +1459,7 @@ async function loadPrivateValidation() {
       new Date(data.validatedAt).toLocaleString();
 
     detailsDiv.innerHTML = `
+
       <div class="field">
         <span class="label">Evidence Title</span>
         <span class="value">${data.evidenceTitle || "—"}</span>
@@ -1431,6 +1479,7 @@ async function loadPrivateValidation() {
         <span class="label">Storage ID</span>
         <span class="value">${data.storageId}</span>
       </div>
+
     `;
 
     // --------------------------------------------------
@@ -1446,6 +1495,7 @@ async function loadPrivateValidation() {
       `;
 
       return;
+
     }
 
     if (data.downloadPolicy === "disabled") {
@@ -1457,15 +1507,20 @@ async function loadPrivateValidation() {
       `;
 
       return;
+
     }
 
-    const token = getAuthToken();
+    const token =
+      getAuthToken();
+
+    const verifyEmail =
+      getVerifyEmail();
 
     // --------------------------------------------------
-    // USER LOGGED → DIRECT DOWNLOAD
+    // AUTHENTICATED USER (TOKEN OR VERIFY EMAIL)
     // --------------------------------------------------
 
-    if (token && data.binaryStorageId) {
+    if ((token || verifyEmail) && data.binaryStorageId) {
 
       downloadsDiv.innerHTML = `
 
@@ -1479,16 +1534,20 @@ async function loadPrivateValidation() {
         <div class="download-status">
           Direct download available for authenticated users.
         </div>
+
       `;
 
       const btn =
         document.getElementById("directDownloadBtn");
 
       btn.addEventListener("click", () => {
+
         directDownload(data.binaryStorageId);
+
       });
 
       return;
+
     }
 
     // --------------------------------------------------
@@ -1524,9 +1583,11 @@ async function loadPrivateValidation() {
       <div class="download-status">
         You will receive a temporary download link in your email.
       </div>
+
     `;
 
-    const btn = document.getElementById("sendBtn");
+    const btn =
+      document.getElementById("sendBtn");
 
     btn.addEventListener("click", () => {
 
@@ -1554,3 +1615,4 @@ async function loadPrivateValidation() {
 }
 
 loadPrivateValidation();
+
