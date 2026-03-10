@@ -1025,6 +1025,7 @@ scanGallery.addEventListener("click", () => {
 
 */
 
+
 // ======================================================
 // 🔍 UDoChain Smart Verify — PRODUCTION STABLE
 // Compatible with:
@@ -1048,6 +1049,7 @@ const API_BASE = "https://api.udochain.com/validate/api/verify";
 // ======================================================
 
 const urlParams = new URLSearchParams(window.location.search);
+
 const authFromDashboard = urlParams.get("auth");
 
 if (authFromDashboard) {
@@ -1056,18 +1058,63 @@ if (authFromDashboard) {
     localStorage.setItem("token", authFromDashboard);
   } catch {}
 
-  const cleanUrl = window.location.origin + window.location.pathname;
+}
+
+// ======================================================
+// 📧 CAPTURE EMAIL FROM DASHBOARD
+// ======================================================
+
+const encodedEmail = urlParams.get("e");
+
+if (encodedEmail) {
+
+  try {
+
+    const decodedEmail =
+      atob(encodedEmail)
+      .toLowerCase()
+      .trim();
+
+    localStorage.setItem(
+      "udo_verify_email",
+      decodedEmail
+    );
+
+  } catch (err) {
+
+    console.warn("Invalid encoded email");
+
+  }
+
+}
+
+// ------------------------------------------------------
+// CLEAN URL (remove auth + email)
+// ------------------------------------------------------
+
+if (authFromDashboard || encodedEmail) {
+
+  const cleanUrl =
+    window.location.origin +
+    window.location.pathname;
+
   window.history.replaceState({}, document.title, cleanUrl);
+
 }
 
 // ======================================================
 // 🔎 MAIN SEARCH LOGIC
 // ======================================================
+
 async function searchIdentifier(value) {
 
   if (!value) {
-    resultDiv.innerHTML = "Please enter an identifier.";
+
+    resultDiv.innerHTML =
+      "Please enter an identifier.";
+
     return;
+
   }
 
   const trimmed = value.trim();
@@ -1075,12 +1122,15 @@ async function searchIdentifier(value) {
   // --------------------------------------------------
   // 0️⃣ If QR already contains full URL → redirect
   // --------------------------------------------------
+
   if (
     trimmed.startsWith("http://") ||
     trimmed.startsWith("https://")
   ) {
+
     window.location.href = trimmed;
     return;
+
   }
 
   resultDiv.innerHTML = "Searching...";
@@ -1090,9 +1140,11 @@ async function searchIdentifier(value) {
     // ==================================================
     // 1️⃣ txHash → PUBLIC
     // ==================================================
+
     if (trimmed.startsWith("0x")) {
 
-      const cleanTx = trimmed.toLowerCase();
+      const cleanTx =
+        trimmed.toLowerCase();
 
       const res = await fetch(
         `${API_BASE}/tx/${encodeURIComponent(cleanTx)}`
@@ -1101,18 +1153,24 @@ async function searchIdentifier(value) {
       const data = await res.json();
 
       if (res.ok && data?.ok) {
+
         window.location.href =
           `/verify-public.html?tx=${encodeURIComponent(cleanTx)}`;
+
         return;
+
       }
+
     }
 
     // ==================================================
     // 2️⃣ storageId → PRIVATE
     // ==================================================
+
     if (trimmed.startsWith("ar://")) {
 
-      const cleanId = trimmed.replace(/^ar:\/\//, "");
+      const cleanId =
+        trimmed.replace(/^ar:\/\//, "");
 
       const res = await fetch(
         `${API_BASE}/storage/${encodeURIComponent(cleanId)}`
@@ -1121,15 +1179,20 @@ async function searchIdentifier(value) {
       const data = await res.json();
 
       if (res.ok && data?.ok) {
+
         window.location.href =
           `/verify-private.html?storage=${encodeURIComponent(trimmed)}`;
+
         return;
+
       }
+
     }
 
     // ==================================================
     // 3️⃣ Try as tx
     // ==================================================
+
     let res = await fetch(
       `${API_BASE}/tx/${encodeURIComponent(trimmed.toLowerCase())}`
     );
@@ -1137,15 +1200,20 @@ async function searchIdentifier(value) {
     let data = await res.json();
 
     if (res.ok && data?.ok) {
+
       window.location.href =
         `/verify-public.html?tx=${encodeURIComponent(trimmed.toLowerCase())}`;
+
       return;
+
     }
 
     // ==================================================
     // 4️⃣ Try as storage
     // ==================================================
-    const cleanId = trimmed.replace(/^ar:\/\//, "");
+
+    const cleanId =
+      trimmed.replace(/^ar:\/\//, "");
 
     res = await fetch(
       `${API_BASE}/storage/${encodeURIComponent(cleanId)}`
@@ -1154,17 +1222,23 @@ async function searchIdentifier(value) {
     data = await res.json();
 
     if (res.ok && data?.ok) {
+
       window.location.href =
         `/verify-private.html?storage=${encodeURIComponent(trimmed)}`;
+
       return;
+
     }
 
     throw new Error("Not found");
 
   } catch {
+
     resultDiv.innerHTML =
       "<span style='color:#b91c1c'>No validation found for this identifier.</span>";
+
   }
+
 }
 
 // ======================================================
@@ -1172,13 +1246,19 @@ async function searchIdentifier(value) {
 // ======================================================
 
 verifyBtn.addEventListener("click", () => {
+
   searchIdentifier(hashInput.value);
+
 });
 
 hashInput.addEventListener("keypress", e => {
+
   if (e.key === "Enter") {
+
     searchIdentifier(hashInput.value);
+
   }
+
 });
 
 // ======================================================
@@ -1191,11 +1271,15 @@ function handleResult(text) {
 
   const cleaned = text.trim();
 
-  resultDiv.textContent = "Detected: " + cleaned;
+  resultDiv.textContent =
+    "Detected: " + cleaned;
 
   setTimeout(() => {
+
     searchIdentifier(cleaned);
+
   }, 600);
+
 }
 
 // ======================================================
@@ -1213,7 +1297,8 @@ scanCamera.addEventListener("click", async () => {
 
   qrPreview.style.display = "block";
 
-  const qrCode = new Html5Qrcode("qr-reader");
+  const qrCode =
+    new Html5Qrcode("qr-reader");
 
   try {
 
@@ -1223,7 +1308,9 @@ scanCamera.addEventListener("click", async () => {
       (decodedText) => {
 
         qrCode.stop();
+
         qrPreview.style.display = "none";
+
         handleResult(decodedText);
 
       }
@@ -1232,9 +1319,12 @@ scanCamera.addEventListener("click", async () => {
   } catch (err) {
 
     console.error("Camera error:", err);
-    resultDiv.textContent = "Camera access denied or unavailable.";
+
+    resultDiv.textContent =
+      "Camera access denied or unavailable.";
 
   }
+
 });
 
 // ======================================================
@@ -1243,29 +1333,38 @@ scanCamera.addEventListener("click", async () => {
 
 scanGallery.addEventListener("click", () => {
 
-  const fileInput = document.createElement("input");
+  const fileInput =
+    document.createElement("input");
+
   fileInput.type = "file";
   fileInput.accept = "image/*";
 
   fileInput.onchange = async (e) => {
 
-    const file = e.target.files[0];
+    const file =
+      e.target.files[0];
+
     if (!file) return;
 
-    const qrCode = new Html5Qrcode("qr-preview");
+    const qrCode =
+      new Html5Qrcode("qr-preview");
 
     try {
 
-      const text = await qrCode.scanFile(file, true);
+      const text =
+        await qrCode.scanFile(file, true);
+
       handleResult(text);
 
     } catch {
 
-      resultDiv.textContent = "No QR detected in the image.";
+      resultDiv.textContent =
+        "No QR detected in the image.";
 
     }
 
   };
 
   fileInput.click();
+
 });
