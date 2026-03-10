@@ -1251,7 +1251,6 @@ async function loadPrivateValidation() {
 
 loadPrivateValidation();*/
 
-
 const detailsDiv = document.getElementById("details");
 const downloadsDiv = document.getElementById("downloads");
 const badgeDiv = document.getElementById("badge");
@@ -1274,9 +1273,33 @@ function cleanId(id) {
 function getVerifyEmail() {
 
   try {
+
+    // 1️⃣ try URL first
+    const encodedEmail = params.get("e");
+
+    if (encodedEmail) {
+
+      const decodedEmail =
+        atob(encodedEmail)
+        .toLowerCase()
+        .trim();
+
+      localStorage.setItem(
+        "udo_verify_email",
+        decodedEmail
+      );
+
+      return decodedEmail;
+
+    }
+
+    // 2️⃣ fallback localStorage
     return localStorage.getItem("udo_verify_email");
+
   } catch {
+
     return null;
+
   }
 
 }
@@ -1543,4 +1566,4 @@ async function loadPrivateValidation() {
 }
 
 loadPrivateValidation();
-
+ 
