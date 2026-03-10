@@ -1044,21 +1044,7 @@ const qrPreview = document.getElementById("qr-preview");
 
 const API_BASE = "https://api.udochain.com/validate/api/verify";
 
-// ======================================================
-// 🔐 CAPTURE AUTH TOKEN FROM DASHBOARD
-// ======================================================
-
 const urlParams = new URLSearchParams(window.location.search);
-
-const authFromDashboard = urlParams.get("auth");
-
-if (authFromDashboard) {
-
-  try {
-    localStorage.setItem("token", authFromDashboard);
-  } catch {}
-
-}
 
 // ======================================================
 // 📧 CAPTURE EMAIL FROM DASHBOARD
@@ -1089,10 +1075,10 @@ if (encodedEmail) {
 }
 
 // ------------------------------------------------------
-// CLEAN URL (remove auth + email)
+// CLEAN URL (remove email)
 // ------------------------------------------------------
 
-if (authFromDashboard || encodedEmail) {
+if (encodedEmail) {
 
   const cleanUrl =
     window.location.origin +
@@ -1120,7 +1106,7 @@ async function searchIdentifier(value) {
   const trimmed = value.trim();
 
   // --------------------------------------------------
-  // 0️⃣ If QR already contains full URL → redirect
+  // If QR already contains full URL → redirect
   // --------------------------------------------------
 
   if (
@@ -1138,7 +1124,7 @@ async function searchIdentifier(value) {
   try {
 
     // ==================================================
-    // 1️⃣ txHash → PUBLIC
+    // txHash → PUBLIC
     // ==================================================
 
     if (trimmed.startsWith("0x")) {
@@ -1164,7 +1150,7 @@ async function searchIdentifier(value) {
     }
 
     // ==================================================
-    // 2️⃣ storageId → PRIVATE
+    // storageId → PRIVATE
     // ==================================================
 
     if (trimmed.startsWith("ar://")) {
@@ -1190,7 +1176,7 @@ async function searchIdentifier(value) {
     }
 
     // ==================================================
-    // 3️⃣ Try as tx
+    // Try as tx
     // ==================================================
 
     let res = await fetch(
@@ -1209,7 +1195,7 @@ async function searchIdentifier(value) {
     }
 
     // ==================================================
-    // 4️⃣ Try as storage
+    // Try as storage
     // ==================================================
 
     const cleanId =
