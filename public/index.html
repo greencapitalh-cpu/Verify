@@ -7,17 +7,9 @@
 <link rel="icon" href="logo-udochain.png" />
 
 <style>
-:root {
-  --udo-primary: #1e3a8a;
-  --udo-primary-hover: #172554;
-  --udo-bg: #f5f6f8;
-}
-
-/* ================= BASE ================= */
-
 body {
   font-family: "Inter", sans-serif;
-  background: var(--udo-bg);
+  background: #f9fafb;
   color: #1e293b;
   margin: 0;
   display: flex;
@@ -34,6 +26,7 @@ header {
   background: white;
   padding: 1rem 1.5rem;
   border-bottom: 1px solid #e2e8f0;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.05);
 }
 
 .header-left {
@@ -48,12 +41,12 @@ header {
 
 .header-title {
   font-weight: 700;
-  font-size: 1.2rem;
-  color: var(--udo-primary);
+  font-size: 1.25rem;
+  color: #2563eb;
 }
 
 .dashboard-btn {
-  background: var(--udo-primary);
+  background: #2563eb;
   color: white;
   padding: 8px 18px;
   border-radius: 12px;
@@ -63,7 +56,7 @@ header {
 }
 
 .dashboard-btn:hover {
-  background: var(--udo-primary-hover);
+  background: #1d4ed8;
 }
 
 /* ================= MAIN ================= */
@@ -76,24 +69,23 @@ main {
   padding: 2rem 1rem;
 }
 
-/* 🔥 CARD MÁS PREMIUM */
 .verify-card {
   background: white;
-  border-radius: 20px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-  padding: 2.4rem;
+  border-radius: 18px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+  padding: 2.2rem;
   max-width: 480px;
   width: 100%;
   text-align: center;
-  overflow: hidden;
 }
 
-/* 🔥 FIX ERROR */
 h2 {
-  color: #0f172a;
-  font-size: 1.7rem;
+  color: h2 {
+  color: #0f172a; ✅
+};
+  font-size: 1.6rem;
   font-weight: 700;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.6rem;
 }
 
 .subtitle {
@@ -108,45 +100,38 @@ h2 {
   display: flex;
   align-items: center;
   border: 1px solid #cbd5e1;
-  border-radius: 14px;
+  border-radius: 12px;
   overflow: hidden;
   margin-bottom: 1.5rem;
   transition: all .2s ease;
-  background: #f8fafc;
-
-  max-width: 100%;
 }
 
 .hash-box:focus-within {
-  border-color: var(--udo-primary);
-  box-shadow: 0 0 0 3px rgba(30,58,138,0.15);
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37,99,235,0.1);
 }
 
 .hash-box input {
   flex: 1;
   border: none;
   outline: none;
-  padding: 14px;
+  padding: 13px;
   font-size: 0.95rem;
-  background: transparent;
-
-  min-width: 0; /* 🔥 CLAVE FLEX FIX */
-  overflow: hidden;
-  text-overflow: ellipsis;
+  background: #f8fafc;
 }
 
 .hash-box button {
-  background: var(--udo-primary);
+  background: #2563eb;
   color: white;
   border: none;
-  padding: 14px 20px;
+  padding: 13px 18px;
   font-weight: 600;
   cursor: pointer;
   transition: 0.25s;
 }
 
 .hash-box button:hover {
-  background: var(--udo-primary-hover);
+  background: #1d4ed8;
 }
 
 /* ================= QR BUTTONS ================= */
@@ -155,49 +140,46 @@ h2 {
   display: flex;
   flex-direction: column;
   gap: 14px;
-  margin-top: 1rem;
+  margin-top: 0.8rem;
 }
 
-.qr-btn {
 .qr-btn {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
-
-  border-radius: 16px;
-  border: 1px solid #e2e8f0;
-
+  border-radius: 14px;
+  border: none;
   font-weight: 600;
   font-size: 0.95rem;
-
   cursor: pointer;
-  padding: 16px;
-
+  padding: 14px;
+  transition: all 0.25s ease;
   width: 100%;
-
-  background: #f8fafc;
-  color: #1e293b;
-
-  transition: all 0.2s ease;
 }
 
-/* HOVER tipo dashboard */
-.qr-btn:hover {
-  background: #f1f5f9;
-  transform: translateY(-1px);
-  box-shadow: 0 6px 14px rgba(0,0,0,0.06);
-}
-
-/* ICONO */
 .qr-btn img {
   width: 20px;
   height: 20px;
-  opacity: 0.8;
 }
 
-/* 🔥 más consistente con app */
+.qr-btn.gallery {
+  background: #e9f8ed;
+  color: #14532d;
+}
 
+.qr-btn.gallery:hover {
+  background: #d4edda;
+}
+
+.qr-btn.camera {
+  background: #edf2f7;
+  color: #1e3a8a;
+}
+
+.qr-btn.camera:hover {
+  background: #e0e7ff;
+}
 
 /* ================= QR PREVIEW ================= */
 
@@ -207,29 +189,31 @@ h2 {
   border-radius: 12px;
   overflow: hidden;
   position: relative;
-
-  max-width: 100%;
-overflow: hidden;
 }
 
 #qr-overlay {
   position: absolute;
   inset: 0;
-  border: 2px solid rgba(30,58,138,0.5);
+  border: 2px solid rgba(37,99,235,0.5);
   border-radius: 8px;
+  pointer-events: none;
+  overflow: hidden;
 }
 
 #scanner-line {
   position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
   height: 3px;
-  background: var(--udo-primary);
-  width: 100%;
+  background: #2563eb;
   animation: scanLine 2s linear infinite;
 }
 
 @keyframes scanLine {
-  0% { top: 0%; }
-  100% { top: 100%; }
+  0% { top: 0%; opacity: 0.8; }
+  50% { opacity: 1; }
+  100% { top: 100%; opacity: 0.8; }
 }
 
 /* ================= RESULT ================= */
@@ -238,9 +222,6 @@ overflow: hidden;
   margin-top: 1.4rem;
   font-weight: 600;
   min-height: 24px;
-
-  word-break: break-word;
-  overflow-wrap: anywhere;
 }
 
 /* ================= FOOTER ================= */
@@ -254,7 +235,6 @@ footer {
   font-size: 0.85rem;
 }
 </style>
-
 
 <meta http-equiv="Content-Security-Policy"
 content="default-src 'self' https: blob: data: 'unsafe-inline' 'unsafe-eval';">
@@ -315,6 +295,5 @@ content="default-src 'self' https: blob: data: 'unsafe-inline' 'unsafe-eval';">
 
 </body>
 </html>
-
 
 
