@@ -91,12 +91,15 @@ main {
   max-width: 480px;
   width: 100%;
   text-align: center;
-
-  /* 🔥 evita overflow */
   overflow: hidden;
+
+  /* 🔥 overflow fix */
+  word-break: break-word;
+  overflow-wrap: anywhere;
 }
 
-/* 🔥 FIX H2 */
+/* ================= TEXT ================= */
+
 h2 {
   color: #0f172a;
   font-size: 1.6rem;
@@ -108,6 +111,9 @@ h2 {
   color: #64748b;
   font-size: 0.95rem;
   margin-bottom: 1.8rem;
+  max-width: 90%;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 /* ================= INPUT ================= */
@@ -135,7 +141,6 @@ h2 {
   font-size: 0.95rem;
   background: #f8fafc;
 
-  /* 🔥 CLAVE para mobile */
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -148,7 +153,6 @@ h2 {
   padding: 13px 18px;
   font-weight: 600;
   cursor: pointer;
-  transition: 0.25s;
 }
 
 .hash-box button:hover {
@@ -161,7 +165,6 @@ h2 {
   display: flex;
   flex-direction: column;
   gap: 14px;
-  margin-top: 0.8rem;
 }
 
 .qr-btn {
@@ -175,51 +178,21 @@ h2 {
   font-size: 0.95rem;
   cursor: pointer;
   padding: 14px;
-  transition: all 0.25s ease;
   width: 100%;
-}
 
-/* 🔥 estilo plomo consistente */
-.qr-btn.gallery,
-.qr-btn.camera {
   background: #f1f5f9;
   color: #334155;
+
+  transition: all 0.2s ease;
 }
 
 .qr-btn:hover {
   background: #e2e8f0;
+  border-color: var(--udo-primary);
 }
 
-/* ================= QR PREVIEW ================= */
-
-#qr-preview {
-  display: none;
-  margin-top: 1.5rem;
-  border-radius: 12px;
-  position: relative;
-
-  max-width: 100%;
-  overflow: hidden;
-}
-
-#qr-overlay {
-  position: absolute;
-  inset: 0;
-  border: 2px solid rgba(30,58,138,0.5);
-  border-radius: 8px;
-}
-
-#scanner-line {
-  position: absolute;
-  height: 3px;
-  width: 100%;
-  background: var(--udo-primary);
-  animation: scanLine 2s linear infinite;
-}
-
-@keyframes scanLine {
-  0% { top: 0%; }
-  100% { top: 100%; }
+.qr-btn:active {
+  transform: scale(0.98);
 }
 
 /* ================= RESULT ================= */
@@ -229,7 +202,6 @@ h2 {
   font-weight: 600;
   min-height: 24px;
 
-  /* 🔥 SOLUCIÓN DEFINITIVA */
   word-break: break-word;
   overflow-wrap: anywhere;
 }
@@ -247,7 +219,6 @@ footer {
 
 </style>
 
-
 <meta http-equiv="Content-Security-Policy"
 content="default-src 'self' https: blob: data: 'unsafe-inline' 'unsafe-eval';">
 </head>
@@ -256,10 +227,8 @@ content="default-src 'self' https: blob: data: 'unsafe-inline' 'unsafe-eval';">
 
 <header>
   <div class="header-left">
-    <img src="logo-udochain.png" alt="UDoChain Logo" class="logo" />
-    <span class="header-title notranslate" translate="no">
-      UDoChain Verify
-    </span>
+    <img src="logo-udochain.png" class="logo" />
+    <span class="header-title">UDoChain Verify</span>
   </div>
 
   <a href="https://app.udochain.com/dashboard" class="dashboard-btn">
@@ -280,13 +249,13 @@ content="default-src 'self' https: blob: data: 'unsafe-inline' 'unsafe-eval';">
     </div>
 
     <div class="qr-actions">
-      <button class="qr-btn gallery" id="scanGallery">
-        <img src="icon-gallery.svg" alt="Gallery" />
+      <button class="qr-btn" id="scanGallery">
+        <img src="icon-gallery.svg" />
         Import from gallery
       </button>
 
-      <button class="qr-btn camera" id="scanCamera">
-        <img src="icon-camera.svg" alt="Camera" />
+      <button class="qr-btn" id="scanCamera">
+        <img src="icon-camera.svg" />
         Scan with camera
       </button>
     </div>
@@ -298,7 +267,7 @@ content="default-src 'self' https: blob: data: 'unsafe-inline' 'unsafe-eval';">
 </main>
 
 <footer>
-  <p class="notranslate" translate="no">You do. We validate.</p>
+  <p>You do. We validate.</p>
   <p>© 2026 UDoChain — All rights reserved.</p>
 </footer>
 
@@ -307,5 +276,3 @@ content="default-src 'self' https: blob: data: 'unsafe-inline' 'unsafe-eval';">
 
 </body>
 </html>
-
-
