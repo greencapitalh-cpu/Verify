@@ -204,3 +204,180 @@ footer {
 
 </body>
 </html>
+
+
+
+<style>
+:root {
+  --udo-primary: #1e3a8a;
+  --udo-primary-hover: #172554;
+  --udo-bg: #f5f6f8;
+}
+
+body {
+  font-family: "Inter", sans-serif;
+  background: var(--udo-bg);
+  color: #1e293b;
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* HEADER */
+
+header {
+  background: white;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo {
+  height: 36px;
+}
+
+.header-title {
+  font-weight: 700;
+  font-size: 1.2rem;
+  color: var(--udo-primary);
+}
+
+.back-link {
+  text-decoration: none;
+  background: #f1f5f9;
+  padding: 6px 14px;
+  border-radius: 10px;
+  color: #475569;
+  font-size: 0.9rem;
+}
+
+/* MAIN */
+
+main {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  padding: 2rem 1rem;
+}
+
+.card {
+  background: white;
+  border-radius: 20px;
+  padding: 2.2rem;
+  max-width: 620px;
+  width: 100%;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+}
+
+h2 {
+  text-align: center;
+  color: #0f172a;
+  margin-bottom: 0.4rem;
+}
+
+.subtitle {
+  text-align: center;
+  color: #64748b;
+  font-size: 0.95rem;
+  margin-bottom: 1.5rem;
+}
+
+/* BADGES */
+
+.badge {
+  margin: 0 auto 1rem;
+  padding: 6px 14px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  width: fit-content;
+}
+
+.badge.verified {
+  background: #e0e7ff;
+  color: var(--udo-primary);
+}
+
+.badge.unverified {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+/* FIELDS */
+
+.field {
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.label {
+  font-weight: 600;
+  color: #475569;
+}
+
+.value {
+  display: block;
+  margin-top: 4px;
+  word-break: break-all;
+}
+
+/* BUTTONS */
+
+.download-btn {
+  width: 100%;
+  padding: 14px;
+  border-radius: 12px;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 1rem;
+  background: var(--udo-primary);
+  color: white;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+}
+
+.download-btn:hover {
+  background: var(--udo-primary-hover);
+}
+
+.download-btn.secondary {
+  background: white;
+  border: 1px solid #e2e8f0;
+  color: #1e293b;
+}
+
+.download-btn.secondary:hover {
+  background: #f8fafc;
+}
+
+/* TEXT */
+
+.download-status,
+.notice {
+  text-align: center;
+  margin-top: 10px;
+  font-size: 0.9rem;
+  color: #64748b;
+}
+
+/* FOOTER */
+
+footer {
+  text-align: center;
+  padding: 1rem;
+  font-size: 0.85rem;
+  color: #6b7280;
+  border-top: 1px solid #e2e8f0;
+  background: white;
+}
+</style>
