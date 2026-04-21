@@ -159,44 +159,45 @@ h2 {
 }
 
 .qr-btn {
+.qr-btn {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
-  border-radius: 14px;
+
+  border-radius: 16px;
   border: 1px solid #e2e8f0;
+
   font-weight: 600;
   font-size: 0.95rem;
+
   cursor: pointer;
-  padding: 14px;
-  transition: all 0.25s ease;
+  padding: 16px;
+
   width: 100%;
-  background: white;
+
+  background: #f8fafc;
+  color: #1e293b;
+
+  transition: all 0.2s ease;
 }
 
+/* HOVER tipo dashboard */
+.qr-btn:hover {
+  background: #f1f5f9;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.06);
+}
+
+/* ICONO */
 .qr-btn img {
   width: 20px;
   height: 20px;
+  opacity: 0.8;
 }
 
 /* 🔥 más consistente con app */
-.qr-btn.gallery {
-  background: #ecfdf5;
-  color: #065f46;
-}
 
-.qr-btn.gallery:hover {
-  background: #d1fae5;
-}
-
-.qr-btn.camera {
-  background: #eef2ff;
-  color: var(--udo-primary);
-}
-
-.qr-btn.camera:hover {
-  background: #e0e7ff;
-}
 
 /* ================= QR PREVIEW ================= */
 
