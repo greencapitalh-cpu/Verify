@@ -295,3 +295,240 @@ content="default-src 'self' https: blob: data: 'unsafe-inline' 'unsafe-eval';">
 
 </body>
 </html>
+
+
+
+<style>
+:root {
+  --udo-primary: #1e3a8a;
+  --udo-primary-hover: #172554;
+  --udo-bg: #f5f6f8;
+}
+
+/* ================= BASE ================= */
+
+body {
+  font-family: "Inter", sans-serif;
+  background: var(--udo-bg);
+  color: #1e293b;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* ================= HEADER ================= */
+
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: white;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo {
+  height: 36px;
+}
+
+.header-title {
+  font-weight: 700;
+  font-size: 1.2rem;
+  color: var(--udo-primary);
+}
+
+.dashboard-btn {
+  background: var(--udo-primary);
+  color: white;
+  padding: 8px 18px;
+  border-radius: 12px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: all .2s ease;
+}
+
+.dashboard-btn:hover {
+  background: var(--udo-primary-hover);
+}
+
+/* ================= MAIN ================= */
+
+main {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+}
+
+/* 🔥 CARD MÁS PREMIUM */
+.verify-card {
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+  padding: 2.4rem;
+  max-width: 480px;
+  width: 100%;
+  text-align: center;
+}
+
+/* 🔥 FIX ERROR */
+h2 {
+  color: #0f172a;
+  font-size: 1.7rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.subtitle {
+  color: #64748b;
+  font-size: 0.95rem;
+  margin-bottom: 1.8rem;
+}
+
+/* ================= INPUT ================= */
+
+.hash-box {
+  display: flex;
+  align-items: center;
+  border: 1px solid #cbd5e1;
+  border-radius: 14px;
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+  transition: all .2s ease;
+  background: #f8fafc;
+}
+
+.hash-box:focus-within {
+  border-color: var(--udo-primary);
+  box-shadow: 0 0 0 3px rgba(30,58,138,0.15);
+}
+
+.hash-box input {
+  flex: 1;
+  border: none;
+  outline: none;
+  padding: 14px;
+  font-size: 0.95rem;
+  background: transparent;
+}
+
+.hash-box button {
+  background: var(--udo-primary);
+  color: white;
+  border: none;
+  padding: 14px 20px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.25s;
+}
+
+.hash-box button:hover {
+  background: var(--udo-primary-hover);
+}
+
+/* ================= QR BUTTONS ================= */
+
+.qr-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 1rem;
+}
+
+.qr-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border-radius: 14px;
+  border: 1px solid #e2e8f0;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  padding: 14px;
+  transition: all 0.25s ease;
+  width: 100%;
+  background: white;
+}
+
+.qr-btn img {
+  width: 20px;
+  height: 20px;
+}
+
+/* 🔥 más consistente con app */
+.qr-btn.gallery {
+  background: #ecfdf5;
+  color: #065f46;
+}
+
+.qr-btn.gallery:hover {
+  background: #d1fae5;
+}
+
+.qr-btn.camera {
+  background: #eef2ff;
+  color: var(--udo-primary);
+}
+
+.qr-btn.camera:hover {
+  background: #e0e7ff;
+}
+
+/* ================= QR PREVIEW ================= */
+
+#qr-preview {
+  display: none;
+  margin-top: 1.5rem;
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+}
+
+#qr-overlay {
+  position: absolute;
+  inset: 0;
+  border: 2px solid rgba(30,58,138,0.5);
+  border-radius: 8px;
+}
+
+#scanner-line {
+  position: absolute;
+  height: 3px;
+  background: var(--udo-primary);
+  width: 100%;
+  animation: scanLine 2s linear infinite;
+}
+
+@keyframes scanLine {
+  0% { top: 0%; }
+  100% { top: 100%; }
+}
+
+/* ================= RESULT ================= */
+
+#result {
+  margin-top: 1.4rem;
+  font-weight: 600;
+  min-height: 24px;
+}
+
+/* ================= FOOTER ================= */
+
+footer {
+  text-align: center;
+  border-top: 1px solid #e2e8f0;
+  background: white;
+  color: #6b7280;
+  padding: 1rem;
+  font-size: 0.85rem;
+}
+</style>
