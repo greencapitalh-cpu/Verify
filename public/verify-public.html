@@ -107,6 +107,115 @@ main{
 }
 
 .section{
+<style>
+:root {
+  --udo-primary: #1e3a8a;
+  --udo-primary-hover: #172554;
+  --udo-bg: #f5f6f8;
+}
+
+/* BASE */
+body{
+  font-family:"Inter",sans-serif;
+  background:var(--udo-bg);
+  margin:0;
+  color:#1e293b;
+  display:flex;
+  flex-direction:column;
+  min-height:100vh;
+}
+
+/* HEADER */
+header{
+  background:white;
+  padding:1rem 1.5rem;
+  border-bottom:1px solid #e2e8f0;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.header-left{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
+.logo{
+  height:36px;
+}
+
+.header-title{
+  font-weight:700;
+  font-size:1.2rem;
+  color:var(--udo-primary);
+}
+
+.dashboard-btn{
+  background:var(--udo-primary);
+  color:white;
+  padding:8px 20px;
+  border-radius:12px;
+  text-decoration:none;
+  font-weight:600;
+  transition:all .2s ease;
+}
+
+.dashboard-btn:hover{
+  background:var(--udo-primary-hover);
+}
+
+/* MAIN */
+main{
+  flex:1;
+  display:flex;
+  justify-content:center;
+  padding:3rem 1rem;
+}
+
+.card{
+  background:white;
+  border-radius:22px;
+  padding:2.5rem;
+  max-width:720px;
+  width:100%;
+  box-shadow:0 12px 40px rgba(0,0,0,0.08);
+}
+
+/* BADGE */
+.badge{
+  display:inline-block;
+  padding:6px 16px;
+  border-radius:20px;
+  font-size:.8rem;
+  font-weight:600;
+  margin-bottom:1.5rem;
+}
+
+.badge.verified{
+  background:#e0e7ff;
+  color:var(--udo-primary);
+}
+
+.badge.unverified{
+  background:#fee2e2;
+  color:#991b1b;
+}
+
+/* TEXT */
+.title{
+  font-size:1.8rem;
+  font-weight:700;
+  margin-bottom:.4rem;
+}
+
+.subtitle{
+  color:#64748b;
+  margin-bottom:2rem;
+}
+
+/* SECTIONS */
+.section{
   margin-bottom:2rem;
 }
 
@@ -119,6 +228,7 @@ main{
   color:#334155;
 }
 
+/* FIELDS */
 .field{
   margin-bottom:1.2rem;
 }
@@ -135,11 +245,13 @@ main{
   word-break:break-all;
 }
 
+/* FILE LIST */
 .file-item{
-  background:#f1f5f9;
-  padding:.8rem;
-  border-radius:10px;
+  background:#f8fafc;
+  padding:.9rem;
+  border-radius:12px;
   margin-bottom:.7rem;
+  border:1px solid #e2e8f0;
 }
 
 .file-name{
@@ -163,13 +275,19 @@ main{
   color:#64748b;
   cursor:pointer;
   transition:.3s;
+  background:white;
+}
+
+.drop-zone:hover{
+  border-color:var(--udo-primary);
 }
 
 .drop-zone.dragover{
-  border-color:#5b2e90;
-  background:#f3e8ff;
+  border-color:var(--udo-primary);
+  background:#eef2ff;
 }
 
+/* STATUS */
 #status{
   text-align:center;
   margin-top:1rem;
@@ -179,6 +297,7 @@ main{
 .ok{ color:#166534; }
 .fail{ color:#b91c1c; }
 
+/* FOOTER */
 footer{
   text-align:center;
   padding:1rem;
