@@ -81,6 +81,8 @@ main{
   max-width:720px;
   width:100%;
   box-shadow:0 12px 40px rgba(0,0,0,0.08);
+
+  overflow: hidden; /* 🔥 ESTE ES CLAVE */
 }
 
 /* BADGE */
@@ -142,7 +144,17 @@ main{
 .value{
   font-size:.95rem;
   font-weight:500;
-  word-break:break-all;
+
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  white-space: normal;
+
+  max-width: 100%;
+}
+  #details,
+#status {
+  word-break: break-word;
+  overflow-wrap: anywhere;
 }
 
 /* FILE ITEM */
@@ -164,6 +176,9 @@ main{
   cursor:pointer;
   transition:.25s;
   background:white;
+
+  max-width:100%;
+  overflow:hidden;
 }
 
 .drop-zone:hover{
