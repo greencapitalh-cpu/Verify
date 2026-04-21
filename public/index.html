@@ -296,3 +296,243 @@ content="default-src 'self' https: blob: data: 'unsafe-inline' 'unsafe-eval';">
 </html>
 
 
+<style>
+
+/* 🔥 DESIGN SYSTEM */
+:root {
+  --udo-primary: #1e3a8a;
+  --udo-primary-hover: #172554;
+}
+
+/* 🔥 GLOBAL FIX */
+* {
+  box-sizing: border-box;
+}
+
+/* ================= BASE ================= */
+
+body {
+  font-family: "Inter", sans-serif;
+  background: #f9fafb;
+  color: #1e293b;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* ================= HEADER ================= */
+
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: white;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid #e2e8f0;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.05);
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo {
+  height: 36px;
+}
+
+.header-title {
+  font-weight: 700;
+  font-size: 1.25rem;
+  color: var(--udo-primary);
+}
+
+.dashboard-btn {
+  background: var(--udo-primary);
+  color: white;
+  padding: 8px 18px;
+  border-radius: 12px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: all .2s ease;
+}
+
+.dashboard-btn:hover {
+  background: var(--udo-primary-hover);
+}
+
+/* ================= MAIN ================= */
+
+main {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+}
+
+.verify-card {
+  background: white;
+  border-radius: 18px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+  padding: 2.2rem;
+  max-width: 480px;
+  width: 100%;
+  text-align: center;
+
+  /* 🔥 evita overflow */
+  overflow: hidden;
+}
+
+/* 🔥 FIX H2 */
+h2 {
+  color: #0f172a;
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin-bottom: 0.6rem;
+}
+
+.subtitle {
+  color: #64748b;
+  font-size: 0.95rem;
+  margin-bottom: 1.8rem;
+}
+
+/* ================= INPUT ================= */
+
+.hash-box {
+  display: flex;
+  align-items: center;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+  transition: all .2s ease;
+}
+
+.hash-box:focus-within {
+  border-color: var(--udo-primary);
+  box-shadow: 0 0 0 2px rgba(30,58,138,0.15);
+}
+
+.hash-box input {
+  flex: 1;
+  border: none;
+  outline: none;
+  padding: 13px;
+  font-size: 0.95rem;
+  background: #f8fafc;
+
+  /* 🔥 CLAVE para mobile */
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.hash-box button {
+  background: var(--udo-primary);
+  color: white;
+  border: none;
+  padding: 13px 18px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.25s;
+}
+
+.hash-box button:hover {
+  background: var(--udo-primary-hover);
+}
+
+/* ================= QR BUTTONS ================= */
+
+.qr-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 0.8rem;
+}
+
+.qr-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border-radius: 14px;
+  border: 1px solid #e2e8f0;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  padding: 14px;
+  transition: all 0.25s ease;
+  width: 100%;
+}
+
+/* 🔥 estilo plomo consistente */
+.qr-btn.gallery,
+.qr-btn.camera {
+  background: #f1f5f9;
+  color: #334155;
+}
+
+.qr-btn:hover {
+  background: #e2e8f0;
+}
+
+/* ================= QR PREVIEW ================= */
+
+#qr-preview {
+  display: none;
+  margin-top: 1.5rem;
+  border-radius: 12px;
+  position: relative;
+
+  max-width: 100%;
+  overflow: hidden;
+}
+
+#qr-overlay {
+  position: absolute;
+  inset: 0;
+  border: 2px solid rgba(30,58,138,0.5);
+  border-radius: 8px;
+}
+
+#scanner-line {
+  position: absolute;
+  height: 3px;
+  width: 100%;
+  background: var(--udo-primary);
+  animation: scanLine 2s linear infinite;
+}
+
+@keyframes scanLine {
+  0% { top: 0%; }
+  100% { top: 100%; }
+}
+
+/* ================= RESULT ================= */
+
+#result {
+  margin-top: 1.4rem;
+  font-weight: 600;
+  min-height: 24px;
+
+  /* 🔥 SOLUCIÓN DEFINITIVA */
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+/* ================= FOOTER ================= */
+
+footer {
+  text-align: center;
+  border-top: 1px solid #e2e8f0;
+  background: white;
+  color: #6b7280;
+  padding: 1rem;
+  font-size: 0.85rem;
+}
+
+</style>
