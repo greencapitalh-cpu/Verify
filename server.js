@@ -53,7 +53,7 @@ app.use((req, res, next) => {
 });
 
 // 🧩 API Routes
-app.use("/api/verify", verifyRoutes);
+app.use("/api/verif", verifyRoutes);
 
 // ❤️ Healthcheck
 app.get("/api/healthz", (_, res) => res.json({ ok: true, service: "Verify Records", time: new Date() }));
