@@ -24,7 +24,7 @@ app.use(
       "https://wapp.udochain.com",
       "https://validate.udochain.com",
       "https://bioid.udochain.com",
-      "https://verify.udochain.com",
+      "https://verif.udochain.com",
       "http://localhost:3000"
     ],
     credentials: true
