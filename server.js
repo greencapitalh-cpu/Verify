@@ -24,7 +24,7 @@ app.use(
       "https://wapp.udochain.com",
       "https://validate.udochain.com",
       "https://bioid.udochain.com",
-      "https://verif.udochain.com",
+      "https://verify.udochain.com",
       "http://localhost:3000"
     ],
     credentials: true
@@ -53,7 +53,7 @@ app.use((req, res, next) => {
 });
 
 // 🧩 API Routes
-app.use("/api/verif", verifyRoutes);
+app.use("/api/verify", verifyRoutes);
 
 // ❤️ Healthcheck
 app.get("/api/healthz", (_, res) => res.json({ ok: true, service: "Verify Records", time: new Date() }));
