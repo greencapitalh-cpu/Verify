@@ -55,7 +55,7 @@ Likely active:
 
 ## Probable Legacy Or Backup Files
 
-These naming patterns look like historical copies or backups:
+These naming patterns looked like historical copies or backups and are removed on the cleanup branch:
 
 - `*.html999`
 - `*.js999`
@@ -64,7 +64,7 @@ These naming patterns look like historical copies or backups:
 - `view.jsggffd`
 - files under `vacio/`
 
-Do not delete these yet without comparing them to active files. Some may contain previous working versions.
+`verify-public.html` still references `script-translate.js`, but the repository only had `script-translate.js999`, not an active `script-translate.js`. That missing active translation script should be handled separately if translation is still required.
 
 ## Cleanup Plan
 
