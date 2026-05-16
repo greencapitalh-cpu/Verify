@@ -5,274 +5,92 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>UDoChain Verify</title>
 <link rel="icon" href="logo-udochain.png" />
-
-<style>
-
-/* 🔥 DESIGN SYSTEM */
-:root {
-  --udo-primary: #1e3a8a;
-  --udo-primary-hover: #172554;
-}
-
-/* 🔥 GLOBAL FIX */
-* {
-  box-sizing: border-box;
-}
-
-/* ================= BASE ================= */
-
-body {
-  font-family: "Inter", sans-serif;
-  background: #f9fafb;
-  color: #1e293b;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-}
-
-/* ================= HEADER ================= */
-
-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: white;
-  padding: 1rem 1.5rem;
-  border-bottom: 1px solid #e2e8f0;
-  box-shadow: 0 1px 6px rgba(0,0,0,0.05);
-}
-
-.header-left {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.logo {
-  height: 36px;
-}
-
-.header-title {
-  font-weight: 700;
-  font-size: 1.25rem;
-  color: var(--udo-primary);
-}
-
-.dashboard-btn {
-  background: var(--udo-primary);
-  color: white;
-  padding: 8px 18px;
-  border-radius: 12px;
-  text-decoration: none;
-  font-weight: 600;
-  transition: all .2s ease;
-}
-
-.dashboard-btn:hover {
-  background: var(--udo-primary-hover);
-}
-
-/* ================= MAIN ================= */
-
-main {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 2rem 1rem;
-}
-
-.verify-card {
-  background: white;
-  border-radius: 18px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
-  padding: 2.2rem;
-  max-width: 480px;
-  width: 100%;
-  text-align: center;
-  overflow: hidden;
-
-  /* 🔥 overflow fix */
-  word-break: break-word;
-  overflow-wrap: anywhere;
-}
-
-/* ================= TEXT ================= */
-
-h2 {
-  color: #0f172a;
-  font-size: 1.6rem;
-  font-weight: 700;
-  margin-bottom: 0.6rem;
-}
-
-.subtitle {
-  color: #64748b;
-  font-size: 0.95rem;
-  margin-bottom: 1.8rem;
-  max-width: 90%;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-/* ================= INPUT ================= */
-
-.hash-box {
-  display: flex;
-  align-items: center;
-  border: 1px solid #cbd5e1;
-  border-radius: 12px;
-  overflow: hidden;
-  margin-bottom: 1.5rem;
-  transition: all .2s ease;
-}
-
-.hash-box:focus-within {
-  border-color: var(--udo-primary);
-  box-shadow: 0 0 0 2px rgba(30,58,138,0.15);
-}
-
-.hash-box input {
-  flex: 1;
-  border: none;
-  outline: none;
-  padding: 13px;
-  font-size: 0.95rem;
-  background: #f8fafc;
-
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.hash-box button {
-  background: var(--udo-primary);
-  color: white;
-  border: none;
-  padding: 13px 18px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.hash-box button:hover {
-  background: var(--udo-primary-hover);
-}
-
-/* ================= QR BUTTONS ================= */
-
-.qr-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
-.qr-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  border-radius: 14px;
-  border: 1px solid #e2e8f0;
-  font-weight: 600;
-  font-size: 0.95rem;
-  cursor: pointer;
-  padding: 14px;
-  width: 100%;
-
-  background: #f1f5f9;
-  color: #334155;
-
-  transition: all 0.2s ease;
-}
-
-.qr-btn:hover {
-  background: #e2e8f0;
-  border-color: var(--udo-primary);
-}
-
-.qr-btn:active {
-  transform: scale(0.98);
-}
-
-/* ================= RESULT ================= */
-
-#result {
-  margin-top: 1.4rem;
-  font-weight: 600;
-  min-height: 24px;
-
-  word-break: break-word;
-  overflow-wrap: anywhere;
-}
-
-/* ================= FOOTER ================= */
-
-footer {
-  text-align: center;
-  border-top: 1px solid #e2e8f0;
-  background: white;
-  color: #6b7280;
-  padding: 1rem;
-  font-size: 0.85rem;
-}
-
-</style>
-
-<meta http-equiv="Content-Security-Policy"
-content="default-src 'self' https: blob: data: 'unsafe-inline' 'unsafe-eval';">
+<link rel="stylesheet" href="styles.css" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' https: blob: data: 'unsafe-inline' 'unsafe-eval';">
 </head>
 
-<body>
-
-<header>
-  <div class="header-left">
-    <img src="logo-udochain.png" class="logo" />
-    <span class="header-title">UDoChain Verify</span>
-  </div>
-
-  <a href="https://app.udochain.com/dashboard" class="dashboard-btn">
-    Go to Dashboard
+<body class="verify-shell">
+<header class="site-header">
+  <a href="/" class="brand">
+    <img src="logo-udochain.png" class="logo" alt="UDoChain logo" />
+    <span class="brand-copy">
+      <span class="brand-title">UDoChain Verify</span>
+      <span class="brand-subtitle">Evidence verification portal</span>
+    </span>
   </a>
+
+  <div class="header-actions">
+    <a href="https://app.udochain.com/dashboard" class="dashboard-btn">
+      Go to Dashboard
+    </a>
+  </div>
 </header>
 
-<main>
-  <section class="verify-card">
-    <h2>Verify Document</h2>
-    <p class="subtitle">
-      Scan a QR code, upload one, or enter a document identifier to verify authenticity.
-    </p>
+<main class="verify-main">
+  <div class="verify-grid">
+    <section class="hero-panel">
+      <div>
+        <p class="eyebrow">Public verification</p>
+        <h1 class="hero-title">Verify blockchain evidence without friction</h1>
+        <p class="hero-copy">
+          Scan a QR code, upload a QR image, or paste a transaction hash or storage ID.
+          UDoChain checks the validation record and routes you to the correct public
+          or private evidence view.
+        </p>
+      </div>
 
-    <div class="hash-box">
-      <input type="text" id="hashInput" placeholder="Paste txHash or ar://storageId..." />
-      <button id="verifyBtn">Search</button>
-    </div>
+      <div class="trust-strip">
+        <div class="trust-item">
+          <strong>Legal evidence</strong>
+          <span>Review timestamps, hashes and certificate details.</span>
+        </div>
+        <div class="trust-item">
+          <strong>Private custody</strong>
+          <span>Storage IDs route to controlled custody verification.</span>
+        </div>
+        <div class="trust-item">
+          <strong>File matching</strong>
+          <span>Compare the original file hash in the browser.</span>
+        </div>
+      </div>
+    </section>
 
-    <div class="qr-actions">
-      <button class="qr-btn" id="scanGallery">
-        <img src="icon-gallery.svg" />
-        Import from gallery
-      </button>
+    <section class="search-panel">
+      <p class="eyebrow">Start here</p>
+      <h2 class="panel-title">Search validation</h2>
+      <p class="lead">
+        Paste a txHash, ar:// storage ID, or a full UDoChain verification link.
+      </p>
 
-      <button class="qr-btn" id="scanCamera">
-        <img src="icon-camera.svg" />
-        Scan with camera
-      </button>
-    </div>
+      <div class="hash-box">
+        <input type="text" id="hashInput" placeholder="Paste txHash or ar://storageId" />
+        <button id="verifyBtn">Search</button>
+      </div>
 
-    <div id="qr-preview"></div>
-    <div id="result"></div>
+      <div class="qr-actions">
+        <button class="qr-btn" id="scanGallery">
+          <img src="icon-gallery.svg" alt="" />
+          Import QR image
+        </button>
 
-  </section>
+        <button class="qr-btn" id="scanCamera">
+          <img src="icon-camera.svg" alt="" />
+          Scan with camera
+        </button>
+      </div>
+
+      <div id="qr-preview"></div>
+      <div id="result"></div>
+    </section>
+  </div>
 </main>
 
-<footer>
+<footer class="site-footer">
   <p>You do. We validate.</p>
-  <p>© 2026 UDoChain — All rights reserved.</p>
+  <p>&copy; 2026 UDoChain. All rights reserved.</p>
 </footer>
 
 <script src="https://unpkg.com/html5-qrcode"></script>
 <script src="verify.js"></script>
-
 </body>
 </html>

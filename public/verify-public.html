@@ -4,286 +4,66 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>UDoChain Public Verification</title>
-
 <link rel="icon" href="logo-udochain.png" />
 <link rel="stylesheet" href="styles.css" />
-
-<style>
-:root {
-  --udo-primary: #1e3a8a;
-  --udo-primary-hover: #172554;
-  --udo-bg: #f5f6f8;
-}
-
-/* BASE */
-body{
-  font-family:"Inter",sans-serif;
-  background:var(--udo-bg);
-  margin:0;
-  color:#1e293b;
-  display:flex;
-  flex-direction:column;
-  min-height:100vh;
-}
-
-/* HEADER */
-header{
-  background:white;
-  padding:1rem 1.5rem;
-  border-bottom:1px solid #e2e8f0;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-}
-
-.header-left{
-  display:flex;
-  align-items:center;
-  gap:12px;
-}
-
-.logo{
-  height:36px;
-}
-
-.header-title{
-  font-weight:700;
-  font-size:1.2rem;
-  color:var(--udo-primary);
-}
-
-.dashboard-btn{
-  background:var(--udo-primary);
-  color:white;
-  padding:8px 20px;
-  border-radius:12px;
-  text-decoration:none;
-  font-weight:600;
-  transition:all .2s ease;
-}
-
-.dashboard-btn:hover{
-  background:var(--udo-primary-hover);
-}
-
-/* MAIN */
-main{
-  flex:1;
-  display:flex;
-  justify-content:center;
-  padding:2.5rem 1rem;
-}
-
-.card{
-  background:white;
-  border-radius:22px;
-  padding:2.5rem;
-  max-width:720px;
-  width:100%;
-  box-shadow:0 12px 40px rgba(0,0,0,0.08);
-
-  overflow: hidden; /* 🔥 ESTE ES CLAVE */
-}
-
-/* BADGE */
-.badge{
-  display:inline-block;
-  padding:6px 16px;
-  border-radius:20px;
-  font-size:.8rem;
-  font-weight:600;
-  margin-bottom:1.5rem;
-}
-
-.badge.verified{
-  background:#e0e7ff;
-  color:var(--udo-primary);
-}
-
-.badge.unverified{
-  background:#fee2e2;
-  color:#991b1b;
-}
-
-/* TEXT */
-.title{
-  font-size:1.8rem;
-  font-weight:700;
-  margin-bottom:.4rem;
-}
-
-.subtitle{
-  color:#64748b;
-  margin-bottom:2rem;
-}
-
-/* SECTIONS */
-.section{
-  margin-bottom:2rem;
-}
-
-.section-title{
-  font-weight:600;
-  font-size:1rem;
-  margin-bottom:1rem;
-  border-bottom:1px solid #e2e8f0;
-  padding-bottom:.5rem;
-  color:#334155;
-}
-
-/* FIELDS */
-.field{
-  margin-bottom:1.2rem;
-}
-
-.label{
-  font-size:.8rem;
-  color:#64748b;
-}
-
-.value{
-  font-size:.95rem;
-  font-weight:500;
-
-  word-break: break-word;
-  overflow-wrap: anywhere;
-  white-space: normal;
-
-  max-width: 100%;
-}
-  #details,
-#status {
-  word-break: break-word;
-  overflow-wrap: anywhere;
-}
-
-/* FILE ITEM */
-.file-item{
-  background:#f8fafc;
-  padding:.9rem;
-  border-radius:12px;
-  margin-bottom:.7rem;
-  border:1px solid #e2e8f0;
-}
-
-/* 🔥 FIX DEFINITIVO FILES */
-.file-name,
-.file-hash {
-  word-break: break-word;
-  overflow-wrap: anywhere;
-  white-space: normal;
-}
-
-/* 🔥 extra seguridad */
-#filesList {
-  max-width: 100%;
-  overflow: hidden;
-}
-  
-
-/* DROP ZONE */
-.drop-zone{
-  border:2px dashed #cbd5e1;
-  border-radius:16px;
-  padding:42px;
-  text-align:center;
-  color:#64748b;
-  cursor:pointer;
-  transition:.25s;
-  background:white;
-
-  max-width:100%;
-  overflow:hidden;
-}
-
-.drop-zone:hover{
-  border-color:var(--udo-primary);
-}
-
-.drop-zone.dragover{
-  border-color:var(--udo-primary);
-  background:#eef2ff;
-}
-
-/* STATUS */
-#status{
-  text-align:center;
-  margin-top:1rem;
-  font-weight:600;
-}
-
-.ok{ color:#166534; }
-.fail{ color:#b91c1c; }
-
-/* FOOTER */
-footer{
-  text-align:center;
-  padding:1rem;
-  font-size:.85rem;
-  color:#6b7280;
-  border-top:1px solid #e2e8f0;
-  background:white;
-}
-</style>
-
 </head>
 
-<body>
-
-<header>
-  <div class="header-left">
-    <img src="logo-udochain.png" class="logo">
-    <span class="header-title">UDoChain Verify</span>
-  </div>
-
-  <a href="https://app.udochain.com/dashboard" class="dashboard-btn">
-    Go to Dashboard
+<body class="verify-shell">
+<header class="site-header">
+  <a href="/" class="brand">
+    <img src="logo-udochain.png" class="logo" alt="UDoChain logo" />
+    <span class="brand-copy">
+      <span class="brand-title">UDoChain Verify</span>
+      <span class="brand-subtitle">Public evidence check</span>
+    </span>
   </a>
+
+  <div class="header-actions">
+    <a href="https://app.udochain.com/dashboard" class="dashboard-btn">
+      Go to Dashboard
+    </a>
+  </div>
 </header>
 
-<main>
-  <div class="card">
-
-    <div id="badge"></div>
-
-    <div class="title">Validation Details</div>
-    <div class="subtitle">
-      Verify the authenticity of this blockchain validation.
+<main class="verify-main">
+  <section class="card verify-card-page">
+    <div class="card-header">
+      <div id="badge"></div>
+      <p class="eyebrow">Verification result</p>
+      <h1 class="page-title">Validation details</h1>
+      <p class="lead">
+        Review the evidence record and upload the original file to compare its hash
+        against the blockchain validation.
+      </p>
     </div>
 
     <div class="section">
-      <div class="section-title">Evidence Information</div>
+      <h2 class="section-title">Evidence information</h2>
       <div id="details">Loading validation data...</div>
     </div>
 
     <div class="section">
-      <div class="section-title">File Verification</div>
-      <div class="subtitle">
-        Upload the original file to check if it matches the blockchain record.
-      </div>
+      <h2 class="section-title">File verification</h2>
+      <p class="lead">
+        The file is hashed locally in your browser. It is not uploaded during this
+        comparison step.
+      </p>
 
       <div id="dropZone" class="drop-zone">
-        Drop or click to upload a file.
+        Drop or click to upload a file for comparison.
       </div>
 
       <div id="status"></div>
-      
-      <!-- 🔥 FILES RENDER (SOLUCIÓN) -->
-<div id="filesList"></div>
+      <div id="filesList"></div>
     </div>
-
-  </div>
+  </section>
 </main>
 
-<footer>
+<footer class="site-footer">
   <p>You do. We validate.</p>
-  <p>© 2025 UDoChain — All rights reserved.</p>
+  <p>&copy; 2026 UDoChain. All rights reserved.</p>
 </footer>
 
 <script src="verify-public.js"></script>
-<script src="script-translate.js"></script>
-
 </body>
 </html>
-
-
